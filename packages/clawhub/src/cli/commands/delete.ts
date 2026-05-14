@@ -1,5 +1,5 @@
 import { apiRequest } from "../../http.js";
-import { ApiRoutes, ApiV1DeleteResponseSchema, parseArk } from "../../schema/index.js";
+import { ApiRoutes, ApiV1DeleteResponseSchema } from "../../schema/index.js";
 import { requireAuthToken } from "../authToken.js";
 import { getRegistry } from "../registry.js";
 import type { GlobalOpts } from "../types.js";
@@ -78,9 +78,8 @@ export async function cmdDeleteSkill(
       },
       ApiV1DeleteResponseSchema,
     );
-    const parsed = parseArk(ApiV1DeleteResponseSchema, result, "Delete response");
-    spinner.succeed(`OK. ${labels.past} ${slug}${formatSlugReservation(parsed)}`);
-    return parsed;
+    spinner.succeed(`OK. ${labels.past} ${slug}${formatSlugReservation(result)}`);
+    return result;
   } catch (error) {
     spinner.fail(formatError(error));
     throw error;
@@ -120,7 +119,7 @@ export async function cmdUndeleteSkill(
       ApiV1DeleteResponseSchema,
     );
     spinner.succeed(`OK. ${labels.past} ${slug}`);
-    return parseArk(ApiV1DeleteResponseSchema, result, "Undelete response");
+    return result;
   } catch (error) {
     spinner.fail(formatError(error));
     throw error;

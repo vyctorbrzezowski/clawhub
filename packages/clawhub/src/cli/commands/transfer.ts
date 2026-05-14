@@ -4,7 +4,6 @@ import {
   ApiV1TransferDecisionResponseSchema,
   ApiV1TransferListResponseSchema,
   ApiV1TransferRequestResponseSchema,
-  parseArk,
 } from "../../schema/index.js";
 import { requireAuthToken } from "../authToken.js";
 import { getRegistry } from "../registry.js";
@@ -95,17 +94,12 @@ export async function cmdTransferRequest(
       },
       ApiV1TransferRequestResponseSchema,
     );
-    const parsed = parseArk(
-      ApiV1TransferRequestResponseSchema,
-      result,
-      "Transfer request response",
-    );
-    if (parsed.transferred) {
-      spinner.succeed(`Transferred ${slug} to @${parsed.toPublisherHandle ?? toHandle}`);
+    if (result.transferred) {
+      spinner.succeed(`Transferred ${slug} to @${result.toPublisherHandle ?? toHandle}`);
     } else {
-      spinner.succeed(`Transfer requested for ${slug} to @${parsed.toUserHandle ?? toHandle}`);
+      spinner.succeed(`Transfer requested for ${slug} to @${result.toUserHandle ?? toHandle}`);
     }
-    return parsed;
+    return result;
   } catch (error) {
     spinner.fail(formatError(error));
     throw error;
@@ -126,16 +120,15 @@ export async function cmdTransferList(opts: GlobalOpts, options: { outgoing?: bo
       { method: "GET", path, token },
       ApiV1TransferListResponseSchema,
     );
-    const parsed = parseArk(ApiV1TransferListResponseSchema, result, "Transfer list response");
     spinner.stop();
 
-    if (parsed.transfers.length === 0) {
+    if (result.transfers.length === 0) {
       console.log(options.outgoing ? "No outgoing transfers." : "No incoming transfers.");
-      return parsed;
+      return result;
     }
 
     console.log(options.outgoing ? "Outgoing transfers:" : "Incoming transfers:");
-    for (const transfer of parsed.transfers) {
+    for (const transfer of result.transfers) {
       const otherHandle = options.outgoing ? transfer.toUser?.handle : transfer.fromUser?.handle;
       const other = otherHandle ? `@${otherHandle.replace(/^@+/, "")}` : "(unknown user)";
       const expiresInDays = Math.max(
@@ -144,7 +137,7 @@ export async function cmdTransferList(opts: GlobalOpts, options: { outgoing?: bo
       );
       console.log(`  ${transfer.skill.slug} -> ${other} (expires in ${expiresInDays}d)`);
     }
-    return parsed;
+    return result;
   } catch (error) {
     spinner.fail(formatError(error));
     throw error;
@@ -180,9 +173,8 @@ async function runTransferDecision(
       },
       ApiV1TransferDecisionResponseSchema,
     );
-    const parsed = parseArk(ApiV1TransferDecisionResponseSchema, result, "Transfer response");
     spinner.succeed(`${spec.success} (${slug})`);
-    return parsed;
+    return result;
   } catch (error) {
     spinner.fail(formatError(error));
     throw error;
