@@ -7,6 +7,16 @@ import { SkillDetailPage } from "../components/SkillDetailPage";
 const navigateMock = vi.fn();
 const routerInvalidateMock = vi.fn();
 const useAuthStatusMock = vi.fn();
+const toastSuccessMock = vi.fn();
+const toastInfoMock = vi.fn();
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: (...args: unknown[]) => toastSuccessMock(...args),
+    info: (...args: unknown[]) => toastInfoMock(...args),
+    error: vi.fn(),
+  },
+}));
 
 process.env.VITE_CONVEX_URL = process.env.VITE_CONVEX_URL ?? "https://example.convex.cloud";
 
@@ -69,6 +79,8 @@ describe("SkillDetailPage", () => {
     navigateMock.mockReset();
     routerInvalidateMock.mockReset();
     useAuthStatusMock.mockReset();
+    toastSuccessMock.mockReset();
+    toastInfoMock.mockReset();
     getReadmeMock.mockResolvedValue({ text: "" });
     useMutationMock.mockReturnValue(vi.fn());
     useAuthStatusMock.mockReturnValue({
@@ -1153,5 +1165,177 @@ describe("SkillDetailPage", () => {
         );
       }),
     ).toBe(false);
+  });
+
+  it("shows toast success when report is submitted and does not call window.alert", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const reportMock = vi.fn().mockResolvedValue({ reported: true });
+    useMutationMock.mockReturnValue(reportMock);
+    useAuthStatusMock.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      me: { _id: "users:reporter", role: "user" },
+    });
+    useQueryMock.mockImplementation((_fn: unknown, args: unknown) => {
+      if (args === "skip") return undefined;
+      if (args && typeof args === "object" && "skillId" in args) return [];
+      if (args && typeof args === "object" && "slug" in args) {
+        return {
+          skill: {
+            _id: "skills:1",
+            slug: "weather",
+            displayName: "Weather",
+            summary: "Get current weather.",
+            ownerUserId: "users:1",
+            ownerPublisherId: "publishers:steipete",
+            tags: {},
+            stats: { stars: 0, downloads: 0 },
+          },
+          owner: {
+            _id: "publishers:steipete",
+            _creationTime: 0,
+            kind: "user",
+            handle: "steipete",
+            displayName: "Peter",
+            linkedUserId: "users:1",
+          },
+          latestVersion: { _id: "skillVersions:1", version: "1.0.0", parsed: {}, files: [] },
+        };
+      }
+      return undefined;
+    });
+
+    render(<SkillDetailPage slug="weather" />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /report/i }));
+    await screen.findByRole("dialog");
+
+    fireEvent.change(screen.getByLabelText(/Report reason/i), {
+      target: { value: "Spam content" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Submit report/i }));
+
+    await waitFor(() => {
+      expect(toastSuccessMock).toHaveBeenCalledWith("Report submitted.");
+    });
+    expect(alertSpy).not.toHaveBeenCalled();
+    expect(toastInfoMock).not.toHaveBeenCalled();
+
+    alertSpy.mockRestore();
+  });
+
+  it("shows toast info when skill was already reported and does not call window.alert", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const reportMock = vi.fn().mockResolvedValue({ reported: false });
+    useMutationMock.mockReturnValue(reportMock);
+    useAuthStatusMock.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      me: { _id: "users:reporter", role: "user" },
+    });
+    useQueryMock.mockImplementation((_fn: unknown, args: unknown) => {
+      if (args === "skip") return undefined;
+      if (args && typeof args === "object" && "skillId" in args) return [];
+      if (args && typeof args === "object" && "slug" in args) {
+        return {
+          skill: {
+            _id: "skills:1",
+            slug: "weather",
+            displayName: "Weather",
+            summary: "Get current weather.",
+            ownerUserId: "users:1",
+            ownerPublisherId: "publishers:steipete",
+            tags: {},
+            stats: { stars: 0, downloads: 0 },
+          },
+          owner: {
+            _id: "publishers:steipete",
+            _creationTime: 0,
+            kind: "user",
+            handle: "steipete",
+            displayName: "Peter",
+            linkedUserId: "users:1",
+          },
+          latestVersion: { _id: "skillVersions:1", version: "1.0.0", parsed: {}, files: [] },
+        };
+      }
+      return undefined;
+    });
+
+    render(<SkillDetailPage slug="weather" />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /report/i }));
+    await screen.findByRole("dialog");
+
+    fireEvent.change(screen.getByLabelText(/Report reason/i), {
+      target: { value: "Spam content" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Submit report/i }));
+
+    await waitFor(() => {
+      expect(toastInfoMock).toHaveBeenCalledWith("You have already reported this skill.");
+    });
+    expect(alertSpy).not.toHaveBeenCalled();
+    expect(toastSuccessMock).not.toHaveBeenCalled();
+
+    alertSpy.mockRestore();
+  });
+
+  it("shows report error in dialog on failure and does not show success toast", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const reportMock = vi.fn().mockRejectedValue(new Error("Network error"));
+    useMutationMock.mockReturnValue(reportMock);
+    useAuthStatusMock.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      me: { _id: "users:reporter", role: "user" },
+    });
+    useQueryMock.mockImplementation((_fn: unknown, args: unknown) => {
+      if (args === "skip") return undefined;
+      if (args && typeof args === "object" && "skillId" in args) return [];
+      if (args && typeof args === "object" && "slug" in args) {
+        return {
+          skill: {
+            _id: "skills:1",
+            slug: "weather",
+            displayName: "Weather",
+            summary: "Get current weather.",
+            ownerUserId: "users:1",
+            ownerPublisherId: "publishers:steipete",
+            tags: {},
+            stats: { stars: 0, downloads: 0 },
+          },
+          owner: {
+            _id: "publishers:steipete",
+            _creationTime: 0,
+            kind: "user",
+            handle: "steipete",
+            displayName: "Peter",
+            linkedUserId: "users:1",
+          },
+          latestVersion: { _id: "skillVersions:1", version: "1.0.0", parsed: {}, files: [] },
+        };
+      }
+      return undefined;
+    });
+
+    render(<SkillDetailPage slug="weather" />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /report/i }));
+    await screen.findByRole("dialog");
+
+    fireEvent.change(screen.getByLabelText(/Report reason/i), {
+      target: { value: "Spam content" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Submit report/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeTruthy();
+    });
+    expect(toastSuccessMock).not.toHaveBeenCalled();
+    expect(toastInfoMock).not.toHaveBeenCalled();
+    expect(alertSpy).not.toHaveBeenCalled();
+
+    alertSpy.mockRestore();
   });
 });

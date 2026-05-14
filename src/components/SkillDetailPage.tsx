@@ -491,9 +491,9 @@ export function SkillDetailPage({
       const submission = await reportSkill({ skillId: skill._id, reason: trimmedReason });
       closeReportDialog();
       if (submission.reported) {
-        window.alert("Thanks — your report has been submitted.");
+        toast.success("Report submitted.");
       } else {
-        window.alert("You have already reported this skill.");
+        toast.info("You have already reported this skill.");
       }
     } catch (error) {
       console.error("Failed to report skill", error);
