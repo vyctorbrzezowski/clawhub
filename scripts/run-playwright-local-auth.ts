@@ -14,6 +14,7 @@ import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { resolveLocalAuthRunnerConfig } from "./playwright-local-auth-config";
+import { runPreflightChecks } from "./playwright-local-auth-preflight";
 
 const DEFAULT_CONVEX_DEPLOYMENT = "local:anonymous-agent";
 const DEFAULT_PLAYWRIGHT_PORT = 4173;
@@ -180,9 +181,21 @@ function restoreLocalState() {
 }
 
 async function cleanup() {
-  await stopManagedChildren();
-  restoreLocalState();
-  rmSync(tempDir, { force: true, recursive: true });
+  try {
+    await stopManagedChildren();
+  } catch (err) {
+    console.error("Failed to stop managed children:", err);
+  }
+  try {
+    restoreLocalState();
+  } catch (err) {
+    console.error("Failed to restore local state:", err);
+  }
+  try {
+    rmSync(tempDir, { force: true, recursive: true });
+  } catch (err) {
+    console.error("Failed to remove temp directory:", err);
+  }
 }
 
 function runRequired(command: string, args: string[], env: NodeJS.ProcessEnv) {
@@ -295,6 +308,12 @@ async function main() {
   const appUrl = `http://127.0.0.1:${appPort}`;
   const convexUrl = runnerConfig.convexUrl;
   const convexSiteUrl = runnerConfig.convexSiteUrl;
+
+  const preflight = await runPreflightChecks({ appPort, convexUrl, convexSiteUrl });
+  if (!preflight.ok) {
+    throw new Error(`Preflight failed: ${preflight.message}`);
+  }
+
   if (await isReachable(convexUrl)) {
     throw new Error(
       `Local Convex is already reachable at ${convexUrl}. Stop the running local Convex process before running this e2e so it can use isolated disposable state.`,
