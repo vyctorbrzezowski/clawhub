@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const siteModeMock = vi.fn(() => "skills");
 const navigateMock = vi.fn();
+const useQueryMock = vi.fn(() => undefined);
 const { convexQueryMock, fetchFeaturedPluginsMock } = vi.hoisted(() => ({
   convexQueryMock: vi.fn(),
   fetchFeaturedPluginsMock: vi.fn(),
@@ -25,12 +26,13 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("convex/react", () => ({
   useAction: () => vi.fn(),
-  useQuery: () => undefined,
+  useQuery: (...args: unknown[]) => useQueryMock(...args),
 }));
 
 vi.mock("../../convex/_generated/api", () => ({
   api: {
     skills: {
+      countPublicSkills: "skills:countPublicSkills",
       listHighlightedPublic: "skills:listHighlightedPublic",
       listPublicPageV4: "skills:listPublicPageV4",
     },
@@ -65,6 +67,7 @@ describe("home route", () => {
     convexQueryMock.mockResolvedValue([]);
     fetchFeaturedPluginsMock.mockResolvedValue([]);
     navigateMock.mockReset();
+    useQueryMock.mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -327,5 +330,40 @@ describe("home route", () => {
     ).toEqual(["Hack", "Hack", "Hack"]);
     expect(document.querySelector(".home-v2-headline-hack")).toBeTruthy();
     expect(document.querySelector(".home-v2-hack-lobster")).toBeTruthy();
+  });
+
+  it("does not render hardcoded proof bar metrics", async () => {
+    await renderHome();
+
+    expect(screen.queryByText("52.7k")).toBeNull();
+    expect(screen.queryByText("180k")).toBeNull();
+    expect(screen.queryByText("12M")).toBeNull();
+    expect(screen.queryByText("4.8")).toBeNull();
+    expect(screen.queryByText("avg rating")).toBeNull();
+  });
+
+  it("renders proof bar with real skills count and non-numeric labels", async () => {
+    useQueryMock.mockImplementation((queryRef: unknown) => {
+      if (queryRef === "skills:countPublicSkills") return 5270;
+      return undefined;
+    });
+
+    await renderHome();
+
+    expect(screen.getByText("5.3k")).toBeTruthy();
+    expect(screen.getByText("tools")).toBeTruthy();
+    expect(screen.getByText("Community")).toBeTruthy();
+    expect(screen.getByText("built")).toBeTruthy();
+    expect(screen.getByText("Ready")).toBeTruthy();
+    expect(screen.getByText("to use")).toBeTruthy();
+  });
+
+  it("shows em dash while skills count is still loading", async () => {
+    useQueryMock.mockReturnValue(undefined);
+
+    await renderHome();
+
+    expect(screen.getByText("\u2014")).toBeTruthy();
+    expect(screen.getByText("tools")).toBeTruthy();
   });
 });

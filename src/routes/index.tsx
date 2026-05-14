@@ -62,6 +62,7 @@ function SkillsHome() {
   const [featuredPlugins, setFeaturedPlugins] = useState<PackageListItem[]>([]);
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const publicSkillsCount = useQuery(api.skills.countPublicSkills, {});
 
   useEffect(() => {
     let cancelled = false;
@@ -750,23 +751,18 @@ function SkillsHome() {
       {/* ═══ PROOF BAR ═══ */}
       <div className="home-v2-proof-bar">
         <div className="home-v2-proof-item">
-          <span className="home-v2-proof-num">52.7k</span>
+          <span className="home-v2-proof-num">{publicSkillsCount === undefined ? "\u2014" : formatStat(publicSkillsCount)}</span>
           <span className="home-v2-proof-label">tools</span>
         </div>
         <span className="home-v2-proof-sep" />
         <div className="home-v2-proof-item">
-          <span className="home-v2-proof-num">180k</span>
-          <span className="home-v2-proof-label">users</span>
+          <span className="home-v2-proof-num">Community</span>
+          <span className="home-v2-proof-label">built</span>
         </div>
         <span className="home-v2-proof-sep" />
         <div className="home-v2-proof-item">
-          <span className="home-v2-proof-num">12M</span>
-          <span className="home-v2-proof-label">downloads</span>
-        </div>
-        <span className="home-v2-proof-sep" />
-        <div className="home-v2-proof-item">
-          <span className="home-v2-proof-num">4.8</span>
-          <span className="home-v2-proof-label">avg rating</span>
+          <span className="home-v2-proof-num">Ready</span>
+          <span className="home-v2-proof-label">to use</span>
         </div>
       </div>
 
