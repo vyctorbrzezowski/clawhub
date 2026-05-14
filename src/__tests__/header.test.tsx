@@ -333,7 +333,7 @@ describe("Header", () => {
     });
   });
 
-  it("falls back to typed skill search when a typeahead skill has no owner handle", () => {
+  it("navigates to skill page using owner id fallback when ownerHandle is null", () => {
     siteModeMock.mockReturnValue("skills");
     navigateMock.mockReset();
     useUnifiedSearchMock.mockReturnValue({
@@ -361,14 +361,45 @@ describe("Header", () => {
     fireEvent.click(screen.getByRole("option", { name: /Weather Skill/i }));
 
     expect(navigateMock).toHaveBeenCalledWith({
-      to: "/search",
-      search: { q: "weather", type: "skills" },
+      to: "/publishers%3Aopaque-id/weather",
     });
     expect(navigateMock).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        to: "/publishers%3Aopaque-id/weather",
+        to: "/search",
       }),
     );
+  });
+
+  it("navigates to skill page on Enter using owner id fallback when ownerHandle is null", () => {
+    siteModeMock.mockReturnValue("skills");
+    navigateMock.mockReset();
+    useUnifiedSearchMock.mockReturnValue({
+      ...defaultUnifiedSearchResult,
+      skillResults: [
+        {
+          ...defaultUnifiedSearchResult.skillResults[0],
+          ownerHandle: null,
+          skill: {
+            ...defaultUnifiedSearchResult.skillResults[0].skill,
+            ownerUserId: "users:opaque-id",
+            ownerPublisherId: null,
+          },
+        },
+      ],
+      pluginResults: [],
+      pluginCount: 0,
+    });
+
+    render(<Header />);
+
+    const input = screen.getByPlaceholderText("Search skills and plugins");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "weather" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(navigateMock).toHaveBeenCalledWith({
+      to: "/users%3Aopaque-id/weather",
+    });
   });
 
   it("shows a single no-results state without section footers", () => {

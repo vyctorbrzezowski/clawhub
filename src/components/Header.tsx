@@ -194,8 +194,11 @@ export default function Header() {
 
   const navigateToTypeaheadItem = (item: TypeaheadItem) => {
     if (item.kind === "skill") {
-      const resultOwnerHandle = item.result.ownerHandle?.trim();
-      if (!resultOwnerHandle) {
+      const resultHandle = item.result.ownerHandle?.trim();
+      const ownerSegment =
+        resultHandle || (item.result.skill.ownerPublisherId ?? item.result.skill.ownerUserId);
+      const slug = item.result.skill.slug;
+      if (!ownerSegment || !slug) {
         void navigate({
           to: "/search",
           search: { q: trimmedNavSearchQuery, type: "skills" },
@@ -206,7 +209,7 @@ export default function Header() {
         return;
       }
       void navigate({
-        to: `/${encodeURIComponent(resultOwnerHandle)}/${encodeURIComponent(item.result.skill.slug)}`,
+        to: `/${encodeURIComponent(ownerSegment)}/${encodeURIComponent(slug)}`,
       });
     } else if (item.kind === "plugin") {
       void navigate({
