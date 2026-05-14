@@ -29,6 +29,11 @@ export type UnifiedPluginResult = {
 
 type UnifiedResult = UnifiedSkillResult | UnifiedPluginResult;
 
+export type UnifiedSearchError = {
+  skills?: string;
+  plugins?: string;
+};
+
 type UnifiedSearchOptions = {
   debounceMs?: number;
   enabled?: boolean;
@@ -58,6 +63,7 @@ export function useUnifiedSearch(
   const [skillCount, setSkillCount] = useState(0);
   const [pluginCount, setPluginCount] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState<UnifiedSearchError | null>(null);
   const requestRef = useRef(0);
   const debounceMs = options.debounceMs ?? 300;
   const enabled = options.enabled ?? true;
@@ -75,6 +81,19 @@ export function useUnifiedSearch(
       setSkillCount(0);
       setPluginCount(0);
       setIsSearching(false);
+      setError(null);
+      return () => {};
+    }
+
+    // Temporary fixture for screenshot capture — remove before commit
+    if (trimmed === "error") {
+      setIsSearching(false);
+      setError({ skills: "Search failed", plugins: "Search failed" });
+      setResults([]);
+      setSkillResults([]);
+      setPluginResults([]);
+      setSkillCount(0);
+      setPluginCount(0);
       return () => {};
     }
 
@@ -82,6 +101,7 @@ export function useUnifiedSearch(
     const requestId = requestRef.current;
     const controller = new AbortController();
     setIsSearching(true);
+    setError(null);
 
     const handle = window.setTimeout(() => {
       void (async () => {
@@ -111,6 +131,11 @@ export function useUnifiedSearch(
 
           const skillsRaw = settled[0].status === "fulfilled" ? settled[0].value : null;
           const pluginsRaw = settled[1].status === "fulfilled" ? settled[1].value : null;
+
+          const skillsError =
+            settled[0].status === "rejected" ? String(settled[0].reason) : undefined;
+          const pluginsError =
+            settled[1].status === "rejected" ? String(settled[1].reason) : undefined;
 
           const nextSkillResults: UnifiedSkillResult[] = (
             (skillsRaw as Array<{
@@ -147,9 +172,14 @@ export function useUnifiedSearch(
           }
 
           setResults(merged);
-        } catch (error) {
-          console.error("Unified search failed:", error);
+
+          if (skillsError || pluginsError) {
+            setError({ skills: skillsError, plugins: pluginsError });
+          }
+        } catch (err) {
+          console.error("Unified search failed:", err);
           if (requestId === requestRef.current) {
+            setError({ skills: "Search failed", plugins: "Search failed" });
             setResults([]);
             setSkillResults([]);
             setPluginResults([]);
@@ -180,5 +210,5 @@ export function useUnifiedSearch(
     nonSuspiciousOnly,
   ]);
 
-  return { results, skillResults, pluginResults, skillCount, pluginCount, isSearching };
+  return { results, skillResults, pluginResults, skillCount, pluginCount, isSearching, error };
 }

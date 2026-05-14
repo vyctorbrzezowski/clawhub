@@ -60,6 +60,7 @@ const defaultUnifiedSearchResult = {
   skillCount: 1,
   pluginCount: 1,
   isSearching: false,
+  error: null,
 };
 
 vi.mock("@tanstack/react-router", () => ({
@@ -204,6 +205,7 @@ describe("Header", () => {
     useUnifiedSearchMock.mockReturnValue(defaultUnifiedSearchResult);
     signInMock.mockReset();
     signInMock.mockResolvedValue({ signingIn: true });
+    navigateMock.mockReset();
   });
 
   it("hides Packages navigation in soul mode on mobile and desktop", () => {
@@ -351,6 +353,7 @@ describe("Header", () => {
       ],
       pluginResults: [],
       pluginCount: 0,
+      error: null,
     });
 
     render(<Header />);
@@ -380,6 +383,7 @@ describe("Header", () => {
       skillCount: 0,
       pluginCount: 0,
       isSearching: false,
+      error: null,
     });
 
     render(<Header />);
@@ -454,6 +458,55 @@ describe("Header", () => {
         view: undefined,
         focus: undefined,
       },
+    });
+  });
+
+  it("shows a search-failed message in the typeahead when both sources error", () => {
+    siteModeMock.mockReturnValue("skills");
+    useUnifiedSearchMock.mockReturnValue({
+      results: [],
+      skillResults: [],
+      pluginResults: [],
+      skillCount: 0,
+      pluginCount: 0,
+      isSearching: false,
+      error: { skills: "failed", plugins: "failed" },
+    });
+
+    render(<Header />);
+
+    const input = screen.getByPlaceholderText("Search skills and plugins");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "fail" } });
+
+    const typeahead = screen.getByRole("listbox");
+    expect(within(typeahead).getByText("Search failed. Press Enter to search page.")).toBeTruthy();
+    expect(within(typeahead).queryByText(/No skills or plugins found/i)).toBeNull();
+  });
+
+  it("keeps the typeahead open and navigable on error", () => {
+    siteModeMock.mockReturnValue("skills");
+    useUnifiedSearchMock.mockReturnValue({
+      results: [],
+      skillResults: [],
+      pluginResults: [],
+      skillCount: 0,
+      pluginCount: 0,
+      isSearching: false,
+      error: { skills: "failed", plugins: "failed" },
+    });
+
+    render(<Header />);
+
+    const input = screen.getByPlaceholderText("Search skills and plugins");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "fail" } });
+
+    fireEvent.submit(screen.getByRole("search", { name: "Site search" }));
+
+    expect(navigateMock).toHaveBeenCalledWith({
+      to: "/search",
+      search: { q: "fail", type: undefined },
     });
   });
 });

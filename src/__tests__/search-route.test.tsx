@@ -58,6 +58,7 @@ describe("search route", () => {
       skillCount: 0,
       pluginCount: 0,
       isSearching: false,
+      error: null,
     });
   });
 
@@ -97,6 +98,7 @@ describe("search route", () => {
       skillCount: 0,
       pluginCount: 3,
       isSearching: false,
+      error: null,
     });
     const route = await loadRoute();
     const Component = route.__config.component as ComponentType;
@@ -145,6 +147,7 @@ describe("search route", () => {
       skillCount: 25,
       pluginCount: 0,
       isSearching: false,
+      error: null,
     });
     const route = await loadRoute();
     const Component = route.__config.component as ComponentType;
@@ -232,5 +235,45 @@ describe("search route", () => {
     render(<Component />);
 
     expect(screen.queryByRole("button", { name: /warnings/i })).toBeNull();
+  });
+
+  it("shows a search-failed message instead of no-results when both sources error", async () => {
+    searchMock = { q: "error-test" };
+    useUnifiedSearchMock.mockReturnValue({
+      results: [],
+      skillResults: [],
+      pluginResults: [],
+      skillCount: 0,
+      pluginCount: 0,
+      isSearching: false,
+      error: { skills: "failed", plugins: "failed" },
+    });
+    const route = await loadRoute();
+    const Component = route.__config.component as ComponentType;
+
+    render(<Component />);
+
+    expect(screen.getByText("Search failed. Please try again.")).toBeTruthy();
+    expect(screen.queryByText(/No results found/i)).toBeNull();
+  });
+
+  it("shows available results and a partial-error notice when one source fails", async () => {
+    searchMock = { q: "partial-test" };
+    useUnifiedSearchMock.mockReturnValue({
+      results: [{ type: "plugin", plugin: { name: "partial-plugin" } }],
+      skillResults: [],
+      pluginResults: [{ type: "plugin", plugin: { name: "partial-plugin" } }],
+      skillCount: 0,
+      pluginCount: 1,
+      isSearching: false,
+      error: { skills: "failed" },
+    });
+    const route = await loadRoute();
+    const Component = route.__config.component as ComponentType;
+
+    render(<Component />);
+
+    expect(screen.getByText("partial-plugin")).toBeTruthy();
+    expect(screen.getByText("Some results could not be loaded. Please try again.")).toBeTruthy();
   });
 });

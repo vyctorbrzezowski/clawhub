@@ -54,6 +54,7 @@ function UnifiedSearchPage() {
     skillCount,
     pluginCount,
     isSearching,
+    error,
   } = useUnifiedSearch(search.q ?? "", "all", {
     limits: {
       skills: resultLimit,
@@ -176,12 +177,23 @@ function UnifiedSearchPage() {
         <Card className="text-center p-10">
           <p className="text-ink-soft">Enter a search term to find skills and plugins</p>
         </Card>
+      ) : error && results.length === 0 ? (
+        <Card className="text-center p-10">
+          <p className="text-ink-soft">Search failed. Please try again.</p>
+        </Card>
       ) : results.length === 0 ? (
         <Card className="text-center p-10">
           <p className="text-ink-soft">No results found for "{search.q}"</p>
         </Card>
       ) : (
         <>
+          {error ? (
+            <Card className="p-4 mb-4">
+              <p className="text-ink-soft text-sm">
+                Some results could not be loaded. Please try again.
+              </p>
+            </Card>
+          ) : null}
           <div className="results-list">
             {results.map((item) =>
               item.type === "skill" ? (

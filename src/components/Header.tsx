@@ -114,6 +114,7 @@ export default function Header() {
     pluginResults,
     pluginCount,
     isSearching: typeaheadSearching,
+    error: typeaheadError,
   } = useUnifiedSearch(navSearchQuery, "all", {
     debounceMs: 180,
     enabled: showTypeahead,
@@ -389,6 +390,7 @@ export default function Header() {
                 activeIndex={typeaheadActiveIndex}
                 items={typeaheadItems}
                 loading={typeaheadSearching}
+                error={typeaheadError}
                 onHoverItem={setTypeaheadActiveIndex}
                 onSelectItem={navigateToTypeaheadItem}
                 query={trimmedNavSearchQuery}
@@ -607,6 +609,7 @@ function SearchTypeahead({
   activeIndex,
   items,
   loading,
+  error,
   onHoverItem,
   onSelectItem,
   query,
@@ -614,6 +617,7 @@ function SearchTypeahead({
   activeIndex: number;
   items: TypeaheadItem[];
   loading: boolean;
+  error?: { skills?: string; plugins?: string } | null;
   onHoverItem: (index: number) => void;
   onSelectItem: (item: TypeaheadItem) => void;
   query: string;
@@ -652,7 +656,12 @@ function SearchTypeahead({
       {loading && !hasMatches ? (
         <div className="navbar-search-typeahead-status">Searching...</div>
       ) : null}
-      {!loading && !hasMatches ? (
+      {!loading && error && !hasMatches ? (
+        <div className="navbar-search-typeahead-status">
+          Search failed. Press Enter to search page.
+        </div>
+      ) : null}
+      {!loading && !error && !hasMatches ? (
         <div className="navbar-search-typeahead-status">
           No skills or plugins found for "{query}"
         </div>
