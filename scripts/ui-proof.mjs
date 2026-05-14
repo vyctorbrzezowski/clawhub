@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
+import crypto from "node:crypto";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -21,6 +22,20 @@ const DEFAULT_PUBLIC_ENV = {
   VITE_CONVEX_SITE_URL: "https://wry-manatee-359.convex.site",
   VITE_CONVEX_URL: "https://wry-manatee-359.convex.cloud",
 };
+
+function sha256(text) {
+  return crypto.createHash("sha256").update(text).digest("hex");
+}
+
+async function resolveCommitSha({ commandRunner, ref, repoRoot }) {
+  const actualRef = ref === "worktree" ? "HEAD" : ref;
+  try {
+    const { stdout } = await commandRunner("git", ["rev-parse", actualRef], { cwd: repoRoot });
+    return stdout.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export function parseProofUiArgs(argv = []) {
   const opts = {
@@ -204,6 +219,7 @@ function shellQuote(value) {
 
 export function renderRemoteLaneScript({ lane, opts, plan, scenarioText }) {
   const scenarioB64 = Buffer.from(scenarioText, "utf8").toString("base64");
+  const scenarioSha256 = sha256(scenarioText);
   const runtimePath = path.join("scripts", "ui-proof-runtime.mjs");
   const laneRemoteDir = `.artifacts/clawhub-ui-proof/remote-${path.basename(plan.outputDir)}/${lane.name}`;
   const appRootSetup =
@@ -219,6 +235,13 @@ export function renderRemoteLaneScript({ lane, opts, plan, scenarioText }) {
   const envExports = Object.entries(DEFAULT_PUBLIC_ENV)
     .map(([key, value]) => `export ${key}=${shellQuote(value)}`)
     .join("\n");
+  const seedFields = [];
+  if (opts.seedCommand) {
+    seedFields.push(`"seedCommand": ${JSON.stringify(opts.seedCommand)}`);
+  }
+  if (opts.seedPreset) {
+    seedFields.push(`"seedPreset": ${JSON.stringify(opts.seedPreset)}`);
+  }
 
   return `set -euo pipefail
 export DISPLAY="\${DISPLAY:-:99}"
@@ -311,7 +334,7 @@ bun ${shellQuote(runtimePath)} run-scenario \
   --base-url ${shellQuote(`http://127.0.0.1:${lane.port}`)} \
   --lane ${shellQuote(lane.name)} \
   --output-dir "$remote_out" || status=$?
-manifest_status=""
+manifest_status="unknown"
 if [ -f "$remote_out/proof-steps.json" ]; then
   manifest_status="$(CLAWHUB_UI_PROOF_MANIFEST="$remote_out/proof-steps.json" bun -e 'const fs = require("fs"); const path = process.env.CLAWHUB_UI_PROOF_MANIFEST; process.stdout.write(JSON.parse(fs.readFileSync(path, "utf8")).status || "unknown");' 2>/dev/null || true)"
   if [ "$manifest_status" = "pass" ]; then
@@ -331,9 +354,22 @@ if [ -f "$remote_out/preview.pid" ]; then
 fi
 cat > "$remote_out/lane-summary.json" <<CLAWHUB_UI_PROOF_SUMMARY
 {
+  "appURL": ${JSON.stringify(`http://127.0.0.1:${lane.port}`)},
+  "baseline": ${JSON.stringify(plan.baseline)},
+  "baseURL": ${JSON.stringify(`http://127.0.0.1:${lane.port}`)},
+  "candidate": ${JSON.stringify(plan.candidate)},
+  "commitSha": "$(cd "$app_root" && git rev-parse HEAD)",
+  "convexURL": ${JSON.stringify(DEFAULT_PUBLIC_ENV.VITE_CONVEX_URL)},
+  "generatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "lane": ${JSON.stringify(lane.name)},
+  "mode": ${JSON.stringify(plan.mode)},
+  "outputDir": "$remote_out",
+  "publicEnvKeys": ${JSON.stringify(Object.keys(DEFAULT_PUBLIC_ENV))},
   "ref": ${JSON.stringify(lane.ref)},
-  "baseURL": ${JSON.stringify(`http://127.0.0.1:${lane.port}`)}
+  "scenarioPath": "$scenario_file",
+  "scenarioSha256": ${JSON.stringify(scenarioSha256)},
+  "siteURL": ${JSON.stringify(DEFAULT_PUBLIC_ENV.VITE_CONVEX_SITE_URL)},
+  "status": "$manifest_status"${seedFields.length ? `,\n  ${seedFields.join(",\n  ")}` : ""}
 }
 CLAWHUB_UI_PROOF_SUMMARY
 exit "$status"
@@ -347,11 +383,15 @@ function renderReport(summary) {
     `Status: ${summary.status}`,
     `Mode: \`${summary.mode}\``,
     `Scenario: \`${summary.scenario}\``,
+    summary.scenarioSha256
+      ? `Scenario SHA256: \`${summary.scenarioSha256.slice(0, 16)}...\``
+      : undefined,
     summary.mode === "feature"
       ? "Baseline: not run for feature proof."
       : `Baseline: \`${summary.baseline}\``,
     `Candidate: \`${summary.candidate}\``,
     `Provider: \`${summary.provider}\``,
+    summary.generatedAt ? `Generated: \`${summary.generatedAt}\`` : undefined,
     "",
     summary.status === "dry-run" ? "Dry run: Crabbox was not invoked." : undefined,
     "## Artifacts",
@@ -359,6 +399,9 @@ function renderReport(summary) {
   ].filter(Boolean);
   for (const lane of summary.lanes) {
     lines.push(`### ${lane.name}`, "");
+    if (lane.commitSha) {
+      lines.push(`- Commit: \`${lane.commitSha.slice(0, 7)}\``);
+    }
     if (lane.error) {
       lines.push(`- Error: ${lane.error}`);
     }
@@ -561,11 +604,27 @@ export async function runProofUi({
   const opts = parseProofUiArgs(args);
   const plan = buildProofUiPlan({ now, opts, repoRoot });
   const scenarioText = await fs.readFile(plan.scenario, "utf8");
+  const scenarioSha256 = sha256(scenarioText);
+
+  const laneCommitShas = opts.dryRun
+    ? []
+    : await Promise.all(
+        plan.lanes.map(async (lane) => ({
+          name: lane.name,
+          sha: await resolveCommitSha({ commandRunner, ref: lane.ref, repoRoot }),
+        })),
+      );
+
   const summary = {
     baseline: plan.baseline,
     candidate: plan.candidate,
+    convexURL: DEFAULT_PUBLIC_ENV.VITE_CONVEX_URL,
     generatedAt: now().toISOString(),
     lanes: plan.lanes.map((lane) => ({
+      appURL: `http://127.0.0.1:${lane.port}`,
+      commitSha: opts.dryRun
+        ? null
+        : (laneCommitShas.find((l) => l.name === lane.name)?.sha ?? null),
       localOutputDir: lane.outputDir,
       name: lane.name,
       ref: lane.ref,
@@ -574,9 +633,20 @@ export async function runProofUi({
     mode: plan.mode,
     outputDir: plan.outputDir,
     provider: plan.provider,
+    publicEnvKeys: Object.keys(DEFAULT_PUBLIC_ENV),
     scenario: plan.scenario,
+    scenarioSha256,
+    siteURL: DEFAULT_PUBLIC_ENV.VITE_CONVEX_SITE_URL,
     status: opts.dryRun ? "dry-run" : "pending",
   };
+
+  if (opts.seedCommand) {
+    summary.seedCommand = opts.seedCommand;
+  }
+  if (opts.seedPreset) {
+    summary.seedPreset = opts.seedPreset;
+  }
+
   if (opts.dryRun) {
     await writeSummaryAndReport({ outputDir: plan.outputDir, summary });
     return {
@@ -605,7 +675,15 @@ export async function runProofUi({
         }),
       );
     }
-    summary.lanes = lanes;
+    summary.lanes = lanes.map((laneResult) => {
+      const planLane = plan.lanes.find((l) => l.name === laneResult.name);
+      const commitSha = laneCommitShas.find((l) => l.name === laneResult.name)?.sha ?? null;
+      return {
+        appURL: `http://127.0.0.1:${planLane.port}`,
+        commitSha,
+        ...laneResult,
+      };
+    });
     summary.status = lanes.every((lane) => lane.status === "pass") ? "pass" : "fail";
   } finally {
     if (!opts.keepLease && created) {

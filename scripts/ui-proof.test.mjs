@@ -110,9 +110,20 @@ describe("ui-proof", () => {
     expect(report).toContain("Baseline: `origin/main`");
     expect(report).toContain("Candidate: `worktree`");
     expect(report).toContain("Dry run");
-    await expect(
-      fs.readFile(path.join(result.outputDir, "summary.json"), "utf8"),
-    ).resolves.toContain('"scenario"');
+    const summary = JSON.parse(
+      await fs.readFile(path.join(result.outputDir, "summary.json"), "utf8"),
+    );
+    expect(summary.scenario).toBe(scenario);
+    expect(summary.scenarioSha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(summary.publicEnvKeys).toEqual(["VITE_CONVEX_SITE_URL", "VITE_CONVEX_URL"]);
+    expect(summary.convexURL).toBe("https://wry-manatee-359.convex.cloud");
+    expect(summary.siteURL).toBe("https://wry-manatee-359.convex.site");
+    expect(summary.generatedAt).toBe("2026-05-12T12:34:56.000Z");
+    expect(summary.lanes).toHaveLength(2);
+    expect(summary.lanes[0]).toHaveProperty("appURL", "http://127.0.0.1:4317");
+    expect(summary.lanes[0]).toHaveProperty("commitSha", null);
+    expect(summary.lanes[1]).toHaveProperty("appURL", "http://127.0.0.1:4318");
+    expect(summary.lanes[1]).toHaveProperty("commitSha", null);
   });
 
   it("dry-runs feature proof with candidate-only report language", async () => {
@@ -136,9 +147,15 @@ describe("ui-proof", () => {
     expect(report).toContain("Candidate: `worktree`");
     expect(report).not.toContain("### baseline");
     expect(report).toContain("### candidate");
-    await expect(
-      fs.readFile(path.join(result.outputDir, "summary.json"), "utf8"),
-    ).resolves.toContain('"mode": "feature"');
+    const summary = JSON.parse(
+      await fs.readFile(path.join(result.outputDir, "summary.json"), "utf8"),
+    );
+    expect(summary.mode).toBe("feature");
+    expect(summary.scenarioSha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(summary.publicEnvKeys).toEqual(["VITE_CONVEX_SITE_URL", "VITE_CONVEX_URL"]);
+    expect(summary.lanes).toHaveLength(1);
+    expect(summary.lanes[0]).toHaveProperty("appURL", "http://127.0.0.1:4318");
+    expect(summary.lanes[0]).toHaveProperty("commitSha", null);
   });
 
   it("treats a passing proof manifest as authoritative after a Crabbox transport error", async () => {
@@ -203,9 +220,17 @@ describe("ui-proof", () => {
     });
 
     expect(result.status).toBe("pass");
-    await expect(
-      fs.readFile(path.join(result.outputDir, "summary.json"), "utf8"),
-    ).resolves.toContain('"status": "pass"');
+    const summary = JSON.parse(
+      await fs.readFile(path.join(result.outputDir, "summary.json"), "utf8"),
+    );
+    expect(summary.status).toBe("pass");
+    expect(summary.scenarioSha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(summary.publicEnvKeys).toEqual(["VITE_CONVEX_SITE_URL", "VITE_CONVEX_URL"]);
+    expect(summary.lanes).toHaveLength(2);
+    expect(summary.lanes[0]).toHaveProperty("appURL");
+    expect(summary.lanes[0]).toHaveProperty("commitSha", null);
+    expect(summary.lanes[1]).toHaveProperty("appURL");
+    expect(summary.lanes[1]).toHaveProperty("commitSha", null);
   });
 
   it("quotes Crabbox ssh key paths with spaces for rsync artifact copying", () => {
@@ -251,5 +276,13 @@ describe("ui-proof", () => {
     expect(script).toContain(
       'manifest_status="$(CLAWHUB_UI_PROOF_MANIFEST="$remote_out/proof-steps.json" bun -e',
     );
+    expect(script).toContain('"scenarioSha256"');
+    expect(script).toContain('"commitSha"');
+    expect(script).toContain('"publicEnvKeys"');
+    expect(script).toContain('"convexURL"');
+    expect(script).toContain('"siteURL"');
+    expect(script).toContain('"generatedAt"');
+    expect(script).toContain('"appURL"');
+    expect(script).toContain('"status"');
   });
 });
