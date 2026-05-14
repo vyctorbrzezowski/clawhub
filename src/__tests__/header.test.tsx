@@ -14,10 +14,8 @@ type HeaderAuthStatus = {
 
 const siteModeMock = vi.fn(() => "souls");
 const navigateMock = vi.fn();
-const { signInMock, useUnifiedSearchMock } = vi.hoisted(() => ({
-  signInMock: vi.fn(),
-  useUnifiedSearchMock: vi.fn(),
-}));
+const signInMock = vi.fn();
+const useUnifiedSearchMock = vi.fn();
 
 const defaultUnifiedSearchResult = {
   results: [],
@@ -369,6 +367,39 @@ describe("Header", () => {
         to: "/publishers%3Aopaque-id/weather",
       }),
     );
+  });
+
+  it("sets aria-activedescendant to the active item id and updates on ArrowDown", () => {
+    siteModeMock.mockReturnValue("skills");
+    render(<Header />);
+
+    const input = screen.getByPlaceholderText("Search skills and plugins");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "weather" } });
+
+    expect(input.getAttribute("aria-activedescendant")).toBe("typeahead-item-skill-skills-weather");
+
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    expect(input.getAttribute("aria-activedescendant")).toBe("typeahead-item-footer-skills");
+
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    expect(input.getAttribute("aria-activedescendant")).toBe(
+      "typeahead-item-plugin-weather-plugin",
+    );
+  });
+
+  it("removes aria-activedescendant when Escape closes typeahead", () => {
+    siteModeMock.mockReturnValue("skills");
+    render(<Header />);
+
+    const input = screen.getByPlaceholderText("Search skills and plugins");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "weather" } });
+
+    expect(input.hasAttribute("aria-activedescendant")).toBe(true);
+
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(input.hasAttribute("aria-activedescendant")).toBe(false);
   });
 
   it("shows a single no-results state without section footers", () => {

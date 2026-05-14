@@ -146,6 +146,8 @@ export default function Header() {
     }
     return items;
   }, [pluginCount, pluginResults, showTypeahead, skillCount, skillResults, trimmedNavSearchQuery]);
+  const activeItem = showTypeahead ? typeaheadItems[typeaheadActiveIndex] : undefined;
+  const activeDescendantId = activeItem ? typeaheadItemId(activeItem.key) : undefined;
 
   useEffect(() => {
     setTypeaheadActiveIndex(0);
@@ -247,10 +249,10 @@ export default function Header() {
         (index) => (index - 1 + typeaheadItems.length) % typeaheadItems.length,
       );
     } else if (event.key === "Enter") {
-      const activeItem = typeaheadItems[typeaheadActiveIndex];
-      if (!activeItem) return;
+      const itemToNavigate = typeaheadItems[typeaheadActiveIndex];
+      if (!itemToNavigate) return;
       event.preventDefault();
-      navigateToTypeaheadItem(activeItem);
+      navigateToTypeaheadItem(itemToNavigate);
     }
   };
 
@@ -381,6 +383,7 @@ export default function Header() {
                 aria-label="Search"
                 aria-expanded={showTypeahead}
                 aria-controls="navbar-search-typeahead"
+                aria-activedescendant={activeDescendantId}
                 autoComplete="off"
               />
             </form>
@@ -720,10 +723,11 @@ function TypeaheadRow({
 }) {
   const body = getTypeaheadRowBody(item);
   return (
-    <button
+    <div
       className={`navbar-search-typeahead-row${active ? " is-active" : ""}${item.kind === "footer" ? " is-footer" : ""}`}
-      type="button"
       role="option"
+      id={typeaheadItemId(item.key)}
+      tabIndex={-1}
       aria-selected={active}
       onMouseEnter={() => onHoverItem(index)}
       onMouseDown={(event) => event.preventDefault()}
@@ -735,7 +739,7 @@ function TypeaheadRow({
         {body.meta ? <span className="navbar-search-typeahead-meta">{body.meta}</span> : null}
       </span>
       {item.kind === "footer" ? <ArrowRight size={14} aria-hidden="true" /> : null}
-    </button>
+    </div>
   );
 }
 
@@ -762,6 +766,10 @@ function getTypeaheadRowBody(item: TypeaheadItem) {
     title: item.label,
     meta: null,
   };
+}
+
+function typeaheadItemId(key: string): string {
+  return `typeahead-item-${key.replace(/[^a-zA-Z0-9-]/g, "-")}`;
 }
 
 function getCurrentRelativeUrl() {
