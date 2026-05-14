@@ -815,6 +815,233 @@ describe("SkillDetailPage", () => {
     expect(routerInvalidateMock).toHaveBeenCalledTimes(2);
   });
 
+  it("uses top-level statsStars for optimistic star count on migrated documents", async () => {
+    const toggleStarMock = vi.fn().mockResolvedValueOnce({ starred: true });
+    useMutationMock.mockReturnValue(toggleStarMock);
+    useAuthStatusMock.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      me: { _id: "users:viewer", role: "user" },
+    });
+    useQueryMock.mockImplementation((_fn: unknown, args: unknown) => {
+      if (args === "skip") return undefined;
+      if (args && typeof args === "object" && "skillId" in args && "limit" in args) return [];
+      if (args && typeof args === "object" && "skillId" in args) return false;
+      if (args && typeof args === "object" && "slug" in args) {
+        return {
+          skill: {
+            _id: skillId,
+            _creationTime: 0,
+            slug: "weather",
+            displayName: "Weather",
+            summary: "Get current weather.",
+            ownerUserId: ownerId,
+            ownerPublisherId,
+            tags: {},
+            badges: {},
+            statsStars: 100,
+            stats: {
+              stars: 0,
+              downloads: 34,
+              installsCurrent: 5,
+              installsAllTime: 8,
+              versions: 1,
+              comments: 0,
+            },
+            createdAt: 0,
+            updatedAt: 0,
+          },
+          owner: {
+            _id: ownerPublisherId,
+            _creationTime: 0,
+            kind: "user",
+            handle: "steipete",
+            displayName: "Peter",
+            linkedUserId: ownerId,
+          },
+          latestVersion: {
+            _id: versionId,
+            _creationTime: 0,
+            skillId,
+            version: "1.0.0",
+            fingerprint: "abc",
+            changelog: "Initial release",
+            parsed: { license: "MIT-0", frontmatter: {} },
+            files: [],
+            createdBy: ownerId,
+            createdAt: 0,
+          },
+          forkOf: null,
+          canonical: null,
+        };
+      }
+      return undefined;
+    });
+
+    render(<SkillDetailPage slug="weather" />);
+
+    const starButton = await screen.findByRole("button", { name: "Star skill" });
+    expect(starButton.textContent).toContain("100");
+
+    fireEvent.click(starButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Unstar skill" }).textContent).toContain("101");
+    });
+    expect(toggleStarMock).toHaveBeenCalledWith({ skillId });
+  });
+
+  it("falls back to stats.stars when no top-level statsStars exists", async () => {
+    const toggleStarMock = vi.fn().mockResolvedValueOnce({ starred: true });
+    useMutationMock.mockReturnValue(toggleStarMock);
+    useAuthStatusMock.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      me: { _id: "users:viewer", role: "user" },
+    });
+    useQueryMock.mockImplementation((_fn: unknown, args: unknown) => {
+      if (args === "skip") return undefined;
+      if (args && typeof args === "object" && "skillId" in args && "limit" in args) return [];
+      if (args && typeof args === "object" && "skillId" in args) return false;
+      if (args && typeof args === "object" && "slug" in args) {
+        return {
+          skill: {
+            _id: skillId,
+            _creationTime: 0,
+            slug: "weather",
+            displayName: "Weather",
+            summary: "Get current weather.",
+            ownerUserId: ownerId,
+            ownerPublisherId,
+            tags: {},
+            badges: {},
+            stats: {
+              stars: 5,
+              downloads: 34,
+              installsCurrent: 5,
+              installsAllTime: 8,
+              versions: 1,
+              comments: 0,
+            },
+            createdAt: 0,
+            updatedAt: 0,
+          },
+          owner: {
+            _id: ownerPublisherId,
+            _creationTime: 0,
+            kind: "user",
+            handle: "steipete",
+            displayName: "Peter",
+            linkedUserId: ownerId,
+          },
+          latestVersion: {
+            _id: versionId,
+            _creationTime: 0,
+            skillId,
+            version: "1.0.0",
+            fingerprint: "abc",
+            changelog: "Initial release",
+            parsed: { license: "MIT-0", frontmatter: {} },
+            files: [],
+            createdBy: ownerId,
+            createdAt: 0,
+          },
+          forkOf: null,
+          canonical: null,
+        };
+      }
+      return undefined;
+    });
+
+    render(<SkillDetailPage slug="weather" />);
+
+    const starButton = await screen.findByRole("button", { name: "Star skill" });
+    expect(starButton.textContent).toContain("5");
+
+    fireEvent.click(starButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Unstar skill" }).textContent).toContain("6");
+    });
+    expect(toggleStarMock).toHaveBeenCalledWith({ skillId });
+  });
+
+  it("does not let unstar drive the counter below zero", async () => {
+    const toggleStarMock = vi.fn().mockResolvedValueOnce({ starred: false });
+    useMutationMock.mockReturnValue(toggleStarMock);
+    useAuthStatusMock.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      me: { _id: "users:viewer", role: "user" },
+    });
+    useQueryMock.mockImplementation((_fn: unknown, args: unknown) => {
+      if (args === "skip") return undefined;
+      if (args && typeof args === "object" && "skillId" in args && "limit" in args) return [];
+      if (args && typeof args === "object" && "skillId" in args) return true;
+      if (args && typeof args === "object" && "slug" in args) {
+        return {
+          skill: {
+            _id: skillId,
+            _creationTime: 0,
+            slug: "weather",
+            displayName: "Weather",
+            summary: "Get current weather.",
+            ownerUserId: ownerId,
+            ownerPublisherId,
+            tags: {},
+            badges: {},
+            statsStars: 0,
+            stats: {
+              stars: 0,
+              downloads: 34,
+              installsCurrent: 5,
+              installsAllTime: 8,
+              versions: 1,
+              comments: 0,
+            },
+            createdAt: 0,
+            updatedAt: 0,
+          },
+          owner: {
+            _id: ownerPublisherId,
+            _creationTime: 0,
+            kind: "user",
+            handle: "steipete",
+            displayName: "Peter",
+            linkedUserId: ownerId,
+          },
+          latestVersion: {
+            _id: versionId,
+            _creationTime: 0,
+            skillId,
+            version: "1.0.0",
+            fingerprint: "abc",
+            changelog: "Initial release",
+            parsed: { license: "MIT-0", frontmatter: {} },
+            files: [],
+            createdBy: ownerId,
+            createdAt: 0,
+          },
+          forkOf: null,
+          canonical: null,
+        };
+      }
+      return undefined;
+    });
+
+    render(<SkillDetailPage slug="weather" />);
+
+    const unstarButton = await screen.findByRole("button", { name: "Unstar skill" });
+    expect(unstarButton.textContent).toContain("0");
+
+    fireEvent.click(unstarButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Star skill" }).textContent).toContain("0");
+    });
+    expect(toggleStarMock).toHaveBeenCalledWith({ skillId });
+  });
+
   it("opens report dialog for authenticated users", async () => {
     useAuthStatusMock.mockReturnValue({
       isAuthenticated: true,

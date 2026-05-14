@@ -11,6 +11,7 @@ import { getUserFacingAuthError } from "../lib/authErrorMessage";
 import { getUserFacingConvexError } from "../lib/convexError";
 import { canManageSkill, isModerator } from "../lib/roles";
 import type { SkillBySlugResult, SkillPageInitialData } from "../lib/skillPage";
+import { readCanonicalStars } from "../lib/skillStats";
 import { clearAuthError, setAuthError } from "../lib/useAuthError";
 import { useAuthStatus } from "../lib/useAuthStatus";
 import { ClientOnly } from "./ClientOnly";
@@ -229,14 +230,18 @@ export function SkillDetailPage({
     optimisticStar && skill && optimisticStar.skillId === skill._id ? optimisticStar : null;
   const effectiveIsStarred = activeOptimisticStar?.starred ?? isStarred;
   const displayedSkill = useMemo(() => {
-    if (!skill || !activeOptimisticStar) return skill;
-    const currentStars = skill.stats.stars ?? 0;
-    if (currentStars !== activeOptimisticStar.baselineStars) return skill;
+    if (!skill) return skill;
+    const canonicalStars = readCanonicalStars(skill);
+    const displayedStars =
+      activeOptimisticStar && canonicalStars === activeOptimisticStar.baselineStars
+        ? Math.max(0, canonicalStars + activeOptimisticStar.delta)
+        : canonicalStars;
+    if ((skill.stats?.stars ?? 0) === displayedStars) return skill;
     return {
       ...skill,
       stats: {
         ...skill.stats,
-        stars: Math.max(0, currentStars + activeOptimisticStar.delta),
+        stars: displayedStars,
       },
     };
   }, [activeOptimisticStar, skill]);
@@ -439,7 +444,7 @@ export function SkillDetailPage({
 
   useEffect(() => {
     if (!skill || !activeOptimisticStar) return;
-    if (skill.stats.stars !== activeOptimisticStar.baselineStars) {
+    if (readCanonicalStars(skill) !== activeOptimisticStar.baselineStars) {
       setOptimisticStar(null);
     }
   }, [activeOptimisticStar, skill]);
@@ -521,7 +526,7 @@ export function SkillDetailPage({
     const activeStar = activeOptimisticStar;
     const baselineStarred = activeStar?.baselineStarred ?? Boolean(effectiveIsStarred);
     const previousIsStarred = Boolean(effectiveIsStarred);
-    const baselineStars = activeStar?.baselineStars ?? skill.stats.stars ?? 0;
+    const baselineStars = activeStar?.baselineStars ?? readCanonicalStars(skill);
 
     try {
       const starResult = (await toggleStar({ skillId: skill._id })) as { starred: boolean };
