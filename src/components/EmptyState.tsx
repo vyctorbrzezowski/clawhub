@@ -35,9 +35,9 @@ export function EmptyState({
       </div>
       {action &&
         (action.href ? (
-          <a href={action.href}>
-            <Button variant="outline">{action.label}</Button>
-          </a>
+          <Button asChild variant="outline">
+            <a href={action.href}>{action.label}</a>
+          </Button>
         ) : (
           <Button variant="outline" onClick={action.onClick}>
             {action.label}
