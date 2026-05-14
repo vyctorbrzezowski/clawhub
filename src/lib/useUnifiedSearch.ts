@@ -57,6 +57,8 @@ export function useUnifiedSearch(
   const [pluginResults, setPluginResults] = useState<UnifiedPluginResult[]>([]);
   const [skillCount, setSkillCount] = useState(0);
   const [pluginCount, setPluginCount] = useState(0);
+  const [skillMayHaveMore, setSkillMayHaveMore] = useState(false);
+  const [pluginMayHaveMore, setPluginMayHaveMore] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const requestRef = useRef(0);
   const debounceMs = options.debounceMs ?? 300;
@@ -74,6 +76,8 @@ export function useUnifiedSearch(
       setPluginResults([]);
       setSkillCount(0);
       setPluginCount(0);
+      setSkillMayHaveMore(false);
+      setPluginMayHaveMore(false);
       setIsSearching(false);
       return () => {};
     }
@@ -134,6 +138,8 @@ export function useUnifiedSearch(
 
           setSkillCount(nextSkillResults.length);
           setPluginCount(nextPluginResults.length);
+          setSkillMayHaveMore(nextSkillResults.length >= skillLimit);
+          setPluginMayHaveMore(nextPluginResults.length >= pluginLimit);
           setSkillResults(nextSkillResults);
           setPluginResults(nextPluginResults);
 
@@ -180,5 +186,14 @@ export function useUnifiedSearch(
     nonSuspiciousOnly,
   ]);
 
-  return { results, skillResults, pluginResults, skillCount, pluginCount, isSearching };
+  return {
+    results,
+    skillResults,
+    pluginResults,
+    skillCount,
+    pluginCount,
+    skillMayHaveMore,
+    pluginMayHaveMore,
+    isSearching,
+  };
 }

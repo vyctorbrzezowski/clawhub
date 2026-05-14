@@ -57,6 +57,8 @@ describe("search route", () => {
       pluginResults: [],
       skillCount: 0,
       pluginCount: 0,
+      skillMayHaveMore: false,
+      pluginMayHaveMore: false,
       isSearching: false,
     });
   });
@@ -144,6 +146,8 @@ describe("search route", () => {
       pluginResults: [],
       skillCount: 25,
       pluginCount: 0,
+      skillMayHaveMore: true,
+      pluginMayHaveMore: false,
       isSearching: false,
     });
     const route = await loadRoute();
@@ -232,5 +236,68 @@ describe("search route", () => {
     render(<Component />);
 
     expect(screen.queryByRole("button", { name: /warnings/i })).toBeNull();
+  });
+
+  it("shows capped counts with plus sign when results may have more", async () => {
+    useUnifiedSearchMock.mockReturnValue({
+      results: [],
+      skillResults: [],
+      pluginResults: [],
+      skillCount: 25,
+      pluginCount: 10,
+      skillMayHaveMore: true,
+      pluginMayHaveMore: false,
+      isSearching: false,
+    });
+    const route = await loadRoute();
+    const Component = route.__config.component as ComponentType;
+
+    render(<Component />);
+
+    expect(screen.getByRole("button", { name: "All 35+" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Skills 25+" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Plugins 10" })).toBeTruthy();
+  });
+
+  it("shows capped counts on All tab when only plugins may have more", async () => {
+    useUnifiedSearchMock.mockReturnValue({
+      results: [],
+      skillResults: [],
+      pluginResults: [],
+      skillCount: 5,
+      pluginCount: 25,
+      skillMayHaveMore: false,
+      pluginMayHaveMore: true,
+      isSearching: false,
+    });
+    const route = await loadRoute();
+    const Component = route.__config.component as ComponentType;
+
+    render(<Component />);
+
+    expect(screen.getByRole("button", { name: "All 30+" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Skills 5" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Plugins 25+" })).toBeTruthy();
+  });
+
+  it("shows exact counts when results are below the limit", async () => {
+    useUnifiedSearchMock.mockReturnValue({
+      results: [],
+      skillResults: [],
+      pluginResults: [],
+      skillCount: 1,
+      pluginCount: 24,
+      skillMayHaveMore: false,
+      pluginMayHaveMore: false,
+      isSearching: false,
+    });
+    const route = await loadRoute();
+    const Component = route.__config.component as ComponentType;
+
+    render(<Component />);
+
+    expect(screen.getByRole("button", { name: "All 25" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Skills 1" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Plugins 24" })).toBeTruthy();
   });
 });

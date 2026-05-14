@@ -53,6 +53,8 @@ function UnifiedSearchPage() {
     results: allResults,
     skillCount,
     pluginCount,
+    skillMayHaveMore,
+    pluginMayHaveMore,
     isSearching,
   } = useUnifiedSearch(search.q ?? "", "all", {
     limits: {
@@ -67,12 +69,13 @@ function UnifiedSearchPage() {
       : allResults.filter((item) => item.type === (activeType === "skills" ? "skill" : "plugin"));
   const showSearchCounts = Boolean(search.q);
   const allCount = skillCount + pluginCount;
+  const allMayHaveMore = skillMayHaveMore || pluginMayHaveMore;
   const canLoadMore =
     search.q &&
     !isSearching &&
-    ((activeType === "all" && (skillCount >= resultLimit || pluginCount >= resultLimit)) ||
-      (activeType === "skills" && skillCount >= resultLimit) ||
-      (activeType === "plugins" && pluginCount >= resultLimit));
+    ((activeType === "all" && (skillMayHaveMore || pluginMayHaveMore)) ||
+      (activeType === "skills" && skillMayHaveMore) ||
+      (activeType === "plugins" && pluginMayHaveMore));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,14 +152,22 @@ function UnifiedSearchPage() {
           type="button"
           onClick={() => setType("all")}
         >
-          All {showSearchCounts ? <span className="search-tab-count">{allCount}</span> : null}
+          All{" "}
+          {showSearchCounts ? (
+            <span className="search-tab-count">{allMayHaveMore ? `${allCount}+` : allCount}</span>
+          ) : null}
         </button>
         <button
           className={`search-tab${activeType === "skills" ? " is-active" : ""}`}
           type="button"
           onClick={() => setType("skills")}
         >
-          Skills {showSearchCounts ? <span className="search-tab-count">{skillCount}</span> : null}
+          Skills{" "}
+          {showSearchCounts ? (
+            <span className="search-tab-count">
+              {skillMayHaveMore ? `${skillCount}+` : skillCount}
+            </span>
+          ) : null}
         </button>
         <button
           className={`search-tab${activeType === "plugins" ? " is-active" : ""}`}
@@ -164,7 +175,11 @@ function UnifiedSearchPage() {
           onClick={() => setType("plugins")}
         >
           Plugins{" "}
-          {showSearchCounts ? <span className="search-tab-count">{pluginCount}</span> : null}
+          {showSearchCounts ? (
+            <span className="search-tab-count">
+              {pluginMayHaveMore ? `${pluginCount}+` : pluginCount}
+            </span>
+          ) : null}
         </button>
       </div>
 
