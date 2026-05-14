@@ -83,6 +83,53 @@ describe("bun http client", () => {
     expect(postArgs).toContain('{"a":1}');
   });
 
+  it("rejects with a clear error when curl is unavailable (ENOENT throw)", async () => {
+    const { client } = createBunClient({
+      spawnImpl: () => {
+        throw Object.assign(new Error("spawnSync ENOENT"), { code: "ENOENT" });
+      },
+    });
+
+    await expect(
+      client.apiRequest("https://registry.example", {
+        method: "GET",
+        path: "/v1/ping",
+      }),
+    ).rejects.toThrow(/curl is required when running under Bun/i);
+  });
+
+  it("rejects with a clear error when curl is unavailable (ENOENT in result.error)", async () => {
+    const { client } = createBunClient({
+      spawnImpl: () =>
+        ({
+          status: null,
+          stdout: "",
+          stderr: "",
+          error: Object.assign(new Error("spawnSync ENOENT"), { code: "ENOENT" }),
+        }) as unknown as SpawnResult,
+    });
+
+    await expect(
+      client.apiRequest("https://registry.example", {
+        method: "GET",
+        path: "/v1/ping",
+      }),
+    ).rejects.toThrow(/curl is required when running under Bun/i);
+  });
+
+  it("preserves stderr for non-zero curl exit status", async () => {
+    const { client } = createBunClient({
+      spawnImpl: () => ({ status: 7, stdout: "", stderr: "connection refused" }),
+    });
+
+    await expect(
+      client.apiRequest("https://registry.example", {
+        method: "GET",
+        path: "/v1/ping",
+      }),
+    ).rejects.toThrow("connection refused");
+  });
+
   it("retries 429 responses and keeps 404 non-retryable", async () => {
     const rateLimited = createBunClient({
       spawnImpl: () => ({ status: 0, stdout: "rate limited\n429", stderr: "" }),

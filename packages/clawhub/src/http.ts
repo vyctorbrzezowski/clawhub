@@ -553,6 +553,40 @@ function getHeader(headers: HeaderSource, key: string): string | undefined {
   return typeof match?.[1] === "string" ? match[1].trim() : undefined;
 }
 
+function isCurlUnavailableError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as NodeJS.ErrnoException).code === "ENOENT"
+  );
+}
+
+const CURL_UNAVAILABLE_MESSAGE =
+  "curl is required when running under Bun. Please install curl or switch to the Node.js runtime.";
+
+function runCurlCommand(
+  spawnSyncImpl: typeof spawnSync,
+  args: string[],
+): ReturnType<typeof spawnSync> {
+  let result: ReturnType<typeof spawnSync>;
+  try {
+    result = spawnSyncImpl("curl", args, { encoding: "utf8" });
+  } catch (error) {
+    if (isCurlUnavailableError(error)) {
+      throw new Error(CURL_UNAVAILABLE_MESSAGE, { cause: error });
+    }
+    throw error;
+  }
+  if (result.error && isCurlUnavailableError(result.error)) {
+    throw new Error(CURL_UNAVAILABLE_MESSAGE, { cause: result.error });
+  }
+  if (result.status !== 0) {
+    throw new Error(result.stderr || "curl failed");
+  }
+  return result;
+}
+
 async function fetchJsonViaCurl(
   deps: Pick<HttpClientDeps, "spawnSyncImpl" | "now">,
   url: string,
@@ -578,10 +612,7 @@ async function fetchJsonViaCurl(
     curlArgs.push("--data-binary", JSON.stringify(args.body ?? {}));
   }
 
-  const result = deps.spawnSyncImpl("curl", curlArgs, { encoding: "utf8" });
-  if (result.status !== 0) {
-    throw new Error(result.stderr || "curl failed");
-  }
+  const result = runCurlCommand(deps.spawnSyncImpl, curlArgs);
   const { body, status, headers: responseHeaders } = parseCurlBodyAndMeta(result.stdout ?? "");
   if (status < 200 || status >= 300) {
     throwHttpStatusError(status, body, responseHeaders, deps.now);
@@ -637,10 +668,7 @@ async function fetchJsonFormViaCurl(
       url,
     ];
 
-    const result = deps.spawnSyncImpl("curl", curlArgs, { encoding: "utf8" });
-    if (result.status !== 0) {
-      throw new Error(result.stderr || "curl failed");
-    }
+    const result = runCurlCommand(deps.spawnSyncImpl, curlArgs);
     const { body, status, headers: responseHeaders } = parseCurlBodyAndMeta(result.stdout ?? "");
     if (status < 200 || status >= 300) {
       throwHttpStatusError(status, body, responseHeaders, deps.now);
@@ -671,10 +699,7 @@ async function fetchTextViaCurl(
     ...headers,
     url,
   ];
-  const result = deps.spawnSyncImpl("curl", curlArgs, { encoding: "utf8" });
-  if (result.status !== 0) {
-    throw new Error(result.stderr || "curl failed");
-  }
+  const result = runCurlCommand(deps.spawnSyncImpl, curlArgs);
   const { body, status, headers: responseHeaders } = parseCurlBodyAndMeta(result.stdout ?? "");
   if (status < 200 || status >= 300) {
     throwHttpStatusError(status, body, responseHeaders, deps.now);
@@ -709,10 +734,7 @@ async function fetchBinaryViaCurl(
       CURL_WRITE_OUT_FORMAT,
       url,
     ];
-    const result = deps.spawnSyncImpl("curl", curlArgs, { encoding: "utf8" });
-    if (result.status !== 0) {
-      throw new Error(result.stderr || "curl failed");
-    }
+    const result = runCurlCommand(deps.spawnSyncImpl, curlArgs);
     const { status, headers: responseHeaders } = parseCurlBodyAndMeta(result.stdout ?? "");
     if (status < 200 || status >= 300) {
       const body = await readFileSafe(deps.readFileImpl, filePath);
