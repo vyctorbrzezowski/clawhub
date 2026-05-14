@@ -122,7 +122,7 @@ export const Route = createFileRoute("/management")({
 });
 
 function Management() {
-  const { me } = useAuthStatus();
+  const { me, isLoading } = useAuthStatus();
   const search = Route.useSearch();
   const navigate = useNavigate();
   const staff = isModerator(me);
@@ -205,6 +205,14 @@ function Management() {
     const handle = setTimeout(() => setUserSearchDebounced(userSearch), 250);
     return () => clearTimeout(handle);
   }, [userSearch]);
+
+  if (isLoading) {
+    return (
+      <main className="section">
+        <Card>Loading management console…</Card>
+      </main>
+    );
+  }
 
   if (!staff) {
     return (
