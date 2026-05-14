@@ -30,6 +30,7 @@
     "dataset:snapshot": "bun scripts/security-dataset/export-snapshot.ts",
     "dataset:snapshot:prod:dry-run": "bun scripts/security-dataset/export-snapshot.ts --prod --limit 10 --dry-run",
     "deadcode:ci": "bun run deadcode:knip",
+    "doctor": "bun scripts/dev-doctor.ts",
     "deadcode:dependencies": "bunx knip@6.8.0 --config knip.config.ts --production --no-progress --reporter compact --dependencies --no-config-hints",
     "deadcode:exports": "KNIP_INCLUDE_TESTS=1 bunx knip@6.8.0 --config knip.config.ts --no-progress --reporter compact --exports --no-config-hints",
     "deadcode:files": "bunx knip@6.8.0 --config knip.config.ts --production --no-progress --reporter compact --files --no-config-hints",
