@@ -120,6 +120,68 @@ These features degrade gracefully without their keys:
 | `DISCORD_WEBHOOK_URL`                                                     | Discord notifications                                     |
 | `GITHUB_APP_ID` / `GITHUB_APP_PRIVATE_KEY` / `GITHUB_APP_INSTALLATION_ID` | GitHub backup sync                                        |
 
+### Local development paths
+
+After the initial setup above, pick the path that fits your workflow:
+
+**Path A — Manual two-terminal**
+Keep full control over the Convex backend and the Vite dev server independently.
+
+```bash
+# terminal A
+bunx convex dev --typecheck=disable
+
+# terminal B
+bun run dev -- --port 3000
+```
+
+**Path B — One-command worktree**
+Start the backend, wait for it, then start the app in a single process. Useful for detached worktrees or CI/automation environments.
+
+```bash
+bun run dev:worktree
+```
+
+Options:
+
+- `--seed` — seed fixtures after the backend starts
+- `--detach` — run in the background (logs to `.clawhub/dev-worktree.log`)
+- `--port <n>` — change the Vite port (default `3000`)
+- `--env-file <path>` — point to a shared `.env.local` outside the worktree
+
+**Seed**
+Populate or refresh `@local` fixtures and global stats:
+
+```bash
+bun run seed:dev
+```
+
+This is equivalent to `dev:worktree --seed-only`.
+
+**Local auth e2e**
+Run Playwright specs under `e2e/local-auth/` against an isolated local backend with dev auth enabled:
+
+```bash
+bunx playwright install chromium
+bun run test:pw:local-auth
+```
+
+The runner temporarily moves aside `.env.local` and `.convex/local/default`, then restores them afterward. Stop any running local Convex before starting it.
+
+To run a single spec:
+
+```bash
+bun run test:pw:local-auth -- --project=chromium e2e/local-auth/<spec>.pw.test.ts
+```
+
+### Troubleshooting
+
+| Issue                              | Fix                                                                                                            |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Port already in use                | Change the port with `bun run dev -- --port <n>` and update `SITE_URL` in `.env.local` and the Convex backend. |
+| `.env.local` missing in a worktree | `dev:worktree` auto-detects the primary worktree's `.env.local`, or pass `--env-file <path>`.                  |
+| Playwright browser missing         | `bunx playwright install chromium`                                                                             |
+
 ## CLI Development
 
 The CLI source lives in [`packages/clawhub/`](packages/clawhub/). Both `clawhub` and `clawdhub` are registered as bin aliases.
