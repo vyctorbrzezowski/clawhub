@@ -404,6 +404,101 @@ describe("SkillsIndex", () => {
 
     expect(screen.getByText(/Loading/)).toBeTruthy();
   });
+
+  it("shows retryable error state when first page fetch fails", async () => {
+    convexHttpMock.query.mockRejectedValue(new Error("Network error"));
+    render(<SkillsIndex />);
+    await act(async () => {});
+
+    expect(screen.getByRole("alert")).toBeTruthy();
+    expect(screen.getByText("Failed to load skills")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeTruthy();
+    expect(screen.queryByText("No skills found")).toBeNull();
+  });
+
+  it("preserves existing items and shows error when load-more fails", async () => {
+    vi.stubGlobal("IntersectionObserver", undefined);
+    convexHttpMock.query
+      .mockResolvedValueOnce({
+        page: [makeListResult("skill-0", "Skill 0")],
+        hasMore: true,
+        nextCursor: "cursor-1",
+      })
+      .mockRejectedValueOnce(new Error("Network error"));
+
+    render(<SkillsIndex />);
+    await act(async () => {});
+
+    expect(screen.getByText("Skill 0")).toBeTruthy();
+
+    const loadMoreButton = screen.getByRole("button", { name: "Load more" });
+    await act(async () => {
+      fireEvent.click(loadMoreButton);
+    });
+
+    expect(screen.getByText("Skill 0")).toBeTruthy();
+    expect(screen.getByRole("alert")).toBeTruthy();
+    expect(screen.getByText("Failed to load more skills.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeTruthy();
+  });
+
+  it("retries first page fetch and clears error on success", async () => {
+    convexHttpMock.query.mockRejectedValueOnce(new Error("Network error")).mockResolvedValueOnce({
+      page: [makeListResult("skill-0", "Skill 0")],
+      hasMore: false,
+      nextCursor: null,
+    });
+
+    render(<SkillsIndex />);
+    await act(async () => {});
+
+    expect(screen.getByRole("alert")).toBeTruthy();
+
+    const retryButton = screen.getByRole("button", { name: "Retry" });
+    await act(async () => {
+      fireEvent.click(retryButton);
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText("Skill 0")).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("retries load-more and clears error on success", async () => {
+    vi.stubGlobal("IntersectionObserver", undefined);
+    convexHttpMock.query
+      .mockResolvedValueOnce({
+        page: [makeListResult("skill-0", "Skill 0")],
+        hasMore: true,
+        nextCursor: "cursor-1",
+      })
+      .mockRejectedValueOnce(new Error("Network error"))
+      .mockResolvedValueOnce({
+        page: [makeListResult("skill-1", "Skill 1")],
+        hasMore: false,
+        nextCursor: null,
+      });
+
+    render(<SkillsIndex />);
+    await act(async () => {});
+
+    const loadMoreButton = screen.getByRole("button", { name: "Load more" });
+    await act(async () => {
+      fireEvent.click(loadMoreButton);
+    });
+
+    expect(screen.getByRole("alert")).toBeTruthy();
+
+    const retryButton = screen.getByRole("button", { name: "Retry" });
+    await act(async () => {
+      fireEvent.click(retryButton);
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText("Skill 0")).toBeTruthy();
+    expect(screen.getByText("Skill 1")).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
 });
 
 function makeListResult(

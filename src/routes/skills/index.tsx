@@ -224,6 +224,9 @@ export function SkillsIndex() {
             canAutoLoad={model.canAutoLoad}
             loadMoreRef={model.loadMoreRef}
             loadMore={model.loadMore}
+            listError={model.listError}
+            retry={model.retry}
+            retryLoadMore={model.retryLoadMore}
           />
         </div>
       </div>

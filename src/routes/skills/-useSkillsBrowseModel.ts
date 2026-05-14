@@ -94,6 +94,7 @@ export function useSkillsBrowseModel({
   const [listResults, setListResults] = useState<SkillListEntry[]>([]);
   const [listCursor, setListCursor] = useState<string | null>(null);
   const [listStatus, setListStatus] = useState<ListStatus>("loading");
+  const [listError, setListError] = useState(false);
   const fetchGeneration = useRef(0);
 
   const fetchPage = useCallback(
@@ -109,6 +110,7 @@ export function useSkillsBrowseModel({
           capabilityTag,
         });
         if (generation !== fetchGeneration.current) return;
+        setListError(false);
         setListResults((prev) => (cursor ? [...prev, ...result.page] : result.page));
         const canAdvance = result.hasMore && result.nextCursor != null;
         setListCursor(canAdvance ? result.nextCursor : null);
@@ -117,6 +119,7 @@ export function useSkillsBrowseModel({
         if (generation !== fetchGeneration.current) return;
         if (!isNavigationAbortError(err)) {
           console.error("Failed to fetch skills page:", err);
+          setListError(true);
         }
         // Reset to idle so the user can retry via "Load more"
         setListStatus(cursor ? "idle" : "done");
@@ -135,6 +138,7 @@ export function useSkillsBrowseModel({
     setListResults([]);
     setListCursor(null);
     setListStatus("loading");
+    setListError(false);
     void fetchPage(null, generation);
     return () => {
       fetchGeneration.current += 1;
@@ -285,6 +289,23 @@ export function useSkillsBrowseModel({
     }
   }, [canLoadMore, fetchPage, hasQuery, isLoadingMore, listCursor]);
 
+  const retry = useCallback(() => {
+    fetchGeneration.current += 1;
+    const generation = fetchGeneration.current;
+    setListResults([]);
+    setListCursor(null);
+    setListStatus("loading");
+    setListError(false);
+    void fetchPage(null, generation);
+  }, [fetchPage]);
+
+  const retryLoadMore = useCallback(() => {
+    if (!listCursor) return;
+    setListStatus("loadingMore");
+    setListError(false);
+    void fetchPage(listCursor, fetchGeneration.current);
+  }, [fetchPage, listCursor]);
+
   useEffect(() => {
     if (!isLoadingMore) {
       loadMoreInFlightRef.current = false;
@@ -426,6 +447,7 @@ export function useSkillsBrowseModel({
     featuredOnly,
     isLoadingMore,
     isLoadingSkills,
+    listError,
     loadMore,
     loadMoreRef,
     nonSuspiciousOnly,
@@ -437,6 +459,8 @@ export function useSkillsBrowseModel({
     onToggleNonSuspicious,
     onToggleView,
     query,
+    retry,
+    retryLoadMore,
     sort,
     sorted,
     view,

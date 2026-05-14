@@ -21,6 +21,9 @@ type SkillsResultsProps = {
   canAutoLoad: boolean;
   loadMoreRef: RefObject<HTMLDivElement | null>;
   loadMore: () => void;
+  listError: boolean;
+  retry: () => void;
+  retryLoadMore: () => void;
 };
 
 export function SkillsResults({
@@ -34,6 +37,9 @@ export function SkillsResults({
   canAutoLoad,
   loadMoreRef,
   loadMore,
+  listError,
+  retry,
+  retryLoadMore,
 }: SkillsResultsProps) {
   return (
     <>
@@ -49,6 +55,14 @@ export function SkillsResults({
               </div>
             </div>
           ))}
+        </div>
+      ) : listError && sorted.length === 0 ? (
+        <div className="empty-state" role="alert">
+          <p className="empty-state-title">Failed to load skills</p>
+          <p className="empty-state-body">Something went wrong. Please try again.</p>
+          <Button type="button" onClick={retry} className="mt-2">
+            Retry
+          </Button>
         </div>
       ) : sorted.length === 0 ? (
         <div className="empty-state">
@@ -117,7 +131,14 @@ export function SkillsResults({
         </div>
       )}
 
-      {canLoadMore || isLoadingMore ? (
+      {listError && sorted.length > 0 ? (
+        <div className="card mt-4 flex items-center justify-center gap-3" role="alert">
+          <span className="text-sm text-red-600">Failed to load more skills.</span>
+          <Button type="button" onClick={retryLoadMore}>
+            Retry
+          </Button>
+        </div>
+      ) : canLoadMore || isLoadingMore ? (
         <div ref={canAutoLoad ? loadMoreRef : null} className="card mt-4 flex justify-center">
           {canAutoLoad ? (
             isLoadingMore ? (
