@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { AnchorHTMLAttributes, ComponentType, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -17,6 +17,7 @@ const isRateLimitedPackageApiErrorMock = vi.fn(
 );
 const useQueryMock = vi.fn();
 const useAuthStatusMock = vi.fn();
+const navigateMock = vi.fn();
 
 type PluginDetailLoaderData = {
   detail: PackageDetailResponse;
@@ -79,6 +80,7 @@ vi.mock("@tanstack/react-router", () => ({
       {children}
     </a>
   ),
+  useNavigate: () => navigateMock,
 }));
 
 vi.mock("convex/react", () => ({
@@ -386,6 +388,44 @@ describe("plugin detail route", () => {
     expect(
       installHeading.compareDocumentPosition(capabilitiesTab) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+  });
+
+  it("navigates via router when clicking a detail tab", async () => {
+    navigateMock.mockClear();
+    loaderDataMock = {
+      detail: {
+        package: {
+          name: "demo-plugin",
+          displayName: "Demo Plugin",
+          family: "code-plugin" as const,
+          channel: "community" as const,
+          isOfficial: false,
+          summary: "Demo summary",
+          latestVersion: null,
+          createdAt: 1,
+          updatedAt: 1,
+          tags: {},
+          compatibility: null,
+          capabilities: { executesCode: true, capabilityTags: ["tools"] },
+          verification: null,
+        },
+        owner: null,
+      },
+      version: null,
+      readme: null,
+      rateLimited: null,
+    };
+    useQueryMock.mockReturnValue(null);
+
+    const { PluginDetailPage } = await import("../routes/plugins/$name");
+    render(<PluginDetailPage />);
+    await act(async () => {});
+
+    fireEvent.click(screen.getByRole("tab", { name: "Capabilities" }));
+    expect(navigateMock).toHaveBeenCalledWith({ hash: "capabilities", replace: true });
+
+    fireEvent.click(screen.getByRole("tab", { name: "Readme" }));
+    expect(navigateMock).toHaveBeenCalledWith({ hash: "", replace: true });
   });
 
   it("does not render owner-only plugin scanner rerun state in the detail security summary", async () => {

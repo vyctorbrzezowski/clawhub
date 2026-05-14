@@ -1,4 +1,11 @@
-import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { AlertTriangle, Download, Settings, Upload } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -217,15 +224,10 @@ function PluginDetailTabs({
   compatibilityPanel: ReactNode | null;
   verificationPanel: ReactNode | null;
 }) {
+  const navigate = useNavigate();
   const selectTab = (tab: PluginDetailTab) => {
     setActiveTab(tab);
-    if (typeof window === "undefined") return;
-    const hash = tab === "readme" ? "" : `#${tab}`;
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${window.location.search}${hash}`,
-    );
+    void navigate({ hash: tab === "readme" ? "" : tab, replace: true });
   };
 
   const effectiveActiveTab =
@@ -585,9 +587,9 @@ export function PluginDetailPage({
         )}
       </span>
       {owner.handle ? (
-        <a className="user-name" href={`/user/${encodeURIComponent(owner.handle)}`}>
+        <Link className="user-name" to={`/user/${encodeURIComponent(owner.handle)}`}>
           {owner.displayName ?? owner.handle}
-        </a>
+        </Link>
       ) : (
         <span className="user-name">{owner.displayName ?? "unknown"}</span>
       )}
@@ -608,15 +610,19 @@ export function PluginDetailPage({
           main={
             <div className="skill-hero-title">
               <nav className="skill-hero-breadcrumbs" aria-label="Plugin breadcrumbs">
-                <a href="/plugins">plugins</a>
+                <Link to="/plugins">plugins</Link>
                 <span aria-hidden="true">/</span>
-                <a href={owner?.handle ? `/user/${encodeURIComponent(owner.handle)}` : "#"}>
-                  {owner?.handle ?? owner?.displayName ?? "unknown"}
-                </a>
+                {owner?.handle ? (
+                  <Link to={`/user/${encodeURIComponent(owner.handle)}`}>
+                    {owner?.handle ?? owner?.displayName ?? "unknown"}
+                  </Link>
+                ) : (
+                  <span>{owner?.displayName ?? "unknown"}</span>
+                )}
                 <span aria-hidden="true">/</span>
-                <a href="/plugins">plugins</a>
+                <Link to="/plugins">plugins</Link>
                 <span aria-hidden="true">/</span>
-                <a href={buildPluginDetailHref(pkg.name)}>{pkg.name}</a>
+                <Link to={buildPluginDetailHref(pkg.name)}>{pkg.name}</Link>
               </nav>
               <div className="skill-hero-title-row">
                 <h1 className="skill-page-title">{pkg.displayName}</h1>
@@ -671,18 +677,18 @@ export function PluginDetailPage({
                   ) : null}
                   {newVersionHref ? (
                     <Button asChild variant="outline" className="skill-sidebar-action-button">
-                      <a href={newVersionHref}>
+                      <Link to={newVersionHref}>
                         <Upload size={14} aria-hidden="true" />
                         New version
-                      </a>
+                      </Link>
                     </Button>
                   ) : null}
                   {settingsHref ? (
                     <Button asChild variant="outline" className="skill-sidebar-action-button">
-                      <a href={settingsHref}>
+                      <Link to={settingsHref}>
                         <Settings size={14} aria-hidden="true" />
                         Settings
-                      </a>
+                      </Link>
                     </Button>
                   ) : null}
                 </div>
