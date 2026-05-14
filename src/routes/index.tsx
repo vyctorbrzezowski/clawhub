@@ -129,6 +129,28 @@ function SkillsHome() {
   const carouselCards =
     highlightedCarouselCards.length > 0 ? highlightedCarouselCards : fallbackCarouselCards;
   const carouselUsesHighlighted = highlightedCarouselCards.length > 0;
+  const carouselTitle = carouselUsesHighlighted ? "Featured skills" : "Popular skills";
+  const carouselLinkSearch = carouselUsesHighlighted
+    ? {
+        q: undefined,
+        sort: undefined,
+        dir: undefined,
+        featured: true,
+        highlighted: undefined,
+        nonSuspicious: undefined,
+        view: undefined,
+        focus: undefined,
+      }
+    : {
+        q: undefined,
+        sort: "downloads",
+        dir: "desc",
+        featured: undefined,
+        highlighted: undefined,
+        nonSuspicious: true,
+        view: undefined,
+        focus: undefined,
+      };
   const trendingCards = popular.slice(0, 6);
   const categoryCount = FEATURE_SOULS ? 4 : 3;
   const categoryLayout = categoryCount === 4 ? "1-2-4" : "1-3";
@@ -537,35 +559,9 @@ function SkillsHome() {
           data-source={carouselUsesHighlighted ? "highlighted" : "popular"}
         >
           <div className="home-v2-carousel-header">
-            <h2>Featured skills</h2>
+            <h2>{carouselTitle}</h2>
             <div className="home-v2-carousel-controls">
-              <Link
-                to="/skills"
-                search={
-                  carouselUsesHighlighted
-                    ? {
-                        q: undefined,
-                        sort: undefined,
-                        dir: undefined,
-                        featured: true,
-                        highlighted: undefined,
-                        nonSuspicious: undefined,
-                        view: undefined,
-                        focus: undefined,
-                      }
-                    : {
-                        q: undefined,
-                        sort: "downloads",
-                        dir: "desc",
-                        featured: undefined,
-                        highlighted: undefined,
-                        nonSuspicious: true,
-                        view: undefined,
-                        focus: undefined,
-                      }
-                }
-                className="home-v2-section-link"
-              >
+              <Link to="/skills" search={carouselLinkSearch} className="home-v2-section-link">
                 View all <ArrowRight size={14} />
               </Link>
               <button

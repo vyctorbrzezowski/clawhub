@@ -203,7 +203,7 @@ describe("home route", () => {
 
     await renderHome();
 
-    expect(await screen.findByText("Featured skills")).toBeTruthy();
+    expect(await screen.findByText("Popular skills")).toBeTruthy();
     expect(
       Array.from(document.querySelectorAll(".home-v2-carousel-track .home-v2-c-name")).map(
         (node) => node.textContent,
@@ -222,6 +222,14 @@ describe("home route", () => {
         nonSuspiciousOnly: true,
       }),
     );
+  });
+
+  it("hides the carousel section when both highlighted and popular are empty", async () => {
+    convexQueryMock.mockResolvedValue([]);
+
+    await renderHome();
+
+    expect(document.querySelector(".home-v2-carousel-section")).toBeNull();
   });
 
   it("restores the Trending Now skill grid from the public downloads feed", async () => {
