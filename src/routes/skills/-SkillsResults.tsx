@@ -1,4 +1,6 @@
+import { Search } from "lucide-react";
 import type { RefObject } from "react";
+import { EmptyState } from "../../components/EmptyState";
 import { SkillCard } from "../../components/SkillCard";
 import { getPlatformLabels } from "../../components/skillDetailUtils";
 import { SkillListItem } from "../../components/SkillListItem";
@@ -51,14 +53,15 @@ export function SkillsResults({
           ))}
         </div>
       ) : sorted.length === 0 ? (
-        <div className="empty-state">
-          <p className="empty-state-title">No skills found</p>
-          <p className="empty-state-body">
-            {hasQuery
+        <EmptyState
+          icon={Search}
+          title="No skills found"
+          description={
+            hasQuery
               ? "Try a different search term or remove filters."
-              : "No skills have been published yet."}
-          </p>
-        </div>
+              : "No skills have been published yet."
+          }
+        />
       ) : view === "grid" ? (
         <div className="grid">
           {sorted.map((entry) => {

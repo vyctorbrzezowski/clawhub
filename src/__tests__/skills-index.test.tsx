@@ -68,6 +68,7 @@ describe("SkillsIndex", () => {
     render(<SkillsIndex />);
     await act(async () => {});
     expect(screen.getByText("No skills found")).toBeTruthy();
+    expect(screen.getByText("No skills have been published yet.")).toBeTruthy();
   });
 
   it("does not render the publish CTA on the skills browse page", async () => {
@@ -131,6 +132,7 @@ describe("SkillsIndex", () => {
 
     // Should show empty state, not loading
     expect(screen.getByText("No skills found")).toBeTruthy();
+    expect(screen.getByText("Try a different search term or remove filters.")).toBeTruthy();
     expect(screen.queryByText(/Loading skills/)).toBeNull();
   });
 
