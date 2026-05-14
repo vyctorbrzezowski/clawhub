@@ -15,6 +15,7 @@ import type * as commentModeration from "../commentModeration.js";
 import type * as comments from "../comments.js";
 import type * as crons from "../crons.js";
 import type * as depRegistryScan from "../depRegistryScan.js";
+import type * as devSearchSeed from "../devSearchSeed.js";
 import type * as devSeed from "../devSeed.js";
 import type * as devSeedExtra from "../devSeedExtra.js";
 import type * as downloads from "../downloads.js";
@@ -146,6 +147,7 @@ declare const fullApi: ApiFromModules<{
   comments: typeof comments;
   crons: typeof crons;
   depRegistryScan: typeof depRegistryScan;
+  devSearchSeed: typeof devSearchSeed;
   devSeed: typeof devSeed;
   devSeedExtra: typeof devSeedExtra;
   downloads: typeof downloads;
