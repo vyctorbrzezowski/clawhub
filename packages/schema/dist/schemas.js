@@ -146,6 +146,14 @@ export const ApiV1SearchResponseSchema = type({
         })
             .or("null")
             .optional(),
+        stats: type({
+            downloads: "number?",
+            stars: "number?",
+            installsCurrent: "number?",
+            installsAllTime: "number?",
+            versions: "number?",
+            comments: "number?",
+        }).optional(),
     }).array(),
 });
 export const ApiV1SkillListResponseSchema = type({

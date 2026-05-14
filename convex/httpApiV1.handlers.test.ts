@@ -500,6 +500,65 @@ describe("httpApiV1 handlers", () => {
     });
   });
 
+  it("search returns stats when skill has them", async () => {
+    const runAction = vi.fn().mockResolvedValue([
+      {
+        score: 1,
+        skill: {
+          slug: "demo",
+          displayName: "Demo",
+          summary: "Summary",
+          updatedAt: 1,
+          stats: { downloads: 340, stars: 12, versions: 3, comments: 0 },
+        },
+        version: { version: "1.0.0" },
+        ownerHandle: "openclaw",
+        owner: {
+          handle: "openclaw",
+          displayName: "OpenClaw",
+          image: "https://example.com/avatar.png",
+        },
+      },
+    ]);
+    const runMutation = vi.fn().mockResolvedValue(okRate());
+
+    const response = await __handlers.searchSkillsV1Handler(
+      makeCtx({ runAction, runMutation }),
+      new Request("https://example.com/api/v1/search?q=demo"),
+    );
+
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.results[0].stats).toEqual({
+      downloads: 340,
+      stars: 12,
+      versions: 3,
+      comments: 0,
+    });
+  });
+
+  it("search omits stats when skill lacks them", async () => {
+    const runAction = vi.fn().mockResolvedValue([
+      {
+        score: 1,
+        skill: { slug: "demo", displayName: "Demo", summary: "Summary", updatedAt: 1 },
+        version: { version: "1.0.0" },
+        ownerHandle: null,
+        owner: null,
+      },
+    ]);
+    const runMutation = vi.fn().mockResolvedValue(okRate());
+
+    const response = await __handlers.searchSkillsV1Handler(
+      makeCtx({ runAction, runMutation }),
+      new Request("https://example.com/api/v1/search?q=demo"),
+    );
+
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.results[0].stats).toBeUndefined();
+  });
+
   it("search forwards nonSuspiciousOnly", async () => {
     const runAction = vi.fn().mockResolvedValue([]);
     const runMutation = vi.fn().mockResolvedValue(okRate());

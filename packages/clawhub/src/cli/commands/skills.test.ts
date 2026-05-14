@@ -281,6 +281,54 @@ describe("cmdSearch", () => {
     expect(mockLog).toHaveBeenCalledWith("demo v1.2.3  @openclaw  Demo Skill  (0.988)");
     expect(mockLog).toHaveBeenCalledWith("legacy  Legacy Owner  Legacy Skill  (0.500)");
   });
+
+  it("prints stats in search results when present", async () => {
+    mockGetOptionalAuthToken.mockResolvedValue(undefined);
+    mockApiRequest.mockResolvedValue({
+      results: [
+        {
+          slug: "demo",
+          displayName: "Demo Skill",
+          version: "1.2.3",
+          ownerHandle: "openclaw",
+          score: 0.9876,
+          stats: { downloads: 340, stars: 12, versions: 3, comments: 0 },
+        },
+      ],
+    });
+
+    await cmdSearch(makeOpts(), "demo");
+
+    expect(mockLog).toHaveBeenCalledWith("demo v1.2.3  @openclaw  Demo Skill  (0.988)  ★ 12 ↓ 340");
+  });
+
+  it("omits stats from search results when absent or zero", async () => {
+    mockGetOptionalAuthToken.mockResolvedValue(undefined);
+    mockApiRequest.mockResolvedValue({
+      results: [
+        {
+          slug: "demo",
+          displayName: "Demo Skill",
+          version: "1.2.3",
+          ownerHandle: "openclaw",
+          score: 0.9876,
+          stats: { downloads: 0, stars: 0, versions: 1, comments: 0 },
+        },
+        {
+          slug: "legacy",
+          displayName: "Legacy Skill",
+          version: null,
+          owner: { displayName: "Legacy Owner" },
+          score: 0.5,
+        },
+      ],
+    });
+
+    await cmdSearch(makeOpts(), "demo");
+
+    expect(mockLog).toHaveBeenCalledWith("demo v1.2.3  @openclaw  Demo Skill  (0.988)");
+    expect(mockLog).toHaveBeenCalledWith("legacy  Legacy Owner  Legacy Skill  (0.500)");
+  });
 });
 
 describe("skill moderation commands", () => {

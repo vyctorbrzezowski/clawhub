@@ -42,6 +42,14 @@ type SearchSkillEntry = {
     displayName?: string;
     summary?: string | null;
     updatedAt?: number;
+    stats?: {
+      downloads?: number;
+      stars?: number;
+      installsCurrent?: number;
+      installsAllTime?: number;
+      versions?: number;
+      comments?: number;
+    };
   } | null;
   version: { version?: string; createdAt?: number } | null;
   ownerHandle?: string | null;
@@ -457,6 +465,7 @@ export async function searchSkillsV1Handler(ctx: ActionCtx, request: Request) {
           updatedAt: result.skill?.updatedAt,
           ownerHandle: result.ownerHandle ?? owner?.handle ?? null,
           owner,
+          stats: result.skill?.stats,
         };
       }),
     },

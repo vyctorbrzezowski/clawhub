@@ -50,4 +50,37 @@ describe("packages/clawhub skill metadata schema", () => {
     expect(parsed.results[0]?.ownerHandle).toBe("openclaw");
     expect(parsed.results[0]?.owner?.displayName).toBe("OpenClaw");
   });
+
+  it("parses v1 search response with stats", () => {
+    const parsed = parseArk(
+      ApiV1SearchResponseSchema,
+      {
+        results: [
+          {
+            slug: "demo",
+            displayName: "Demo",
+            summary: null,
+            version: "1.0.0",
+            score: 1,
+            ownerHandle: "openclaw",
+            owner: {
+              handle: "openclaw",
+              displayName: "OpenClaw",
+              image: null,
+            },
+            stats: {
+              downloads: 340,
+              stars: 12,
+              versions: 3,
+              comments: 0,
+            },
+          },
+        ],
+      },
+      "Search",
+    );
+
+    expect(parsed.results[0]?.stats?.downloads).toBe(340);
+    expect(parsed.results[0]?.stats?.stars).toBe(12);
+  });
 });

@@ -168,6 +168,14 @@ export declare const ApiV1SearchResponseSchema: import("arktype/internal/variant
             displayName?: string | null | undefined;
             image?: string | null | undefined;
         } | null | undefined;
+        stats?: {
+            downloads?: number | undefined;
+            stars?: number | undefined;
+            installsCurrent?: number | undefined;
+            installsAllTime?: number | undefined;
+            versions?: number | undefined;
+            comments?: number | undefined;
+        } | undefined;
     }[];
 }, {}>;
 export declare const ApiV1SkillListResponseSchema: import("arktype/internal/variants/object.ts").ObjectType<{

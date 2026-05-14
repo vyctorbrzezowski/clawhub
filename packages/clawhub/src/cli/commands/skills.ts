@@ -98,6 +98,27 @@ function formatSearchOwner(entry: {
   return entry.owner?.displayName ?? "unknown owner";
 }
 
+function formatSearchStats(entry: {
+  stats?: {
+    stars?: number;
+    downloads?: number;
+    installsCurrent?: number;
+    installsAllTime?: number;
+    versions?: number;
+    comments?: number;
+  };
+}) {
+  if (!entry.stats) return "";
+  const parts: string[] = [];
+  if (typeof entry.stats.stars === "number" && entry.stats.stars > 0) {
+    parts.push(`★ ${entry.stats.stars}`);
+  }
+  if (typeof entry.stats.downloads === "number" && entry.stats.downloads > 0) {
+    parts.push(`↓ ${entry.stats.downloads}`);
+  }
+  return parts.length > 0 ? `  ${parts.join(" ")}` : "";
+}
+
 export async function cmdSearch(opts: GlobalOpts, query: string, limit?: number) {
   if (!query) fail("Query required");
 
@@ -120,8 +141,9 @@ export async function cmdSearch(opts: GlobalOpts, query: string, limit?: number)
       const slug = entry.slug ?? "unknown";
       const name = entry.displayName ?? slug;
       const version = entry.version ? ` v${entry.version}` : "";
+      const stats = formatSearchStats(entry);
       console.log(
-        `${slug}${version}  ${formatSearchOwner(entry)}  ${name}  (${entry.score.toFixed(3)})`,
+        `${slug}${version}  ${formatSearchOwner(entry)}  ${name}  (${entry.score.toFixed(3)})${stats}`,
       );
     }
   } catch (error) {
