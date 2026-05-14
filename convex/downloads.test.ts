@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ActionCtx } from "./_generated/server";
 import { __test, downloadZipHandler } from "./downloads";
+import { buildDeterministicZip } from "./lib/skillZip";
+
+vi.mock("./lib/skillZip", () => ({
+  buildDeterministicZip: vi.fn(() => new Uint8Array([0x50, 0x4b, 0x03, 0x04])),
+}));
 
 type RateLimitArgs = { key: string; limit: number; windowMs: number };
 
@@ -140,5 +145,156 @@ describe("downloads helpers", () => {
       identityHash: expect.any(String),
       hourStart: expect.any(Number),
     });
+  });
+
+  it("returns 500 when a stored file is missing", async () => {
+    class MockResponse {
+      status: number;
+      headers: Headers;
+      private body: BodyInit | null;
+
+      constructor(body?: BodyInit | null, init?: ResponseInit) {
+        this.status = init?.status ?? 200;
+        this.headers = new Headers(init?.headers);
+        this.body = body ?? null;
+      }
+
+      async text() {
+        if (this.body === null) return "";
+        if (typeof this.body === "string") return this.body;
+        if (this.body instanceof Blob) return await this.body.text();
+        if (this.body instanceof Uint8Array) return new TextDecoder().decode(this.body);
+        return "";
+      }
+    }
+    vi.stubGlobal("Response", MockResponse as unknown as typeof Response);
+
+    const runQuery = vi.fn(async (_query: unknown, args: Record<string, unknown>) => {
+      if (isRateLimitArgs(args)) return okRate();
+      if ("slug" in args) {
+        return {
+          skill: {
+            _id: "skills:1",
+            ownerUserId: "users:1",
+            slug: "demo",
+            tags: {},
+            latestVersionId: "skillVersions:1",
+          },
+          moderationInfo: null,
+        };
+      }
+      if ("versionId" in args) {
+        return {
+          _id: "skillVersions:1",
+          version: "1.0.0",
+          createdAt: 3,
+          files: [
+            { path: "SKILL.md", storageId: "_storage:1" },
+            { path: "README.md", storageId: "_storage:2" },
+          ],
+          softDeletedAt: undefined,
+        };
+      }
+      return null;
+    });
+    const runMutation = vi.fn(async (_mutation: unknown, args: Record<string, unknown>) => {
+      if (isRateLimitArgs(args)) return okRate();
+      return null;
+    });
+    const runAfter = vi.fn();
+    const storageGet = vi.fn().mockImplementation(async (id: string) => {
+      if (id === "_storage:1") return new Blob(["hello"], { type: "text/markdown" });
+      return null;
+    });
+
+    vi.mocked(buildDeterministicZip).mockClear();
+
+    const response = await downloadZipHandler(
+      {
+        runQuery,
+        runMutation,
+        scheduler: { runAfter },
+        storage: { get: storageGet },
+      } as unknown as ActionCtx,
+      new Request("https://example.com/api/v1/download?slug=demo", {
+        headers: { "cf-connecting-ip": "1.2.3.4" },
+      }),
+    );
+
+    expect(response.status).toBe(500);
+    expect(await response.text()).toContain("missing");
+    expect(buildDeterministicZip).not.toHaveBeenCalled();
+    expect(runAfter).not.toHaveBeenCalled();
+  });
+
+  it("returns 410 when version is soft-deleted", async () => {
+    class MockResponse {
+      status: number;
+      headers: Headers;
+      private body: BodyInit | null;
+
+      constructor(body?: BodyInit | null, init?: ResponseInit) {
+        this.status = init?.status ?? 200;
+        this.headers = new Headers(init?.headers);
+        this.body = body ?? null;
+      }
+
+      async text() {
+        if (this.body === null) return "";
+        if (typeof this.body === "string") return this.body;
+        if (this.body instanceof Blob) return await this.body.text();
+        if (this.body instanceof Uint8Array) return new TextDecoder().decode(this.body);
+        return "";
+      }
+    }
+    vi.stubGlobal("Response", MockResponse as unknown as typeof Response);
+
+    const runQuery = vi.fn(async (_query: unknown, args: Record<string, unknown>) => {
+      if (isRateLimitArgs(args)) return okRate();
+      if ("slug" in args) {
+        return {
+          skill: {
+            _id: "skills:1",
+            ownerUserId: "users:1",
+            slug: "demo",
+            tags: {},
+            latestVersionId: "skillVersions:1",
+          },
+          moderationInfo: null,
+        };
+      }
+      if ("versionId" in args) {
+        return {
+          _id: "skillVersions:1",
+          version: "1.0.0",
+          createdAt: 3,
+          files: [{ path: "SKILL.md", storageId: "_storage:1" }],
+          softDeletedAt: 1,
+        };
+      }
+      return null;
+    });
+    const runMutation = vi.fn(async (_mutation: unknown, args: Record<string, unknown>) => {
+      if (isRateLimitArgs(args)) return okRate();
+      return null;
+    });
+    const runAfter = vi.fn();
+    const storageGet = vi.fn();
+
+    const response = await downloadZipHandler(
+      {
+        runQuery,
+        runMutation,
+        scheduler: { runAfter },
+        storage: { get: storageGet },
+      } as unknown as ActionCtx,
+      new Request("https://example.com/api/v1/download?slug=demo", {
+        headers: { "cf-connecting-ip": "1.2.3.4" },
+      }),
+    );
+
+    expect(response.status).toBe(410);
+    expect(storageGet).not.toHaveBeenCalled();
+    expect(runAfter).not.toHaveBeenCalled();
   });
 });

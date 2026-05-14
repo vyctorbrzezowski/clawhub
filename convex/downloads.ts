@@ -109,7 +109,12 @@ export async function downloadZipHandler(
   const entries: Array<{ path: string; bytes: Uint8Array }> = [];
   for (const file of version.files) {
     const blob = await ctx.storage.get(file.storageId);
-    if (!blob) continue;
+    if (!blob) {
+      return new Response(`Stored file missing: ${file.path}`, {
+        status: 500,
+        headers: mergeHeaders(rate.headers, corsHeaders()),
+      });
+    }
     const buffer = new Uint8Array(await blob.arrayBuffer());
     entries.push({ path: file.path, bytes: buffer });
   }
