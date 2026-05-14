@@ -2,14 +2,15 @@ import { Link } from "@tanstack/react-router";
 import { ArrowDownToLine, Star } from "lucide-react";
 import { getSkillBadges } from "../lib/badges";
 import { formatCompactStat } from "../lib/numberFormat";
-import type { PublicPublisher, PublicSkill } from "../lib/publicUser";
+import type { PublicPublisher } from "../lib/publicUser";
+import type { SkillListItemSkill } from "../lib/skillListItem";
 import { timeAgo } from "../lib/timeAgo";
 import { MarketplaceIcon } from "./MarketplaceIcon";
 import { Badge } from "./ui/badge";
 import { VerifiedBadge } from "./VerifiedBadge";
 
 type SkillListItemProps = {
-  skill: PublicSkill;
+  skill: SkillListItemSkill;
   ownerHandle?: string | null;
   owner?: PublicPublisher | null;
 };

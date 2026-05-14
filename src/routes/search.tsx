@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { PluginListItem } from "../components/PluginListItem";
 import { SkillListItem } from "../components/SkillListItem";
 import { Card } from "../components/ui/card";
-import type { PublicSkill } from "../lib/publicUser";
 import {
   useUnifiedSearch,
   type UnifiedSearchType,
@@ -209,8 +208,7 @@ function UnifiedSearchPage() {
 }
 
 function SkillResultRow({ result }: { result: UnifiedSkillResult }) {
-  const skill = result.skill as unknown as PublicSkill;
-  return <SkillListItem skill={skill} ownerHandle={result.ownerHandle} />;
+  return <SkillListItem skill={result.skill} ownerHandle={result.ownerHandle} />;
 }
 
 function PluginResultRow({ result }: { result: UnifiedPluginResult }) {

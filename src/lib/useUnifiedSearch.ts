@@ -1,23 +1,14 @@
 import { useAction } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
+import type { SkillListItemSkill } from "./skillListItem";
 import { fetchPluginCatalog, type PackageListItem } from "./packageApi";
 
 export type UnifiedSearchType = "all" | "skills" | "plugins";
 
 export type UnifiedSkillResult = {
   type: "skill";
-  skill: {
-    _id: string;
-    slug: string;
-    displayName: string;
-    summary?: string | null;
-    ownerUserId: string;
-    ownerPublisherId?: string | null;
-    stats: { downloads: number; stars: number; versions?: number };
-    updatedAt: number;
-    createdAt: number;
-  };
+  skill: SkillListItemSkill;
   ownerHandle: string | null;
   score: number;
 };
