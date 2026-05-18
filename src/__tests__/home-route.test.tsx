@@ -91,11 +91,15 @@ describe("home route", () => {
     return label;
   }
 
-  it("renders the restored community hero copy", async () => {
+  it("renders the agent-indexable community hero copy", async () => {
     await renderHome();
 
     expect(screen.getByText("BUILT BY THE COMMUNITY.")).toBeTruthy();
-    expect(screen.getByText("Tools built by thousands, ready in one search.")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "ClawHub is the public OpenClaw registry for SKILL.md agent skills and code plugins. Search, inspect, install, and publish versioned packages through the browser, CLI, or HTTP API.",
+      ),
+    ).toBeTruthy();
   });
 
   it("marks the three home category options for one-or-three-column breakpoints", async () => {

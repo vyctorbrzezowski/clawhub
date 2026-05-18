@@ -110,12 +110,15 @@ describe("restored UI design contract", () => {
     expect(compact).not.toContain(".navbar-search {\n    display: none;");
   });
 
-  it("requires the restored home hero, carousel, category grid, and Trending Now sections", () => {
+  it("requires the agent-indexable home hero, carousel, category grid, and Trending Now sections", () => {
     const homeSource = home();
     const css = styles();
 
     expect(homeSource).toContain("BUILT BY THE COMMUNITY.");
-    expect(homeSource).toContain("Tools built by thousands, ready in one search.");
+    expect(homeSource).toContain(
+      "ClawHub is the public OpenClaw registry for SKILL.md agent skills and code plugins.",
+    );
+    expect(homeSource).toContain("data-agent-summary");
     expect(homeSource).toContain("api.skills.listHighlightedPublic");
     expect(homeSource).toContain("api.skills.listPublicPageV4");
     expect(homeSource).toContain("const [popular, setPopular]");
