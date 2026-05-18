@@ -31,9 +31,7 @@ describe("agent skills discovery index", () => {
       expect(skill.name).toMatch(/^[a-z0-9-]+$/);
       expect(skill.type).toBe("skill-md");
       expect(skill.description.length).toBeGreaterThan(20);
-      expect(skill.url).toBe(
-        `https://clawhub.ai/.well-known/agent-skills/${skill.name}/SKILL.md`,
-      );
+      expect(skill.url).toBe(`https://clawhub.ai/.well-known/agent-skills/${skill.name}/SKILL.md`);
 
       const body = readFileSync(
         join(root, `public/.well-known/agent-skills/${skill.name}/SKILL.md`),
