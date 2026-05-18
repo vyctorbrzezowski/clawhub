@@ -102,15 +102,26 @@ async function fixtureProof({ mode = "before-after", status = "pass" } = {}) {
 
 describe("ui-proof-publish", () => {
   it("parses publish defaults", () => {
-    expect(
-      parseProofPublishArgs(["--proof-dir", ".artifacts/proof", "--target-pr", "123"]),
-    ).toMatchObject({
-      artifactBranch: "qa-artifacts",
-      marker: "<!-- clawhub-ui-proof -->",
-      proofDir: ".artifacts/proof",
-      repo: "openclaw/clawhub",
-      targetPr: "123",
-    });
+    const previousRepository = process.env.GITHUB_REPOSITORY;
+    delete process.env.GITHUB_REPOSITORY;
+
+    try {
+      expect(
+        parseProofPublishArgs(["--proof-dir", ".artifacts/proof", "--target-pr", "123"]),
+      ).toMatchObject({
+        artifactBranch: "qa-artifacts",
+        marker: "<!-- clawhub-ui-proof -->",
+        proofDir: ".artifacts/proof",
+        repo: "openclaw/clawhub",
+        targetPr: "123",
+      });
+    } finally {
+      if (previousRepository === undefined) {
+        delete process.env.GITHUB_REPOSITORY;
+      } else {
+        process.env.GITHUB_REPOSITORY = previousRepository;
+      }
+    }
   });
 
   it("renders before/after proof comments with inline screenshots and video links", async () => {
