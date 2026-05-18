@@ -47,6 +47,7 @@ describe("agent readiness helpers", () => {
     expect(getOAuthAuthorizationServer()).toMatchObject({
       issuer: "https://clawhub.ai",
       device_authorization_endpoint: "https://clawhub.ai/api/cli/device/code",
+      grant_types_supported: ["urn:ietf:params:oauth:grant-type:device_code"],
       jwks_uri: "https://convex.example/.well-known/jwks.json",
     });
     expect(getOAuthProtectedResource()).toMatchObject({

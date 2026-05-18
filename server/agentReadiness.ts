@@ -131,26 +131,10 @@ export function getOAuthAuthorizationServer() {
     token_endpoint: `${SITE_ORIGIN}/api/cli/device/token`,
     device_authorization_endpoint: `${SITE_ORIGIN}/api/cli/device/code`,
     jwks_uri: `${convexIssuer}/.well-known/jwks.json`,
-    grant_types_supported: ["authorization_code", "urn:ietf:params:oauth:grant-type:device_code"],
-    response_types_supported: ["code"],
+    grant_types_supported: ["urn:ietf:params:oauth:grant-type:device_code"],
+    response_types_supported: ["token"],
     token_endpoint_auth_methods_supported: ["none"],
     scopes_supported: ["api:read", "api:write", "skills:publish", "packages:publish"],
-    service_documentation: `${SITE_ORIGIN}/docs/auth`,
-  };
-}
-
-export function getOpenIdConfiguration() {
-  const convexIssuer = getConvexSiteOrigin();
-  return {
-    issuer: convexIssuer,
-    authorization_endpoint: `${convexIssuer}/oauth/authorize`,
-    token_endpoint: `${SITE_ORIGIN}/api/cli/device/token`,
-    device_authorization_endpoint: `${SITE_ORIGIN}/api/cli/device/code`,
-    jwks_uri: `${convexIssuer}/.well-known/jwks.json`,
-    grant_types_supported: ["authorization_code", "urn:ietf:params:oauth:grant-type:device_code"],
-    response_types_supported: ["code"],
-    subject_types_supported: ["public"],
-    id_token_signing_alg_values_supported: ["RS256"],
     service_documentation: `${SITE_ORIGIN}/docs/auth`,
   };
 }
