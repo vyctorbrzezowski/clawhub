@@ -12,7 +12,8 @@ describe("WebMCP registration script", () => {
     expect(WEB_MCP_REGISTRATION_SCRIPT).toContain("inspect_clawhub_skill");
   });
 
-  it("is safe to execute in browsers that do not expose WebMCP", () => {
-    expect(() => new Function(WEB_MCP_REGISTRATION_SCRIPT)()).not.toThrow();
+  it("guards browsers that do not expose WebMCP", () => {
+    expect(WEB_MCP_REGISTRATION_SCRIPT).toContain("typeof navigator === 'undefined'");
+    expect(WEB_MCP_REGISTRATION_SCRIPT).toContain("if (!modelContext) return");
   });
 });
