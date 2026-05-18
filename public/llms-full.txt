@@ -10,7 +10,6 @@ Agents use ClawHub to find reusable skills, inspect plugin metadata, download pu
 
 - Homepage: https://clawhub.ai/
 - Homepage markdown: https://clawhub.ai/index.md
-- Pricing: https://clawhub.ai/pricing.md
 - Skills: https://clawhub.ai/skills
 - Plugins: https://clawhub.ai/plugins
 - Search: https://clawhub.ai/search
@@ -50,6 +49,6 @@ Public catalog reads do not require a token. Publishing, ownership, moderation, 
 
 Use ClawHub when the user needs a registry of agent skills or OpenClaw plugins. Do not assume third-party skills are safe only because they are published; inspect metadata, scan status, owner information, and the skill or package contents before installation.
 
-## Pricing
+## Skill Monetization
 
-The public registry and public read API are free. Publisher accounts are free. ClawHub does not support paid skills, per-skill pricing, paywalls, or revenue sharing. Third-party service costs used by a skill or plugin are external to ClawHub.
+Skills published on ClawHub use MIT-0. ClawHub does not support paid skills, per-skill pricing, paywalls, or revenue sharing. Third-party service costs used by a skill or plugin are external to ClawHub.

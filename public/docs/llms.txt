@@ -6,7 +6,6 @@ ClawHub documentation covers CLI usage, authentication, API behavior, skill form
 
 - API docs: https://clawhub.ai/docs/api
 - Auth docs: https://clawhub.ai/docs/auth
-- Pricing: https://clawhub.ai/pricing.md
 - OpenAPI: https://clawhub.ai/api/v1/openapi.json
 
 ## Agent Notes

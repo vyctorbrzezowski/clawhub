@@ -5,7 +5,6 @@ ClawHub is the public OpenClaw registry for SKILL.md agent skills and code plugi
 ## Core Resources
 
 - [Homepage markdown](https://clawhub.ai/index.md)
-- [Pricing](https://clawhub.ai/pricing.md)
 - [API documentation](https://clawhub.ai/docs/api)
 - [Authentication documentation](https://clawhub.ai/docs/auth)
 - [OpenAPI description](https://clawhub.ai/api/v1/openapi.json)

@@ -7,7 +7,6 @@ export const HOME_LINK_HEADER = [
   '</.well-known/api-catalog>; rel="api-catalog"',
   '</api/v1/openapi.json>; rel="service-desc"; type="application/vnd.oai.openapi+json"',
   '</docs/api>; rel="service-doc"; type="text/html"',
-  '</pricing.md>; rel="describedby"; type="text/markdown"',
   '</.well-known/agent.json>; rel="describedby"; type="application/json"',
   '</.well-known/agent-skills/index.json>; rel="describedby"; type="application/json"',
   '</.well-known/mcp>; rel="service-meta"; type="application/json"',
@@ -28,7 +27,6 @@ available without authentication; write and publishing flows use ClawHub API tok
 - Browse plugins: ${SITE_ORIGIN}/plugins
 - Agent view: ${SITE_ORIGIN}/?mode=agent
 - Markdown homepage: ${SITE_ORIGIN}/index.md
-- Pricing: ${SITE_ORIGIN}/pricing.md
 - Public API documentation: ${SITE_ORIGIN}/docs/api
 - OpenAPI description: ${SITE_ORIGIN}/api/v1/openapi.json
 - API catalog: ${SITE_ORIGIN}/.well-known/api-catalog
@@ -139,7 +137,6 @@ export function getAgentModeView() {
     ],
     endpoints: {
       homepage_markdown: `${SITE_ORIGIN}/index.md`,
-      pricing_markdown: `${SITE_ORIGIN}/pricing.md`,
       api_docs: `${SITE_ORIGIN}/docs/api`,
       auth_docs: `${SITE_ORIGIN}/docs/auth`,
       openapi: `${SITE_ORIGIN}/api/v1/openapi.json`,

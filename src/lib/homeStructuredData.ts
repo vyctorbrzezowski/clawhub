@@ -55,12 +55,6 @@ export function getClawHubHomeStructuredData() {
         license: `${GITHUB_REPO}/blob/main/LICENSE`,
         description:
           "Public registry for agent skills and OpenClaw plugins, with searchable metadata, artifact downloads, and token-authenticated publishing APIs.",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-          url: `${CLAWHUB_ORIGIN}/pricing.md`,
-        },
       },
       {
         "@type": "FAQPage",

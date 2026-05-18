@@ -8,11 +8,5 @@
   "url": "https://clawhub.ai",
   "codeRepository": "https://github.com/openclaw/clawhub",
   "license": "https://github.com/openclaw/clawhub/blob/main/LICENSE",
-  "description": "Public registry for agent skills and OpenClaw plugins, with searchable metadata, artifact downloads, and token-authenticated publishing APIs.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD",
-    "url": "https://clawhub.ai/pricing.md"
-  }
+  "description": "Public registry for agent skills and OpenClaw plugins, with searchable metadata, artifact downloads, and token-authenticated publishing APIs."
 }

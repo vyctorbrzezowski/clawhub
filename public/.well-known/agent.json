@@ -9,7 +9,6 @@
   ],
   "entrypoints": {
     "homepage_markdown": "https://clawhub.ai/index.md",
-    "pricing": "https://clawhub.ai/pricing.md",
     "api_docs": "https://clawhub.ai/docs/api",
     "auth_docs": "https://clawhub.ai/docs/auth",
     "openapi": "https://clawhub.ai/api/v1/openapi.json",

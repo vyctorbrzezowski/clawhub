@@ -13,7 +13,6 @@ These are truthful, machine-checkable improvements and can be maintained in this
 - Agent discovery: `/.well-known/agent.json`, `/.well-known/agent-card.json`, `/.well-known/agent-skills/index.json`, and concise `llms.txt` files.
 - API discovery: `/.well-known/api-catalog`, OpenAPI operation IDs, `/status`, and `/api/llms.txt`.
 - MCP discovery: `/.well-known/mcp`, `/.well-known/mcp/server-card.json`, and GET `/mcp` discovery alongside POST JSON-RPC.
-- Pricing clarity: `/pricing.md` documenting the current free registry/publisher model and the no-paid-skills invariant.
 
 ## Worth doing, but not as this PR
 
@@ -24,6 +23,7 @@ These are real improvements, but they need product, ecosystem, or API-contract w
 - Webhook signature verification. Do this only if ClawHub exposes customer webhooks; do not document verification for unrelated internal or outbound webhook code.
 - Comparison pages, category content, case studies, and developer tutorials. These are marketing/docs investments and should make specific, supportable claims.
 - skills.sh or ChatGPT/Claude/Gemini listings. These are external publication workflows, not repo-only code changes.
+- `pricing.md`. ClawHub is an OSS registry, not a priced SaaS surface; do not add a fake pricing document just to satisfy a scanner. Keep the no-paid-skills invariant in product docs and agent context instead.
 
 ## Do not fake
 
