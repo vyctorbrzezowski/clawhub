@@ -1,0 +1,29 @@
+# ClawHub
+
+ClawHub is the public OpenClaw registry for SKILL.md agent skills and code plugins. Agents can use it to search, inspect, install, and publish versioned packages through a browser, CLI, or HTTP API.
+
+## Core Resources
+
+- [Homepage markdown](https://clawhub.ai/index.md)
+- [Pricing](https://clawhub.ai/pricing.md)
+- [API documentation](https://clawhub.ai/docs/api)
+- [Authentication documentation](https://clawhub.ai/docs/auth)
+- [OpenAPI description](https://clawhub.ai/api/v1/openapi.json)
+- [API catalog](https://clawhub.ai/.well-known/api-catalog)
+- [Agent discovery](https://clawhub.ai/.well-known/agent.json)
+- [MCP discovery](https://clawhub.ai/.well-known/mcp)
+- [MCP server card](https://clawhub.ai/.well-known/mcp/server-card.json)
+- [Status](https://clawhub.ai/status)
+- [Agent skills index](https://clawhub.ai/.well-known/agent-skills/index.json)
+- [API llms.txt](https://clawhub.ai/api/llms.txt)
+- [Docs llms.txt](https://clawhub.ai/docs/llms.txt)
+
+## When Agents Should Use ClawHub
+
+Use ClawHub when a user asks to find, compare, inspect, install, or publish Codex-style agent skills and OpenClaw plugins.
+
+Prefer the OpenAPI description for exact request schemas, the API catalog for service discovery, and the agent skills index for static machine-readable capability summaries.
+
+## Authentication
+
+Public read endpoints do not require authentication. Publishing, ownership, moderation, and account workflows use `Authorization: Bearer clh_...` API tokens. The CLI supports device authorization flows for headless agents.

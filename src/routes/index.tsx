@@ -21,9 +21,17 @@ import { fetchFeaturedPlugins } from "../lib/featuredCatalog";
 import { FEATURE_SOULS } from "../lib/features";
 import type { PackageListItem } from "../lib/packageApi";
 import type { PublicSkill, PublicSoul, PublicUser } from "../lib/publicUser";
-import { getSiteMode } from "../lib/site";
+import { getSiteMode, getSiteUrlForMode } from "../lib/site";
 
 export const Route = createFileRoute("/")({
+  head: () => {
+    const mode = getSiteMode();
+    const siteUrl = getSiteUrlForMode(mode);
+    return {
+      links: [{ rel: "canonical", href: siteUrl }],
+      meta: [{ property: "og:url", content: siteUrl }],
+    };
+  },
   component: Home,
 });
 
@@ -479,7 +487,11 @@ function SkillsHome() {
           </h1>
         )}
 
-        <p className="home-v2-sub">Tools built by thousands, ready in one search.</p>
+        <p className="home-v2-sub" data-agent-summary>
+          ClawHub is the public OpenClaw registry for SKILL.md agent skills and code plugins.
+          Search, inspect, install, and publish versioned packages through the browser, CLI, or HTTP
+          API.
+        </p>
 
         <div className="home-v2-search-container">
           <form className="home-v2-search-bar" onSubmit={handleSearch}>

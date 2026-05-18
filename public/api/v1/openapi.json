@@ -1578,7 +1578,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getBundlePlugins"
       }
     },
     "/api/v1/code-plugins": {
@@ -1668,7 +1669,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getCodePlugins"
       }
     },
     "/api/v1/download": {
@@ -1712,7 +1714,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getDownload"
       }
     },
     "/api/v1/packages": {
@@ -1964,7 +1967,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackages"
       }
     },
     "/api/v1/packages/{name}": {
@@ -2019,7 +2023,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesByName"
       }
     },
     "/api/v1/packages/{name}/download": {
@@ -2114,7 +2119,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesByNameDownload"
       }
     },
     "/api/v1/packages/{name}/file": {
@@ -2199,7 +2205,8 @@
           "415": {
             "description": "Binary files are not served inline"
           }
-        }
+        },
+        "operationId": "getPackagesByNameFile"
       }
     },
     "/api/v1/packages/{name}/readiness": {
@@ -2254,7 +2261,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesByNameReadiness"
       }
     },
     "/api/v1/packages/{name}/versions": {
@@ -2316,7 +2324,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesByNameVersions"
       }
     },
     "/api/v1/packages/{name}/versions/{version}": {
@@ -2379,7 +2388,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesByNameVersionsByVersion"
       }
     },
     "/api/v1/packages/{name}/versions/{version}/artifact": {
@@ -2442,7 +2452,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesByNameVersionsByVersionArtifact"
       }
     },
     "/api/v1/packages/{name}/versions/{version}/artifact/download": {
@@ -2529,7 +2540,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesByNameVersionsByVersionArtifactDownload"
       }
     },
     "/api/v1/packages/{name}/versions/{version}/security": {
@@ -2584,7 +2596,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesByNameVersionsByVersionSecurity"
       }
     },
     "/api/v1/packages/search": {
@@ -2708,7 +2721,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPackagesSearch"
       }
     },
     "/api/v1/plugins": {
@@ -2819,7 +2833,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPlugins"
       }
     },
     "/api/v1/plugins/search": {
@@ -2930,7 +2945,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getPluginsSearch"
       }
     },
     "/api/v1/resolve": {
@@ -2985,7 +3001,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getResolve"
       }
     },
     "/api/v1/search": {
@@ -3045,7 +3062,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getSearch"
       }
     },
     "/api/v1/skills": {
@@ -3129,7 +3147,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getSkills"
       },
       "post": {
         "summary": "Publish a skill version",
@@ -3241,7 +3260,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "postSkills"
       }
     },
     "/api/v1/skills/{slug}": {
@@ -3278,7 +3298,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getSkillsBySlug"
       },
       "delete": {
         "summary": "Soft delete skill",
@@ -3308,7 +3329,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "deleteSkillsBySlug"
       }
     },
     "/api/v1/skills/{slug}/file": {
@@ -3369,7 +3391,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getSkillsBySlugFile"
       }
     },
     "/api/v1/skills/{slug}/moderation": {
@@ -3467,7 +3490,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getSkillsBySlugModeration"
       }
     },
     "/api/v1/skills/{slug}/scan": {
@@ -3520,7 +3544,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getSkillsBySlugScan"
       }
     },
     "/api/v1/skills/{slug}/undelete": {
@@ -3552,7 +3577,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "postSkillsBySlugUndelete"
       }
     },
     "/api/v1/skills/{slug}/versions": {
@@ -3595,7 +3621,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getSkillsBySlugVersions"
       }
     },
     "/api/v1/skills/{slug}/versions/{version}": {
@@ -3630,7 +3657,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getSkillsBySlugVersionsByVersion"
       }
     },
     "/api/v1/whoami": {
@@ -3652,7 +3680,8 @@
               }
             }
           }
-        }
+        },
+        "operationId": "getWhoami"
       }
     }
   }

@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   estimateMarkdownTokens,
+  getAgentModeView,
   getApiCatalog,
   getMcpServerCard,
   getOAuthAuthorizationServer,
@@ -11,6 +12,7 @@ import {
   HOME_LINK_HEADER,
   HOME_MARKDOWN,
   prefersMarkdown,
+  textResponse,
 } from "./agentReadiness";
 
 describe("agent readiness helpers", () => {
@@ -23,6 +25,10 @@ describe("agent readiness helpers", () => {
     expect(HOME_LINK_HEADER).toContain('rel="api-catalog"');
     expect(HOME_LINK_HEADER).toContain('rel="service-desc"');
     expect(HOME_LINK_HEADER).toContain('rel="service-doc"');
+    expect(HOME_LINK_HEADER).toContain("/sitemap.xml");
+    expect(HOME_LINK_HEADER).toContain("/index.md");
+    expect(HOME_LINK_HEADER).toContain("/.well-known/agent.json");
+    expect(HOME_LINK_HEADER).toContain("/.well-known/mcp");
     expect(HOME_LINK_HEADER).toContain("/.well-known/agent-skills/index.json");
   });
 
@@ -31,6 +37,26 @@ describe("agent readiness helpers", () => {
     expect(prefersMarkdown("text/html, text/markdown;q=0.9")).toBe(true);
     expect(prefersMarkdown("text/html,application/xhtml+xml")).toBe(false);
     expect(Number(estimateMarkdownTokens(HOME_MARKDOWN))).toBeGreaterThan(0);
+    const response = textResponse(HOME_MARKDOWN, "text/markdown; charset=utf-8");
+    expect(response.headers.get("Vary")).toBe("Accept");
+    expect(response.headers.get("Content-Type")).toContain("text/markdown");
+  });
+
+  it("builds a machine-readable agent mode view for the homepage", () => {
+    expect(getAgentModeView()).toMatchObject({
+      name: "ClawHub",
+      endpoints: {
+        openapi: "https://clawhub.ai/api/v1/openapi.json",
+        agent_discovery: "https://clawhub.ai/.well-known/agent.json",
+        mcp_discovery: "https://clawhub.ai/.well-known/mcp",
+      },
+      authentication: {
+        public_read: "Public catalog read endpoints do not require authentication.",
+      },
+      api: {
+        version: "v1",
+      },
+    });
   });
 
   it("builds an RFC 9727 linkset for the public API", () => {
@@ -59,14 +85,17 @@ describe("agent readiness helpers", () => {
 
   it("publishes MCP discovery and a minimal JSON-RPC capability surface", () => {
     expect(getMcpServerCard()).toMatchObject({
+      name: "ClawHub",
+      serverUrl: "https://clawhub.ai/mcp",
       serverInfo: { name: "ClawHub" },
       transport: { endpoint: "https://clawhub.ai/mcp" },
+      tools: [{ name: "search_clawhub" }, { name: "inspect_clawhub_skill" }],
     });
 
     expect(handleMcpJsonRpc({ jsonrpc: "2.0", id: 1, method: "tools/list" })).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
-      result: { tools: [{ name: "search_clawhub" }] },
+      result: { tools: [{ name: "search_clawhub" }, { name: "inspect_clawhub_skill" }] },
     });
   });
 });

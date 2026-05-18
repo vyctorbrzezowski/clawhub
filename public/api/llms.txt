@@ -1,0 +1,26 @@
+# ClawHub API Context
+
+The ClawHub API is versioned under `https://clawhub.ai/api/v1`.
+
+## Discovery
+
+- OpenAPI: https://clawhub.ai/api/v1/openapi.json
+- API docs: https://clawhub.ai/docs/api
+- API catalog: https://clawhub.ai/.well-known/api-catalog
+- OAuth authorization server metadata: https://clawhub.ai/.well-known/oauth-authorization-server
+- OAuth protected resource metadata: https://clawhub.ai/.well-known/oauth-protected-resource
+
+## Authentication
+
+Public read endpoints do not require authentication. Protected write endpoints require `Authorization: Bearer clh_...`.
+
+## Rate Limits
+
+API responses expose `RateLimit-Limit`, `RateLimit-Remaining`, and `RateLimit-Reset` headers so agents can self-throttle.
+
+## Recommended Agent Flow
+
+1. Fetch the OpenAPI description.
+2. Use public read endpoints for search and inspection.
+3. Request or reuse a ClawHub API token before publishing, changing ownership, or calling moderation/account endpoints.
+4. Honor rate-limit and retry headers.

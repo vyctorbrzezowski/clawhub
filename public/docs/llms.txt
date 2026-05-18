@@ -1,0 +1,14 @@
+# ClawHub Documentation Context
+
+ClawHub documentation covers CLI usage, authentication, API behavior, skill format rules, package publishing, telemetry, and security audits.
+
+## Useful Documentation
+
+- API docs: https://clawhub.ai/docs/api
+- Auth docs: https://clawhub.ai/docs/auth
+- Pricing: https://clawhub.ai/pricing.md
+- OpenAPI: https://clawhub.ai/api/v1/openapi.json
+
+## Agent Notes
+
+Use documentation pages for current behavior and user-facing commands. Use the OpenAPI description for exact request and response schemas. Skills published on ClawHub use MIT-0 and cannot define paid ClawHub pricing metadata.

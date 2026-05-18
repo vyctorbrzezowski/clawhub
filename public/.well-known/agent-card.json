@@ -1,0 +1,44 @@
+{
+  "name": "ClawHub",
+  "description": "Public OpenClaw registry for SKILL.md agent skills and code plugins.",
+  "url": "https://clawhub.ai",
+  "version": "1.0.0",
+  "provider": {
+    "organization": "OpenClaw",
+    "url": "https://github.com/openclaw/clawhub"
+  },
+  "documentationUrl": "https://clawhub.ai/docs/api",
+  "defaultInputModes": ["application/json", "text/markdown"],
+  "defaultOutputModes": ["application/json", "text/markdown"],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "skills": [
+    {
+      "id": "search-clawhub",
+      "name": "Search ClawHub",
+      "description": "Search public skills and plugins by keyword or capability.",
+      "tags": ["search", "skills", "plugins"]
+    },
+    {
+      "id": "inspect-clawhub-skill",
+      "name": "Inspect ClawHub Skill",
+      "description": "Read public metadata, version history, and files for a published skill.",
+      "tags": ["skills", "metadata", "files"]
+    },
+    {
+      "id": "publish-clawhub-skill",
+      "name": "Publish ClawHub Skill",
+      "description": "Publish or update owned skills with a ClawHub API token.",
+      "tags": ["publishing", "auth", "skills"]
+    }
+  ],
+  "endpoints": {
+    "agentDiscovery": "https://clawhub.ai/.well-known/agent.json",
+    "apiCatalog": "https://clawhub.ai/.well-known/api-catalog",
+    "openapi": "https://clawhub.ai/api/v1/openapi.json",
+    "mcp": "https://clawhub.ai/mcp"
+  }
+}

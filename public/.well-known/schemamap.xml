@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemamap>
+  <url>
+    <loc>https://clawhub.ai/</loc>
+    <schema>https://clawhub.ai/schema/clawhub.jsonld</schema>
+  </url>
+  <url>
+    <loc>https://clawhub.ai/api/v1/openapi.json</loc>
+    <schema>https://clawhub.ai/.well-known/api-catalog</schema>
+  </url>
+</schemamap>

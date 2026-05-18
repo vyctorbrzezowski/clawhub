@@ -1,0 +1,43 @@
+{
+  "name": "ClawHub",
+  "url": "https://clawhub.ai",
+  "description": "Public OpenClaw registry for SKILL.md agent skills and code plugins.",
+  "when_to_use": [
+    "Find, compare, inspect, install, or publish Codex-style agent skills.",
+    "Find, inspect, or publish OpenClaw code plugins and package artifacts.",
+    "Resolve public skill and plugin metadata through a CLI-friendly HTTP API."
+  ],
+  "entrypoints": {
+    "homepage_markdown": "https://clawhub.ai/index.md",
+    "pricing": "https://clawhub.ai/pricing.md",
+    "api_docs": "https://clawhub.ai/docs/api",
+    "auth_docs": "https://clawhub.ai/docs/auth",
+    "openapi": "https://clawhub.ai/api/v1/openapi.json",
+    "api_catalog": "https://clawhub.ai/.well-known/api-catalog",
+    "agent_card": "https://clawhub.ai/.well-known/agent-card.json",
+    "agent_skills_index": "https://clawhub.ai/.well-known/agent-skills/index.json",
+    "mcp_discovery": "https://clawhub.ai/.well-known/mcp",
+    "mcp_transport": "https://clawhub.ai/mcp",
+    "status": "https://clawhub.ai/status"
+  },
+  "authentication": {
+    "public_read": "No token required.",
+    "protected_write": "Use Authorization: Bearer clh_... for publish, ownership, moderation, and account workflows.",
+    "device_authorization_endpoint": "https://clawhub.ai/api/cli/device/code",
+    "token_endpoint": "https://clawhub.ai/api/cli/device/token"
+  },
+  "capabilities": [
+    "skill_search",
+    "skill_inspection",
+    "skill_file_download",
+    "plugin_search",
+    "plugin_inspection",
+    "package_artifact_download",
+    "authenticated_publish"
+  ],
+  "maintainer": {
+    "name": "OpenClaw",
+    "repository": "https://github.com/openclaw/clawhub",
+    "support": "https://github.com/openclaw/clawhub/issues"
+  }
+}
