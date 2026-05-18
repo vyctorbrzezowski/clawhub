@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "search-clawhub",
+      "type": "skill-md",
+      "description": "Discover public ClawHub skills and plugins through the public search API.",
+      "url": "https://clawhub.ai/.well-known/agent-skills/search-clawhub/SKILL.md",
+      "digest": "sha256:91ecfbb243bb203f18191f5077b65b7cb7de8e87a319903334f9c2a78820d035"
+    },
+    {
+      "name": "inspect-clawhub-skill",
+      "type": "skill-md",
+      "description": "Read metadata, version history, and public files for a ClawHub skill.",
+      "url": "https://clawhub.ai/.well-known/agent-skills/inspect-clawhub-skill/SKILL.md",
+      "digest": "sha256:b1df61f66999549dcae9441623af7360349252b70767f101e878908412054f4d"
+    },
+    {
+      "name": "publish-clawhub-skill",
+      "type": "skill-md",
+      "description": "Publish or update a ClawHub skill with an authenticated API token.",
+      "url": "https://clawhub.ai/.well-known/agent-skills/publish-clawhub-skill/SKILL.md",
+      "digest": "sha256:a64920254768a64b4ceb582c727795f0da9d67a1b6eeab132b3f89e6a517b2b4"
+    }
+  ]
+}
