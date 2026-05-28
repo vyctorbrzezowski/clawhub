@@ -168,10 +168,24 @@ export function Dashboard() {
     selectedPublisher?.publisher.handle ?? me.handle ?? me.name ?? me.displayName ?? me._id;
   const isDashboardEmpty = !isLoading && skills.length === 0 && packages.length === 0;
 
-  const publisherSelector =
-    publishers && publishers.length > 1 ? (
+  function renderPublisherSelector(label: string, options?: { showStatic?: boolean }) {
+    const publisherEntries = publishers ?? [];
+    if (publisherEntries.length <= 1) {
+      if (!options?.showStatic) return null;
+      const entry = selectedPublisher ?? publisherEntries[0];
+      if (!entry) return null;
+      return (
+        <div className="dashboard-publisher-select">
+          <span className="text-sm font-medium text-muted-foreground">{label}</span>
+          <div className="dashboard-publisher-static">
+            @{entry.publisher.handle} · {entry.publisher.kind === "org" ? "Org" : "Personal"}
+          </div>
+        </div>
+      );
+    }
+    return (
       <div className="dashboard-publisher-select">
-        <span className="text-sm font-medium text-muted-foreground">Viewing as</span>
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
         <Select value={selectedPublisherId} onValueChange={setSelectedPublisherId}>
           <SelectTrigger
             aria-label="Dashboard publisher"
@@ -188,44 +202,51 @@ export function Dashboard() {
           </SelectContent>
         </Select>
       </div>
-    ) : null;
+    );
+  }
 
   // Welcome state for new users with no content
   if (isDashboardEmpty) {
     return (
-      <main className="section">
-        <div className="empty-state">
-          <h1 className="empty-state-title text-[1.4rem] font-[family-name:var(--font-display)]">
-            Welcome to ClawHub
-          </h1>
-          <p className="empty-state-body">
-            You're signed in as @{ownerHandle}. Get started by publishing your first skill or
-            plugin.
-          </p>
-          {publisherSelector}
-          <div className="flex gap-3 justify-center">
-            <Button asChild variant="primary">
-              <Link to="/skills/publish" search={{ updateSlug: undefined, ownerHandle }}>
-                Publish a Skill
-              </Link>
-            </Button>
-            <Button asChild>
-              <Link
-                to="/skills"
-                search={{
-                  q: undefined,
-                  sort: undefined,
-                  dir: undefined,
-                  highlighted: undefined,
-                  view: undefined,
-                  focus: undefined,
-                }}
-              >
-                Browse Skills
-              </Link>
-            </Button>
+      <main className="section dashboard-empty-shell">
+        <section className="dashboard-empty-state" aria-labelledby="dashboard-empty-title">
+          <div className="dashboard-empty-content">
+            <div className="dashboard-empty-copy">
+              <h1 id="dashboard-empty-title">Welcome to ClawHub</h1>
+              <p>Start by publishing your first skill or plugin.</p>
+            </div>
+            {renderPublisherSelector("Publishing as", { showStatic: true })}
+            <div className="dashboard-empty-actions">
+              <Button asChild variant="outline" className="dashboard-empty-action">
+                <Link to="/skills/publish" search={{ updateSlug: undefined, ownerHandle }}>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Publish skill
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="dashboard-empty-action">
+                <Link to="/plugins/publish" search={{ ...emptyPluginPublishSearch, ownerHandle }}>
+                  <Package className="h-4 w-4" aria-hidden="true" />
+                  Publish plugin
+                </Link>
+              </Button>
+              <Button asChild variant="ghost">
+                <Link
+                  to="/skills"
+                  search={{
+                    q: undefined,
+                    sort: undefined,
+                    dir: undefined,
+                    highlighted: undefined,
+                    view: undefined,
+                    focus: undefined,
+                  }}
+                >
+                  Browse skills
+                </Link>
+              </Button>
+            </div>
           </div>
-        </div>
+        </section>
       </main>
     );
   }
@@ -237,7 +258,7 @@ export function Dashboard() {
           <h1 className="section-title m-0">Dashboard</h1>
           <p className="section-subtitle m-0">View your published skills and plugins.</p>
         </div>
-        {publisherSelector}
+        {renderPublisherSelector("Viewing as")}
       </div>
 
       <div className="dashboard-owner-grid">

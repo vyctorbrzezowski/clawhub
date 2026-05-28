@@ -398,9 +398,21 @@ describe("Dashboard rows", () => {
       target: { value: "publishers:clawkit" },
     });
 
-    expect(
-      (await screen.findByRole("link", { name: "Publish a Skill" })).getAttribute("href"),
-    ).toBe("/skills/publish?ownerHandle=clawkit");
+    expect((await screen.findByRole("link", { name: "Publish skill" })).getAttribute("href")).toBe(
+      "/skills/publish?ownerHandle=clawkit",
+    );
+    expect((await screen.findByRole("link", { name: "Publish plugin" })).getAttribute("href")).toBe(
+      "/plugins/publish?ownerHandle=clawkit",
+    );
+  });
+
+  it("keeps publishing context visible in the empty dashboard state with one publisher", async () => {
+    arrangeDashboard({});
+
+    renderDashboard();
+
+    expect(screen.getByText("Publishing as")).toBeTruthy();
+    expect(screen.getByText("@local · Personal")).toBeTruthy();
   });
 
   it("renders a skeleton while auth state is loading", () => {
