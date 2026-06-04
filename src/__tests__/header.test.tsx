@@ -225,8 +225,11 @@ describe("Header", () => {
 
     expect(document.querySelector(".navbar-calm")).toBeTruthy();
     expect(document.querySelector(".navbar-calm-rail")).toBeTruthy();
-    expect(document.querySelector(".theme-mode-toggle")).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Cycle theme mode/i })).toBeTruthy();
+    expect(document.querySelector(".navbar-theme-switcher")).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Theme mode" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "System theme" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
     expect(screen.getByPlaceholderText("Search skills and plugins")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Sign in with GitHub" })).toBeTruthy();
     expect(document.querySelector(".github-sign-in-logo")).toBeTruthy();
@@ -242,7 +245,10 @@ describe("Header", () => {
     expect(screen.queryByText("Manage")).toBeNull();
     expect(screen.getByPlaceholderText("Search skills and plugins")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: /Cycle theme mode/i }));
+    const themeSwitcher = document.querySelector(".navbar-theme-switcher");
+    expect(themeSwitcher).toBeTruthy();
+    fireEvent.mouseEnter(themeSwitcher as Element);
+    fireEvent.click(screen.getByRole("button", { name: "Light theme" }));
     expect(setModeMock).toHaveBeenCalledWith("light");
 
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
@@ -328,7 +334,7 @@ describe("Header", () => {
     expect(css).not.toContain(".navbar-inner,\n  .section.detail-page-section");
   });
 
-  it("shows grouped skills and plugins typeahead without users", () => {
+  it("shows tabbed skills and plugins typeahead without users", () => {
     siteModeMock.mockReturnValue("skills");
     navigateMock.mockReset();
 
@@ -338,12 +344,14 @@ describe("Header", () => {
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "weather" } });
 
+    const tablist = screen.getByRole("tablist", { name: "Result type" });
+    expect(within(tablist).getByRole("tab", { name: "Skills" })).toBeTruthy();
+    expect(within(tablist).getByRole("tab", { name: "Plugins" })).toBeTruthy();
+
     const typeahead = screen.getByRole("listbox");
-    expect(within(typeahead).getByText("Skills")).toBeTruthy();
     expect(screen.getByText("Weather Skill")).toBeTruthy();
     expect(screen.getByText("@local / weather")).toBeTruthy();
-    expect(within(typeahead).getByText("Plugins")).toBeTruthy();
-    expect(screen.getByText("Weather Plugin")).toBeTruthy();
+    expect(screen.queryByText("Weather Plugin")).toBeNull();
     expect(input.getAttribute("role")).toBe("combobox");
     expect(input.getAttribute("aria-autocomplete")).toBe("list");
     expect(input.getAttribute("aria-expanded")).toBe("true");
@@ -353,6 +361,11 @@ describe("Header", () => {
     expect(within(typeahead).queryByText("Publishers")).toBeNull();
     expect(within(typeahead).queryByText('See user results for "weather"')).toBeNull();
 
+    fireEvent.click(within(tablist).getByRole("tab", { name: "Plugins" }));
+    expect(screen.getByText("Weather Plugin")).toBeTruthy();
+    expect(screen.queryByText("Weather Skill")).toBeNull();
+
+    fireEvent.click(within(tablist).getByRole("tab", { name: "Skills" }));
     fireEvent.keyDown(input, { key: "ArrowDown" });
     fireEvent.keyDown(input, { key: "Enter" });
 
@@ -419,12 +432,10 @@ describe("Header", () => {
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "zzzz" } });
 
-    const typeahead = screen.getByRole("listbox");
-    expect(within(typeahead).getByText('No skills or plugins found for "zzzz"')).toBeTruthy();
-    expect(within(typeahead).queryByText("Skills")).toBeNull();
-    expect(within(typeahead).queryByText("Plugins")).toBeNull();
-    expect(within(typeahead).queryByText('See skill results for "zzzz"')).toBeNull();
-    expect(within(typeahead).queryByText('See plugin results for "zzzz"')).toBeNull();
+    expect(screen.getByText('No skills or plugins found for "zzzz"')).toBeTruthy();
+    expect(screen.queryByRole("tablist", { name: "Result type" })).toBeNull();
+    expect(screen.queryByText('See skill results for "zzzz"')).toBeNull();
+    expect(screen.queryByText('See plugin results for "zzzz"')).toBeNull();
   });
 
   it("shows Home above Skills in the mobile menu", () => {
