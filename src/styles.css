@@ -13609,7 +13609,8 @@ a.publisher-profile-detail:hover {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 4px 0 24px;
+  min-height: 44px;
+  padding: 0;
   border-bottom: 1px solid var(--hv2-border);
   margin-bottom: 28px;
 }
@@ -13617,6 +13618,7 @@ a.publisher-profile-detail:hover {
 .home-v2-listing-kind {
   display: inline-flex;
   flex-shrink: 0;
+  align-self: center;
   padding: 3px;
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--hv2-text) 7%, transparent);
@@ -13625,10 +13627,10 @@ a.publisher-profile-detail:hover {
 .home-v2-listing-kind-btn {
   border: none;
   border-radius: var(--r-pill);
-  padding: 6px 14px;
-  font-size: 13px;
+  padding: 7px 14px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1;
   cursor: pointer;
   background: transparent;
   color: var(--hv2-text-tertiary);
@@ -13648,14 +13650,16 @@ a.publisher-profile-detail:hover {
 
 .home-v2-listing-divider {
   width: 1px;
-  height: 20px;
+  align-self: center;
+  height: 18px;
   flex-shrink: 0;
   background: var(--hv2-border);
 }
 
 .home-v2-listing-tabs {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  align-self: stretch;
   gap: 28px;
   flex: 1;
   min-width: 0;
@@ -13668,13 +13672,16 @@ a.publisher-profile-detail:hover {
 }
 
 .home-v2-listing-tab {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
   border: none;
   background: none;
-  padding: 0 0 12px;
+  padding: 0 2px;
   margin-bottom: -1px;
   font-size: 14px;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1;
   color: var(--hv2-text-tertiary);
   cursor: pointer;
   white-space: nowrap;
@@ -13695,6 +13702,7 @@ a.publisher-profile-detail:hover {
 
 .home-v2-listing-filter {
   margin-left: auto;
+  align-self: center;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -13704,9 +13712,9 @@ a.publisher-profile-detail:hover {
   color: var(--hv2-text);
   font-size: 14px;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1;
   cursor: pointer;
-  padding: 8px 0 8px 12px;
+  padding: 0 0 0 12px;
   transition: color 0.15s ease;
 }
 
@@ -13979,14 +13987,22 @@ a.publisher-profile-detail:hover {
   .home-v2-listing-toolbar {
     gap: 12px;
     flex-wrap: wrap;
+    align-items: center;
+    min-height: 0;
+    padding-bottom: 0;
   }
   .home-v2-listing-tabs {
     order: 3;
     flex-basis: 100%;
+    align-self: auto;
     gap: 20px;
+    min-height: 40px;
+  }
+  .home-v2-listing-tab {
+    align-self: stretch;
   }
   .home-v2-listing-filter {
-    margin-left: 0;
+    margin-left: auto;
     padding-left: 0;
   }
   .home-v2-carousel-header {
