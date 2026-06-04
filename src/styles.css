@@ -1125,42 +1125,48 @@ code {
 
 .navbar-calm .navbar-top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(200px, 300px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px) minmax(0, 1fr);
   align-items: center;
   padding: 12px 0;
   min-height: 52px;
-  gap: 12px 20px;
+  gap: 12px 24px;
 }
 
-.navbar-calm .nav-mobile,
-.navbar-calm .brand {
+.navbar-calm-start {
   grid-column: 1;
-  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
   justify-self: start;
 }
 
-.navbar-calm .navbar-search-wrap {
+.navbar-calm-center {
   grid-column: 2;
-  grid-row: 1;
   justify-self: center;
   width: 100%;
-  max-width: 300px;
+  max-width: 360px;
+  min-width: 0;
 }
 
-.navbar-calm .navbar-calm-end {
+.navbar-calm-center .navbar-search-wrap {
+  width: 100%;
+}
+
+.navbar-calm-actions {
   grid-column: 3;
-  grid-row: 1;
   justify-self: end;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 18px;
+  gap: 10px;
   min-width: 0;
 }
 
 .navbar-calm .brand {
   font-weight: 600;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .navbar-calm .brand-mark {
@@ -1215,13 +1221,15 @@ code {
 .navbar-calm .navbar-calm-rail {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   min-width: 0;
+  flex-wrap: nowrap;
 }
 
 .navbar-calm-rail-link {
   font-size: 0.875rem;
   font-weight: 450;
+  line-height: 1;
   color: color-mix(in srgb, var(--ink-soft) 94%, transparent);
   text-decoration: none;
   white-space: nowrap;
@@ -1240,6 +1248,7 @@ code {
 .navbar-calm .nav-actions {
   gap: 10px;
   flex-shrink: 0;
+  margin-left: 0;
 }
 
 .navbar-calm .theme-mode-toggle {
@@ -6520,20 +6529,21 @@ code {
     gap: 8px;
   }
 
-  .navbar-calm .nav-mobile {
+  .navbar-calm-start {
     grid-column: 1;
+    gap: 0;
   }
 
   .navbar-calm .brand {
     display: none;
   }
 
-  .navbar-calm .navbar-search-wrap {
+  .navbar-calm-center {
     grid-column: 2;
     max-width: none;
   }
 
-  .navbar-calm .navbar-calm-end {
+  .navbar-calm-actions {
     grid-column: 3;
     gap: 0;
   }

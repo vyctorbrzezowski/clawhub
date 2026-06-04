@@ -287,7 +287,8 @@ export default function Header() {
       <div className="navbar-inner">
         {/* Row 1: Brand + Search + Actions */}
         <div className="navbar-top">
-          <div className="nav-mobile">
+          <div className="navbar-calm-start">
+            <div className="nav-mobile">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <button
                 className="nav-mobile-trigger"
@@ -374,24 +375,50 @@ export default function Header() {
                 </div>
               </SheetContent>
             </Sheet>
+            </div>
+
+            <Link
+              to="/"
+              search={{ q: undefined, highlighted: undefined, search: undefined }}
+              className="brand"
+            >
+              <span className="brand-mark">
+                <img
+                  src={CLAWHUB_BRAND_MARK_SRC}
+                  alt=""
+                  aria-hidden="true"
+                  className="brand-mark-image"
+                />
+              </span>
+              <span className="brand-name brand-name-responsive">{siteName}</span>
+            </Link>
+
+            <nav className="navbar-calm-rail" aria-label="Content types">
+              {isSoulMode ? (
+                <a href={clawHubUrl} className="navbar-calm-rail-link">
+                  ClawHub
+                </a>
+              ) : null}
+              {primaryItems.map((item) => (
+                <HeaderNavTab
+                  key={item.to + item.label}
+                  item={item}
+                  pathname={location.pathname}
+                  className="navbar-calm-rail-link"
+                />
+              ))}
+              {secondaryItems.map((item) => (
+                <HeaderNavTab
+                  key={(item.href ?? item.to ?? "") + item.label}
+                  item={item}
+                  pathname={location.pathname}
+                  className="navbar-calm-rail-link navbar-calm-rail-link-secondary"
+                />
+              ))}
+            </nav>
           </div>
 
-          <Link
-            to="/"
-            search={{ q: undefined, highlighted: undefined, search: undefined }}
-            className="brand"
-          >
-            <span className="brand-mark">
-              <img
-                src={CLAWHUB_BRAND_MARK_SRC}
-                alt=""
-                aria-hidden="true"
-                className="brand-mark-image"
-              />
-            </span>
-            <span className="brand-name brand-name-responsive">{siteName}</span>
-          </Link>
-
+          <div className="navbar-calm-center">
           <div className="navbar-search-wrap" ref={searchWrapRef}>
             <form
               className="navbar-search"
@@ -431,33 +458,9 @@ export default function Header() {
               />
             ) : null}
           </div>
+          </div>
 
-          <div className="navbar-calm-end">
-            <nav className="navbar-calm-rail" aria-label="Content types">
-              {isSoulMode ? (
-                <a href={clawHubUrl} className="navbar-calm-rail-link">
-                  ClawHub
-                </a>
-              ) : null}
-              {primaryItems.map((item) => (
-                <HeaderNavTab
-                  key={item.to + item.label}
-                  item={item}
-                  pathname={location.pathname}
-                  className="navbar-calm-rail-link"
-                />
-              ))}
-              {secondaryItems.map((item) => (
-                <HeaderNavTab
-                  key={(item.href ?? item.to ?? "") + item.label}
-                  item={item}
-                  pathname={location.pathname}
-                  className="navbar-calm-rail-link navbar-calm-rail-link-secondary"
-                />
-              ))}
-            </nav>
-
-            <div className="nav-actions">
+          <div className="navbar-calm-actions nav-actions">
             <button
               className="navbar-search-mobile-trigger"
               type="button"
@@ -590,7 +593,6 @@ export default function Header() {
                 </Button>
               </>
             )}
-            </div>
           </div>
         </div>
 
