@@ -106,6 +106,7 @@ export default function Header() {
   const [typeaheadActiveIndex, setTypeaheadActiveIndex] = useState(0);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
   const searchWrapRef = useRef<HTMLDivElement | null>(null);
   const ThemeModeIcon = getThemeModeIcon(mode);
   const trimmedNavSearchQuery = navSearchQuery.trim();
@@ -168,6 +169,25 @@ export default function Header() {
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [typeaheadOpen]);
+
+  useEffect(() => {
+    const threshold = 8;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      setHeaderScrolled(window.scrollY > threshold);
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [location.pathname]);
 
   const setThemeMode = (next: "system" | "light" | "dark") => {
     applyTheme(next, theme);
@@ -263,7 +283,7 @@ export default function Header() {
   };
 
   return (
-    <header className="navbar navbar-calm">
+    <header className={`navbar navbar-calm${headerScrolled ? " navbar-calm-scrolled" : ""}`}>
       <div className="navbar-inner">
         {/* Row 1: Brand + Search + Actions */}
         <div className="navbar-top">
