@@ -46,7 +46,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 const THEME_MODE_SEQUENCE: Array<"system" | "light" | "dark"> = ["system", "light", "dark"];
-const CLAWHUB_BRAND_MARK_SRC = "/clawd-mark.png";
+const CLAWHUB_BRAND_MARK_SRC = "/og-clawhub-watermark.png";
 
 function GitHubLogo({ className }: { className?: string }) {
   return (

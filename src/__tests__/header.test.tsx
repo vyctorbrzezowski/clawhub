@@ -230,7 +230,9 @@ describe("Header", () => {
     expect(screen.getByPlaceholderText("Search skills and plugins")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Sign in with GitHub" })).toBeTruthy();
     expect(document.querySelector(".github-sign-in-logo")).toBeTruthy();
-    expect(document.querySelector('.brand-mark-image[src="/clawd-mark.png"]')).toBeTruthy();
+    expect(
+      document.querySelector('.brand-mark-image[src="/og-clawhub-watermark.png"]'),
+    ).toBeTruthy();
     expect(screen.getAllByText("Skills")).toHaveLength(1);
     expect(screen.getAllByText("Plugins")).toHaveLength(1);
     expect(screen.getAllByText("Publishers")).toHaveLength(1);
@@ -432,7 +434,9 @@ describe("Header", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
 
-    expect(document.querySelector('.mobile-nav-brand-mark-image[src="/clawd-mark.png"]')).toBeTruthy();
+    expect(
+      document.querySelector('.mobile-nav-brand-mark-image[src="/og-clawhub-watermark.png"]'),
+    ).toBeTruthy();
 
     const labels = Array.from(document.querySelectorAll(".mobile-nav-section .mobile-nav-link"))
       .map((element) => element.textContent?.trim())

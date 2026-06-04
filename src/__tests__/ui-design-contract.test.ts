@@ -86,7 +86,7 @@ describe("restored UI design contract", () => {
     expect(headerSource).toContain('className="navbar-calm-center"');
     expect(headerSource).toContain("navbar-calm-actions");
     expect(headerSource).toContain('className="navbar-calm-rail"');
-    expect(headerSource).toContain("/clawd-mark.png");
+    expect(headerSource).toContain("/og-clawhub-watermark.png");
 
     expect(navSource).toContain("export const SECONDARY_NAV_ITEMS");
     expect(navSource).toContain('label: "Publishers"');
