@@ -307,7 +307,9 @@ a.home-quick-link:hover,
 a.home-category-card:hover,
 a.home-v2-c-card:hover,
 a.home-v2-cat-item:hover,
-a.home-v2-trend-card:hover {
+a.home-v2-trend-card:hover,
+a.brand:hover,
+a.brand:focus-visible {
   text-decoration: none;
 }
 
