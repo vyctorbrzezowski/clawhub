@@ -308,6 +308,7 @@ a.home-category-card:hover,
 a.home-v2-c-card:hover,
 a.home-v2-cat-item:hover,
 a.home-v2-trend-card:hover,
+a.home-v2-listing-row:hover,
 a.brand:hover,
 a.brand:focus-visible {
   text-decoration: none;
@@ -13790,20 +13791,134 @@ a.publisher-profile-detail:hover {
   color: var(--hv2-text-secondary);
 }
 
-.home-v2-listing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+.home-v2-listing-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hv2-border);
+  border-radius: var(--hv2-radius-lg);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--hv2-surface) 90%, transparent);
 }
 
-.home-v2-listing-grid-loading {
+.home-v2-listing-list-loading {
   pointer-events: none;
 }
 
+.home-v2-listing-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px 18px;
+  align-items: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--hv2-border);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.home-v2-listing-row:last-child {
+  border-bottom: none;
+}
+
+.home-v2-listing-row:hover,
+.home-v2-listing-row:focus-visible {
+  background: var(--hv2-surface-hover);
+  text-decoration: none;
+}
+
+.home-v2-listing-row-body {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.home-v2-listing-row-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.home-v2-listing-row-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--hv2-text);
+  letter-spacing: -0.01em;
+}
+
+.home-v2-listing-row-by {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--hv2-text-tertiary);
+  white-space: nowrap;
+}
+
+.home-v2-listing-row-summary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--hv2-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.home-v2-listing-row-aside {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.home-v2-listing-row-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--hv2-text-tertiary);
+  white-space: nowrap;
+}
+
+.home-v2-listing-row-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-v2-listing-row-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--hv2-radius-sm);
+  border: 1px solid var(--hv2-green-border);
+  background: var(--hv2-green-fill);
+  color: var(--hv2-green);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.home-v2-listing-row:hover .home-v2-listing-row-cta,
+.home-v2-listing-row:focus-visible .home-v2-listing-row-cta {
+  background: var(--hv2-green-fill-hover);
+  border-color: var(--hv2-green-border-hover);
+}
+
 .home-v2-listing-skeleton {
-  min-height: 196px;
-  border-radius: var(--hv2-radius-lg);
-  border: 1px solid var(--hv2-border);
+  min-height: 72px;
+  border-bottom: 1px solid var(--hv2-border);
   background: linear-gradient(
     110deg,
     color-mix(in srgb, var(--hv2-surface) 88%, transparent) 8%,
@@ -13812,6 +13927,10 @@ a.publisher-profile-detail:hover {
   );
   background-size: 200% 100%;
   animation: home-v2-listing-shimmer 1.2s ease-in-out infinite;
+}
+
+.home-v2-listing-skeleton:last-child {
+  border-bottom: none;
 }
 
 @keyframes home-v2-listing-shimmer {
@@ -13993,8 +14112,7 @@ a.publisher-profile-detail:hover {
   .home-v2-discovery-grid {
     grid-template-columns: 1fr;
   }
-  .home-v2-trending-grid,
-  .home-v2-listing-grid {
+  .home-v2-trending-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   .home-v2-proof-bar {
@@ -14044,12 +14162,24 @@ a.publisher-profile-detail:hover {
     align-items: flex-start;
     flex-direction: column;
   }
-  .home-v2-trending-grid,
-  .home-v2-listing-grid {
+  .home-v2-trending-grid {
     grid-template-columns: 1fr;
   }
   .home-v2-listing {
     padding: 0 20px 64px;
+  }
+  .home-v2-listing-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 10px;
+    padding: 12px 14px;
+  }
+  .home-v2-listing-row-aside {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    padding-left: 50px;
+  }
+  .home-v2-listing-row-stats {
+    gap: 10px;
   }
   .home-v2-listing-toolbar {
     gap: 12px;
