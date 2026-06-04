@@ -12649,9 +12649,12 @@ a.publisher-profile-detail:hover {
 
 /* --- Variables (scoped) --- */
 .home-v2-main {
+  position: relative;
+  isolation: isolate;
   max-width: var(--page-max);
   margin-inline: auto;
   width: 100%;
+  background: var(--hv2-bg);
   --hv2-bg: #060608;
   --hv2-surface: rgba(255, 255, 255, 0.02);
   --hv2-surface-hover: rgba(255, 255, 255, 0.045);
@@ -12677,6 +12680,24 @@ a.publisher-profile-detail:hover {
   --hv2-radius-lg: 16px;
 }
 
+/* Ambient glow spans hero + listing so the page base color stays even */
+[data-theme-resolved="dark"] .home-v2-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(212, 69, 58, 0.07) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 45% at 50% 18%, rgba(212, 69, 58, 0.04) 0%, transparent 62%);
+}
+
+.home-v2-hero,
+.home-v2-listing {
+  position: relative;
+  z-index: 1;
+}
+
 /* Home hero decor bleeds up behind the floating calm header */
 .app-shell:has(.home-v2-main) main.home-v2-main {
   margin-top: -64px;
@@ -12688,10 +12709,12 @@ a.publisher-profile-detail:hover {
 
 .app-shell:has(.home-v2-main) .home-v2-hero-bg {
   top: -112px;
-  bottom: 0;
+  bottom: -120px;
   left: 50%;
   width: 100vw;
   margin-left: -50vw;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
 }
 
 /* ═══ HERO ═══ */
@@ -12702,7 +12725,7 @@ a.publisher-profile-detail:hover {
   align-items: center;
   text-align: center;
   padding: 64px 48px 48px;
-  overflow: hidden;
+  overflow: visible;
 }
 .home-v2-hero > *:not(.home-v2-hero-bg) {
   position: relative;
@@ -12719,10 +12742,7 @@ a.publisher-profile-detail:hover {
 .home-v2-glow {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 40% 30%, rgba(212, 69, 58, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 65% 55%, rgba(212, 69, 58, 0.04) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 90%, rgba(180, 80, 70, 0.03) 0%, transparent 50%);
+  background: transparent;
   animation: home-v2-glowShift 16s ease-in-out infinite alternate;
 }
 @keyframes home-v2-glowShift {
@@ -14117,12 +14137,16 @@ a.publisher-profile-detail:hover {
 
 /* --- Light-mode page background --- */
 [data-theme-resolved="light"] .home-v2-main {
-  background: var(--hv2-bg);
+  background: linear-gradient(180deg, #fdf9f4 0%, var(--hv2-bg) 42%, var(--hv2-bg) 100%);
+}
+
+[data-theme-resolved="light"] .home-v2-main::before {
+  content: none;
 }
 
 /* --- Light-mode hero --- */
 [data-theme-resolved="light"] .home-v2-hero {
-  background: linear-gradient(180deg, #fdf9f4 0%, #faf3ea 100%);
+  background: transparent;
 }
 [data-theme-resolved="light"] .home-v2-hero-bg {
   opacity: 0;
