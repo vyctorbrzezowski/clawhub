@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { HomeAppsSection } from "../components/HomeAppsSection";
 import { HomeDiscoverSection } from "../components/HomeDiscoverSection";
+import { HomeFeaturedStackSection } from "../components/HomeFeaturedStackSection";
 import { HomeListingSection } from "../components/HomeListingSection";
 import { SoulCard } from "../components/SoulCard";
 import { SoulStatsTripletLine } from "../components/SoulStats";
@@ -380,6 +381,7 @@ function SkillsHome() {
       </section>
 
       <HomeListingSection />
+      <HomeFeaturedStackSection />
       <HomeAppsSection />
       <HomeDiscoverSection />
     </main>

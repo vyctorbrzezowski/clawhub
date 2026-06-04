@@ -26,17 +26,20 @@ describe("HomeDiscoverSection", () => {
     render(<HomeDiscoverSection />);
 
     expect(screen.getByRole("region", { name: "Curated discovery" })).toBeTruthy();
-    expect(screen.getByText(/Editor.s pick/i)).toBeTruthy();
-    expect(screen.getByText("OpenClaw essentials")).toBeTruthy();
     expect(screen.getByText("Trending stacks")).toBeTruthy();
     expect(screen.getByText("More collections")).toBeTruthy();
     expect(screen.getByText(/not another full browse/i)).toBeTruthy();
     expect(screen.getAllByText("Peter Steinberger").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("NVIDIA AI")).toBeTruthy();
+    expect(screen.queryByText("+43%")).toBeNull();
+    expect(document.querySelector(".home-v2-stack-trend-growth")).toBeNull();
     expect(screen.getByText("Data & APIs")).toBeTruthy();
     expect(screen.getByText("REST")).toBeTruthy();
     expect(document.querySelector(".home-v2-stack-trend-rail")).toBeTruthy();
     expect(document.querySelectorAll(".home-v2-stack-trend-card").length).toBe(6);
+    expect(screen.queryByRole("button", { name: "Show previous trending stacks" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Show more trending stacks" })).toBeTruthy();
+    expect(document.querySelector(".home-v2-stack-trend-viewport")).toBeTruthy();
     expect(document.querySelectorAll(".home-v2-collection-card").length).toBe(10);
   });
 });

@@ -1,91 +1,195 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getHomeStackHref,
+  homeStackAvatarKind,
   HOME_COLLECTION_STACKS,
-  HOME_FEATURED_STACK,
   HOME_TRENDING_STACKS,
   type HomeStack,
 } from "../lib/homeStacks";
+import { StackAvatar } from "./homeStackAvatar";
 
-function StackAvatar({
-  label,
-  logoUrl,
-  size = "md",
-}: {
-  label: string;
-  logoUrl?: string;
-  size?: "md" | "sm";
-}) {
-  const className = `home-v2-stack-avatar${logoUrl ? " home-v2-stack-avatar--image" : ""}${size === "sm" ? " home-v2-stack-avatar--sm" : ""}`;
-  if (logoUrl) {
-    return (
-      <span className={className}>
-        <img src={logoUrl} alt="" width={size === "sm" ? 32 : 44} height={size === "sm" ? 32 : 44} decoding="async" />
-      </span>
-    );
-  }
-  const initial = label.trim().charAt(0).toUpperCase() || "?";
-  return <span className={className}>{initial}</span>;
+const TREND_TRACK_GAP_PX = 10;
+const TREND_DRAG_CLICK_THRESHOLD_PX = 6;
+
+function trendingCardsPerView(viewportWidth: number) {
+  if (viewportWidth < 560) return 1;
+  if (viewportWidth < 900) return 2;
+  if (viewportWidth < 1200) return 3;
+  return 4;
 }
 
-function TrendingStackCard({ stack }: { stack: HomeStack }) {
+function TrendingStackCard({
+  stack,
+  suppressNavigation,
+}: {
+  stack: HomeStack;
+  suppressNavigation?: boolean;
+}) {
   const href = getHomeStackHref(stack);
-  const direction = stack.growthDirection ?? "up";
   return (
     <Link
       {...href}
       className="home-v2-stack-trend-card"
       aria-label={`${stack.title} — ${stack.description}`}
+      tabIndex={suppressNavigation ? -1 : undefined}
+      onClick={(event) => {
+        if (suppressNavigation) {
+          event.preventDefault();
+        }
+      }}
     >
-      <StackAvatar label={stack.title} logoUrl={stack.logoUrl} />
-      <div className="home-v2-stack-trend-copy">
+      <div className="home-v2-stack-trend-head">
+        <StackAvatar
+          label={stack.title}
+          logoUrl={stack.logoUrl}
+          kind={homeStackAvatarKind(stack)}
+          size="sm"
+        />
         <span className="home-v2-stack-trend-title">{stack.title}</span>
+      </div>
+      <div className="home-v2-stack-trend-copy">
         <p className="home-v2-stack-trend-desc">{stack.description}</p>
         <span className="home-v2-stack-trend-stat">{stack.statsLabel}</span>
       </div>
-      {stack.growthLabel ? (
-        <span className={`home-v2-stack-trend-growth is-${direction}`}>
-          {stack.growthLabel}
-        </span>
-      ) : null}
     </Link>
   );
 }
 
-function FeaturedStackBanner({ stack }: { stack: HomeStack }) {
-  const href = getHomeStackHref(stack);
-  const previews = stack.previews ?? [];
+function TrendingStacksCarousel({ stacks }: { stacks: HomeStack[] }) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startScrollLeft: number;
+    moved: boolean;
+  } | null>(null);
+  const [cardsPerView, setCardsPerView] = useState(4);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [suppressCardClick, setSuppressCardClick] = useState(false);
+
+  const measure = useCallback(() => {
+    if (typeof window === "undefined") return;
+    setCardsPerView(trendingCardsPerView(window.innerWidth));
+  }, []);
+
+  const updateScrollEdges = useCallback(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+    setCanScrollNext(viewport.scrollLeft < maxScroll - 1);
+  }, []);
+
+  useEffect(() => {
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [measure]);
+
+  useEffect(() => {
+    updateScrollEdges();
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    viewport.addEventListener("scroll", updateScrollEdges, { passive: true });
+    return () => viewport.removeEventListener("scroll", updateScrollEdges);
+  }, [updateScrollEdges, stacks.length, cardsPerView]);
+
+  const showNav = stacks.length > cardsPerView;
+
+  const scrollByStep = (direction: 1 | -1) => {
+    const viewport = viewportRef.current;
+    const card = viewport?.querySelector<HTMLElement>(".home-v2-stack-trend-card");
+    if (!viewport || !card) return;
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    viewport.scrollBy({
+      left: direction * (card.offsetWidth + TREND_TRACK_GAP_PX),
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  };
+
+  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const viewport = viewportRef.current;
+    const drag = dragRef.current;
+    if (!viewport || !drag || drag.pointerId !== event.pointerId) return;
+
+    if (viewport.hasPointerCapture(event.pointerId)) {
+      viewport.releasePointerCapture(event.pointerId);
+    }
+
+    if (drag.moved) {
+      setSuppressCardClick(true);
+      window.setTimeout(() => setSuppressCardClick(false), 0);
+    }
+
+    dragRef.current = null;
+    setIsDragging(false);
+    updateScrollEdges();
+  };
+
+  const handleViewportPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startScrollLeft: viewport.scrollLeft,
+      moved: false,
+    };
+    viewport.setPointerCapture(event.pointerId);
+    setIsDragging(true);
+  };
+
+  const handleViewportPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const viewport = viewportRef.current;
+    const drag = dragRef.current;
+    if (!viewport || !drag || drag.pointerId !== event.pointerId) return;
+
+    const delta = event.clientX - drag.startX;
+    if (Math.abs(delta) > TREND_DRAG_CLICK_THRESHOLD_PX) {
+      drag.moved = true;
+    }
+    viewport.scrollLeft = drag.startScrollLeft - delta;
+  };
+
   return (
-    <div className="home-v2-stack-feature">
-      <div className="home-v2-stack-feature-lead">
-        <span className="home-v2-stack-feature-eyebrow">Editor&rsquo;s pick</span>
-        <div className="home-v2-stack-feature-id">
-          <StackAvatar label={stack.title} logoUrl={stack.logoUrl} />
-          <div>
-            <h3 className="home-v2-stack-feature-title">{stack.title}</h3>
-            <p className="home-v2-stack-feature-stat">
-              {stack.statsLabel}
-              {stack.growthLabel ? (
-                <span className="home-v2-stack-feature-delta">{stack.growthLabel}</span>
-              ) : null}
-            </p>
-          </div>
+    <div
+      className={`home-v2-stack-trend-rail${showNav ? " has-nav" : ""}${canScrollNext ? " can-next" : ""}`}
+    >
+      <div
+        ref={viewportRef}
+        className={`home-v2-stack-trend-viewport${isDragging ? " is-dragging" : ""}`}
+        onPointerDown={handleViewportPointerDown}
+        onPointerMove={handleViewportPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
+        <div className="home-v2-stack-trend-track" role="list">
+          {stacks.map((stack) => (
+            <TrendingStackCard
+              key={stack.id}
+              stack={stack}
+              suppressNavigation={suppressCardClick}
+            />
+          ))}
         </div>
-        <p className="home-v2-stack-feature-desc">{stack.description}</p>
-        <Link {...href} className="home-v2-stack-feature-link">
-          View collection <ArrowRight size={14} aria-hidden="true" />
-        </Link>
       </div>
-      <div className="home-v2-stack-feature-items">
-        {previews.map((preview) => (
-          <Link {...href} key={preview.title} className="home-v2-stack-feature-item">
-            <StackAvatar label={preview.title} size="sm" />
-            <span className="home-v2-stack-feature-item-title">{preview.title}</span>
-            <span className="home-v2-stack-feature-item-meta">{preview.meta}</span>
-          </Link>
-        ))}
-      </div>
+      {showNav ? (
+        <button
+          type="button"
+          className="home-v2-stack-trend-nav home-v2-stack-trend-nav--next"
+          aria-label="Show more trending stacks"
+          disabled={!canScrollNext}
+          onClick={() => scrollByStep(1)}
+        >
+          <ChevronRight size={18} aria-hidden="true" />
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -100,7 +204,12 @@ function CollectionCard({ stack }: { stack: HomeStack }) {
       className="home-v2-collection-card"
       aria-label={`${stack.title} — ${stack.description}`}
     >
-      <StackAvatar label={stack.title} logoUrl={stack.logoUrl} size="sm" />
+      <StackAvatar
+        label={stack.title}
+        logoUrl={stack.logoUrl}
+        size="sm"
+        kind={homeStackAvatarKind(stack)}
+      />
       <div className="home-v2-collection-copy">
         <h3 className="home-v2-collection-title">{stack.title}</h3>
         <p className="home-v2-collection-desc">{stack.description}</p>
@@ -120,15 +229,11 @@ function CollectionCard({ stack }: { stack: HomeStack }) {
 export function HomeDiscoverSection() {
   return (
     <section className="home-v2-discover" aria-label="Curated discovery">
-      <div className="home-v2-discover-chapter home-v2-discover-chapter--spotlight">
-        <FeaturedStackBanner stack={HOME_FEATURED_STACK} />
-      </div>
-
       <div className="home-v2-discover-chapter">
         <div className="home-v2-discover-header">
           <div className="home-v2-discover-heading">
             <h2 className="home-v2-discover-title">Trending stacks</h2>
-            <p className="home-v2-discover-lede">Publishers and themes gaining installs this week.</p>
+            <p className="home-v2-discover-lede">Publishers and themes from the catalog.</p>
           </div>
           <Link
             to="/skills"
@@ -145,13 +250,7 @@ export function HomeDiscoverSection() {
             See what&apos;s rising <ArrowRight size={14} aria-hidden="true" />
           </Link>
         </div>
-        <div className="home-v2-stack-trend-rail">
-          <div className="home-v2-stack-trend-track" role="list">
-            {HOME_TRENDING_STACKS.map((stack) => (
-              <TrendingStackCard key={stack.id} stack={stack} />
-            ))}
-          </div>
-        </div>
+        <TrendingStacksCarousel stacks={HOME_TRENDING_STACKS} />
       </div>
 
       <div className="home-v2-discover-chapter">

@@ -5,6 +5,8 @@ type MarketplaceIconProps = {
   kind: MarketplaceIconKind;
   label: string;
   imageUrl?: string | null;
+  /** When set (e.g. Simple Icons brand hex), overrides the hashed label tone. */
+  brandColor?: string | null;
   /**
    * Skill custom-icon protocol string (e.g. `lucide:Plug`). Only honoured
    * when `kind === "skill"`; for other kinds the prop is ignored. Falls
@@ -33,15 +35,21 @@ export function MarketplaceIcon({
   label,
   imageUrl,
   icon,
+  brandColor,
   size = "sm",
 }: MarketplaceIconProps) {
   const customIcon = kind === "skill" ? parseSkillIcon(icon) : null;
   const Icon = MARKETPLACE_KIND_ICONS[kind];
-  const tone = hashTone(label);
+  const tone = brandColor
+    ? {
+        accent: brandColor,
+        wash: `color-mix(in srgb, ${brandColor} 16%, transparent)`,
+      }
+    : hashTone(label);
 
   return (
     <span
-      className={`marketplace-icon marketplace-icon-${kind} marketplace-icon-${size}`}
+      className={`marketplace-icon marketplace-icon-${kind} marketplace-icon-${size}${brandColor ? " marketplace-icon--brand" : ""}`}
       style={
         {
           "--marketplace-icon-accent": tone.accent,

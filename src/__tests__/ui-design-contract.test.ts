@@ -101,8 +101,10 @@ describe("restored UI design contract", () => {
     expect(headerShell).toContain("padding: 0 var(--space-5)");
 
     const themeControl = cssRule(css, ".navbar-theme-switcher");
-    expect(themeControl).toContain("height: 36px");
-    expect(themeControl).toContain("border-radius: 10px");
+    expect(themeControl).toContain("--navbar-theme-outer-r: 10px");
+    expect(themeControl).toContain("--navbar-theme-inner-r: calc(var(--navbar-theme-outer-r) - var(--navbar-theme-pad))");
+    expect(themeControl).toContain("--navbar-theme-collapsed-w:");
+    expect(themeControl).toContain("width: var(--navbar-theme-collapsed-w)");
     expect(css).toContain("--r-btn: var(--r-sm)");
 
     const compact = cssMediaContaining(css, "(max-width: 760px)", [

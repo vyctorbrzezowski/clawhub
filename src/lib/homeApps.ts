@@ -1,6 +1,8 @@
-/** Curated app surfaces for the home “skills for your apps” grid (design-time). */
+/** Curated shortcuts for the home apps constellation (design-time). */
 
-export type HomeApp = {
+import { homePluginBrandIconUrl, type HomePluginBrand } from "./homePluginBrands";
+
+export type HomeSkillApp = {
   id: string;
   name: string;
   description: string;
@@ -11,7 +13,17 @@ export type HomeApp = {
   iconDomain: string;
 };
 
-export const HOME_APPS: HomeApp[] = [
+export type HomePluginShortcut = {
+  id: string;
+  runtimeId: string;
+  name: string;
+  description: string;
+  packageName: string;
+  brand: HomePluginBrand;
+};
+
+/** Left orbit — skills for everyday tools. */
+export const HOME_SKILL_APPS: HomeSkillApp[] = [
   {
     id: "chrome",
     name: "Google Chrome",
@@ -19,14 +31,6 @@ export const HOME_APPS: HomeApp[] = [
     browseQuery: "chrome browser",
     skillsLabel: "48 skills",
     iconDomain: "google.com",
-  },
-  {
-    id: "slack",
-    name: "Slack",
-    description: "Post updates, triage channels, and run workflows in Slack.",
-    browseQuery: "slack",
-    skillsLabel: "36 skills",
-    iconDomain: "slack.com",
   },
   {
     id: "vscode",
@@ -77,60 +81,12 @@ export const HOME_APPS: HomeApp[] = [
     iconDomain: "cursor.com",
   },
   {
-    id: "spotify",
-    name: "Spotify",
-    description: "Control playback, playlists, and listening from agents.",
-    browseQuery: "spotify",
-    skillsLabel: "14 skills",
-    iconDomain: "spotify.com",
-  },
-  {
-    id: "discord",
-    name: "Discord",
-    description: "Send messages, moderate servers, and automate communities.",
-    browseQuery: "discord",
-    skillsLabel: "18 skills",
-    iconDomain: "discord.com",
-  },
-  {
-    id: "gmail",
-    name: "Gmail",
-    description: "Draft, triage, and send mail from agent workflows.",
-    browseQuery: "gmail email",
-    skillsLabel: "29 skills",
-    iconDomain: "mail.google.com",
-  },
-  {
-    id: "drive",
-    name: "Google Drive",
-    description: "Find files, sync folders, and share docs from Drive.",
-    browseQuery: "google drive",
-    skillsLabel: "21 skills",
-    iconDomain: "drive.google.com",
-  },
-  {
-    id: "jira",
-    name: "Jira",
-    description: "Update tickets, sprints, and delivery status in Jira.",
-    browseQuery: "jira",
-    skillsLabel: "17 skills",
-    iconDomain: "atlassian.com",
-  },
-  {
-    id: "teams",
-    name: "Microsoft Teams",
-    description: "Chat, meetings, and handoffs inside Teams.",
-    browseQuery: "microsoft teams",
-    skillsLabel: "16 skills",
-    iconDomain: "teams.microsoft.com",
-  },
-  {
-    id: "zoom",
-    name: "Zoom",
-    description: "Schedule calls, capture notes, and follow up after meetings.",
-    browseQuery: "zoom",
-    skillsLabel: "12 skills",
-    iconDomain: "zoom.us",
+    id: "raycast",
+    name: "Raycast",
+    description: "Launch commands, scripts, and quick actions on macOS.",
+    browseQuery: "raycast",
+    skillsLabel: "15 skills",
+    iconDomain: "raycast.com",
   },
   {
     id: "aws",
@@ -140,26 +96,90 @@ export const HOME_APPS: HomeApp[] = [
     skillsLabel: "33 skills",
     iconDomain: "aws.amazon.com",
   },
+];
+
+/** Right orbit — official @openclaw gateway plugins. */
+export const HOME_PLUGIN_SHORTCUTS: HomePluginShortcut[] = [
   {
-    id: "raycast",
-    name: "Raycast",
-    description: "Launch commands, scripts, and quick actions on macOS.",
-    browseQuery: "raycast",
-    skillsLabel: "15 skills",
-    iconDomain: "raycast.com",
+    id: "whatsapp",
+    runtimeId: "whatsapp",
+    name: "WhatsApp",
+    description: "WhatsApp Web channel plugin for agent chats.",
+    packageName: "@openclaw/whatsapp",
+    brand: { slug: "whatsapp", color: "25D366" },
   },
   {
-    id: "dropbox",
-    name: "Dropbox",
-    description: "Sync files, share links, and organize team storage.",
-    browseQuery: "dropbox",
-    skillsLabel: "11 skills",
-    iconDomain: "dropbox.com",
+    id: "matrix",
+    runtimeId: "matrix",
+    name: "Matrix",
+    description: "Rooms and direct messages on Matrix.",
+    packageName: "@openclaw/matrix",
+    brand: { slug: "matrix", color: "0DBD8B" },
+  },
+  {
+    id: "codex",
+    runtimeId: "codex",
+    name: "Codex",
+    description: "Codex app-server harness and model provider.",
+    packageName: "@openclaw/codex",
+    brand: { slug: "openai", color: "412991" },
+  },
+  {
+    id: "discord",
+    runtimeId: "discord",
+    name: "Discord",
+    description: "Channels, DMs, commands, and app events.",
+    packageName: "@openclaw/discord",
+    brand: { slug: "discord", color: "5865F2" },
+  },
+  {
+    id: "feishu",
+    runtimeId: "feishu",
+    name: "Feishu/Lark",
+    description: "Workplace chats and collaboration tools.",
+    packageName: "@openclaw/feishu",
+    brand: { slug: "bytedance", color: "3C8CFF" },
+  },
+  {
+    id: "slack",
+    runtimeId: "slack",
+    name: "Slack",
+    description: "Channels, DMs, commands, and app events.",
+    packageName: "@openclaw/slack",
+    brand: { slug: "slack", color: "4A154B" },
+  },
+  {
+    id: "msteams",
+    runtimeId: "msteams",
+    name: "Microsoft Teams",
+    description: "Meetings and team chat for agents.",
+    packageName: "@openclaw/msteams",
+    brand: { slug: "microsoftteams", color: "6264A7" },
+  },
+  {
+    id: "brave",
+    runtimeId: "brave",
+    name: "Brave Search",
+    description: "Brave Search provider for web lookup.",
+    packageName: "@openclaw/brave",
+    brand: { slug: "brave", color: "FB542B" },
+  },
+  {
+    id: "googlechat",
+    runtimeId: "googlechat",
+    name: "Google Chat",
+    description: "Spaces and direct messages on Google Chat.",
+    packageName: "@openclaw/googlechat",
+    brand: { slug: "googlechat", color: "34A853" },
   },
 ];
 
 export function homeAppIconUrl(iconDomain: string) {
   return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(iconDomain)}&sz=128`;
+}
+
+export function homePluginShortcutIconUrl(shortcut: HomePluginShortcut) {
+  return homePluginBrandIconUrl(shortcut.brand);
 }
 
 export const SKILLS_BROWSE_SEARCH = {

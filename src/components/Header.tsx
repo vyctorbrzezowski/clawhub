@@ -17,6 +17,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getUserFacingAuthError } from "../lib/authErrorMessage";
 import { gravatarUrl } from "../lib/gravatar";
 import { NAV_ICONS } from "../lib/marketplaceIcons";
+import { MarketplaceIcon } from "./MarketplaceIcon";
 import { filterNavItems, PRIMARY_NAV_ITEMS, SECONDARY_NAV_ITEMS } from "../lib/nav-items";
 import { isModerator } from "../lib/roles";
 import { getClawHubSiteUrl, getSiteMode, getSiteName } from "../lib/site";
@@ -768,6 +769,7 @@ function SearchTypeahead({
       ) : null}
       <div
         id="navbar-search-typeahead-panel"
+        className="navbar-search-typeahead-panel"
         role="tabpanel"
         aria-labelledby={
           activeTab === "skills"
@@ -784,7 +786,7 @@ function SearchTypeahead({
           </div>
         ) : null}
         {hasMatches ? (
-          <div role="listbox" aria-label="Search suggestions">
+          <div className="navbar-search-typeahead-results" role="listbox" aria-label="Search suggestions">
             {activeTabHasItems ? (
               items.map((item, index) => (
                 <TypeaheadRow
@@ -833,7 +835,7 @@ function TypeaheadRow({
       onMouseDown={(event) => event.preventDefault()}
       onClick={() => onSelectItem(item)}
     >
-      {body.icon ? <span className="navbar-search-typeahead-icon">{body.icon}</span> : null}
+      <TypeaheadRowIcon item={item} />
       <span className="navbar-search-typeahead-copy">
         <span className="navbar-search-typeahead-title">{body.title}</span>
         {body.meta ? <span className="navbar-search-typeahead-meta">{body.meta}</span> : null}
@@ -847,11 +849,35 @@ function getTypeaheadOptionId(item: TypeaheadItem) {
   return `navbar-search-typeahead-${item.key.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
+function TypeaheadRowIcon({ item }: { item: TypeaheadItem }) {
+  if (item.kind === "skill") {
+    const label = item.result.skill.displayName || item.result.skill.slug;
+    return (
+      <span className="navbar-search-typeahead-icon" aria-hidden="true">
+        <MarketplaceIcon
+          kind="skill"
+          label={label}
+          icon={item.result.skill.icon}
+          size="xs"
+        />
+      </span>
+    );
+  }
+  if (item.kind === "plugin") {
+    const label = item.result.plugin.displayName || item.result.plugin.name;
+    return (
+      <span className="navbar-search-typeahead-icon" aria-hidden="true">
+        <MarketplaceIcon kind="plugin" label={label} size="xs" />
+      </span>
+    );
+  }
+  return null;
+}
+
 function getTypeaheadRowBody(item: TypeaheadItem) {
   if (item.kind === "skill") {
     const owner = item.result.ownerHandle ? `@${item.result.ownerHandle}` : "Skill";
     return {
-      icon: "S",
       title: item.result.skill.displayName,
       meta: `${owner} / ${item.result.skill.slug}`,
     };
@@ -861,13 +887,11 @@ function getTypeaheadRowBody(item: TypeaheadItem) {
       ? `@${item.result.plugin.ownerHandle} / ${item.result.plugin.name}`
       : item.result.plugin.name;
     return {
-      icon: "P",
       title: item.result.plugin.displayName,
       meta: owner,
     };
   }
   return {
-    icon: null,
     title: item.label,
     meta: null,
   };
@@ -913,7 +937,10 @@ function NavbarThemeSwitcher({
           aria-label={label}
           aria-pressed={mode === value}
           title={label}
-          onClick={() => onSetMode(value)}
+          onClick={(event) => {
+            onSetMode(value);
+            event.currentTarget.blur();
+          }}
         >
           <Icon size={16} aria-hidden="true" />
         </button>

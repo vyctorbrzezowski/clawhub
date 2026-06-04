@@ -73,16 +73,32 @@ describe("HomeListingSection", () => {
     fetchPluginCatalogMock.mockResolvedValue({
       items: [
         {
-          name: "demo-plugin",
-          displayName: "Demo Plugin",
+          name: "@openclaw/whatsapp",
+          displayName: "WhatsApp",
+          runtimeId: "whatsapp",
           family: "code-plugin",
-          channel: "community",
-          isOfficial: false,
-          summary: "Runs workflows.",
+          channel: "official",
+          isOfficial: true,
+          ownerHandle: "openclaw",
+          summary: "OpenClaw WhatsApp channel plugin for WhatsApp Web chats.",
           createdAt: 1,
           updatedAt: 2,
-          latestVersion: "1.0.0",
+          latestVersion: "2026.6.1",
           stats: { stars: 8, downloads: 120, installs: 0, versions: 1 },
+        },
+        {
+          name: "@openclaw/discord",
+          displayName: "Discord",
+          runtimeId: "discord",
+          family: "code-plugin",
+          channel: "official",
+          isOfficial: true,
+          ownerHandle: "openclaw",
+          summary: "OpenClaw Discord channel plugin.",
+          createdAt: 1,
+          updatedAt: 2,
+          latestVersion: "2026.6.1",
+          stats: { stars: 4, downloads: 90, installs: 0, versions: 1 },
         },
       ],
       nextCursor: null,
@@ -99,17 +115,60 @@ describe("HomeListingSection", () => {
     });
   });
 
-  it("switches to plugins and loads plugin cards", async () => {
+  it("switches to plugins on Officials and loads openclaw catalog", async () => {
     render(<HomeListingSection />);
 
     fireEvent.click(screen.getByRole("button", { name: "Plugins" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Demo Plugin")).toBeTruthy();
-      expect(screen.getByText("120")).toBeTruthy();
-      expect(screen.getByText("8")).toBeTruthy();
+      expect(screen.getByRole("tab", { name: "Officials", selected: true })).toBeTruthy();
+      expect(screen.getByText("WhatsApp")).toBeTruthy();
+      expect(screen.getAllByText("@openclaw").length).toBeGreaterThan(0);
     });
-    expect(fetchPluginCatalogMock).toHaveBeenCalled();
+
+    const whatsappIcon = document.querySelector(
+      'img.marketplace-icon-image[src="https://cdn.simpleicons.org/whatsapp/25D366"]',
+    );
+    expect(whatsappIcon).toBeTruthy();
+
+    expect(fetchPluginCatalogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ isOfficial: true }),
+    );
+  });
+
+  it("shows hardcoded openclaw officials when the plugin API is empty", async () => {
+    fetchPluginCatalogMock.mockResolvedValue({ items: [], nextCursor: null });
+
+    render(<HomeListingSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Plugins" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: "Officials", selected: true })).toBeTruthy();
+      expect(screen.getByText("WhatsApp")).toBeTruthy();
+      expect(screen.getByText("Discord")).toBeTruthy();
+      expect(screen.getByText("Matrix")).toBeTruthy();
+      expect(screen.getByText("Codex")).toBeTruthy();
+      expect(screen.queryByText("Quiet shelf")).toBeNull();
+      expect(screen.getAllByText("@openclaw").length).toBeGreaterThan(0);
+    });
+
+    const whatsappIcon = document.querySelector(
+      'img.marketplace-icon-image[src="https://cdn.simpleicons.org/whatsapp/25D366"]',
+    );
+    expect(whatsappIcon).toBeTruthy();
+  });
+
+  it("shows hardcoded openclaw officials when the plugin API fails", async () => {
+    fetchPluginCatalogMock.mockRejectedValue(new Error("network"));
+
+    render(<HomeListingSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Plugins" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("WhatsApp")).toBeTruthy();
+      expect(screen.queryByText("Quiet shelf")).toBeNull();
+      expect(screen.queryByText("Listings took a coffee break")).toBeNull();
+    });
   });
 
   it("opens listing search from the toolbar icon and with slash", async () => {
@@ -151,6 +210,20 @@ describe("HomeListingSection", () => {
     });
   });
 
+  it("groups search, category, and view in the actions rail with even spacing", () => {
+    render(<HomeListingSection />);
+
+    const sort = document.querySelector(".home-v2-listing-sort");
+    expect(sort?.querySelector(".home-v2-listing-search-trigger")).toBeNull();
+
+    const rail = document.querySelector(".home-v2-listing-actions-rail");
+    expect(rail).toBeTruthy();
+    expect(rail?.classList.contains("has-category")).toBe(true);
+    expect(rail?.querySelector(".home-v2-listing-search-trigger")).toBeTruthy();
+    expect(rail?.querySelector(".home-v2-listing-category-menu")).toBeTruthy();
+    expect(rail?.querySelector(".home-v2-listing-view")).toBeTruthy();
+  });
+
   it("renders browse taxonomy category select for skills", () => {
     render(<HomeListingSection />);
 
@@ -162,6 +235,30 @@ describe("HomeListingSection", () => {
     expect(screen.getByRole("option", { name: "All categories" })).toBeTruthy();
     expect(screen.getByRole("option", { name: "Data, APIs & Integrations" })).toBeTruthy();
     expect(screen.getByRole("option", { name: "Security, Vetting & Trust" })).toBeTruthy();
+  });
+
+  it("shows see more when the first page is full and the API reports more", async () => {
+    convexQueryMock.mockResolvedValue({
+      page: Array.from({ length: 20 }, (_, index) => ({
+        skill: {
+          _id: `skills:${index}`,
+          slug: `skill-${index}`,
+          displayName: `Skill ${index}`,
+          summary: "Summary",
+          stats: { stars: 1, downloads: 1 },
+        },
+        ownerHandle: "builder",
+      })),
+      hasMore: true,
+    });
+
+    render(<HomeListingSection />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Skill 19")).toBeTruthy();
+    });
+    expect(screen.queryByText("Skill 20")).toBeNull();
+    expect(screen.getByRole("button", { name: "See more" })).toBeTruthy();
   });
 
   it("expands the listing preview when see more is clicked", async () => {

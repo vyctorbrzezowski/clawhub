@@ -7,10 +7,14 @@ export type HomeStackPreview = {
   meta: string;
 };
 
+/** User publishers render round avatars; orgs and thematic collections stay square. */
+export type HomeStackAvatarKind = "user" | "org";
+
 export type HomeStack = {
   id: string;
   title: string;
   description: string;
+  avatarKind?: HomeStackAvatarKind;
   /** Publisher profile route when the stack maps to a known builder/org. */
   publisherHandle?: string;
   /** Browse fallback when the stack is thematic rather than owner-scoped. */
@@ -31,6 +35,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     id: "peter-steinberger",
     title: "Peter Steinberger",
     description: "Core OpenClaw skills from the ecosystem architect.",
+    avatarKind: "user",
     publisherHandle: "steipete",
     statsLabel: "24 skills",
     growthLabel: "+43%",
@@ -40,6 +45,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     id: "nvidia",
     title: "NVIDIA",
     description: "GPU, inference, and agent tooling from NVIDIA publishers.",
+    avatarKind: "org",
     publisherHandle: "nvidia",
     statsLabel: "18 skills",
     growthLabel: "+28%",
@@ -49,6 +55,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     id: "gary-tan",
     title: "Gary Tan",
     description: "Startup ops, growth, and founder workflows.",
+    avatarKind: "user",
     publisherHandle: "garytan",
     statsLabel: "11 skills",
     growthLabel: "+19%",
@@ -58,6 +65,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     id: "openclaw",
     title: "OpenClaw",
     description: "Official gateway, plugins, and reference agents.",
+    avatarKind: "org",
     publisherHandle: "openclaw",
     statsLabel: "32 skills",
     growthLabel: "+12%",
@@ -67,6 +75,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     id: "security",
     title: "Security essentials",
     description: "Auditing, secrets, and safe agent execution.",
+    avatarKind: "org",
     browseQuery: "security",
     statsLabel: "46 skills",
     growthLabel: "+36%",
@@ -76,6 +85,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     id: "coding-agents",
     title: "Coding agents",
     description: "Repo tools, reviews, and shipping automation.",
+    avatarKind: "org",
     browseQuery: "coding agent",
     statsLabel: "58 skills",
     growthLabel: "+51%",
@@ -89,6 +99,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     id: "coll-peter",
     title: "Peter Steinberger",
     description: "Production OpenClaw skills from the ecosystem architect.",
+    avatarKind: "user",
     publisherHandle: "steipete",
     statsLabel: "24 skills",
     collectionTags: ["Publishing", "PR review", "Architecture"],
@@ -97,6 +108,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     id: "coll-nvidia",
     title: "NVIDIA AI",
     description: "Inference, speech, and GPU workflows from NVIDIA builders.",
+    avatarKind: "org",
     publisherHandle: "nvidia",
     statsLabel: "18 skills",
     collectionTags: ["Inference", "CUDA", "Speech"],
@@ -105,6 +117,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     id: "coll-gary",
     title: "Gary Tan",
     description: "Startup ops, growth, and founder workflows.",
+    avatarKind: "user",
     publisherHandle: "garytan",
     statsLabel: "11 skills",
     collectionTags: ["Growth", "Fundraising", "Ops"],
@@ -113,6 +126,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     id: "coll-openclaw",
     title: "OpenClaw gateway",
     description: "Official gateway, plugins, and reference agents.",
+    avatarKind: "org",
     publisherHandle: "openclaw",
     logoUrl: OPENCLAW_LOGO_URL,
     statsLabel: "32 skills",
@@ -120,6 +134,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
   },
   {
     id: "coll-security",
+    avatarKind: "org",
     title: "Security essentials",
     description: "Auditing, secrets, and safe agent execution.",
     browseQuery: "security audit",
@@ -128,6 +143,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
   },
   {
     id: "coll-coding",
+    avatarKind: "org",
     title: "Coding agents",
     description: "Repo tools, reviews, and shipping automation.",
     browseQuery: "coding agent",
@@ -136,6 +152,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
   },
   {
     id: "coll-automation",
+    avatarKind: "org",
     title: "Automation workflows",
     description: "Cron, pipelines, and multi-step agent runs.",
     browseQuery: "automation workflow",
@@ -144,6 +161,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
   },
   {
     id: "coll-devtools",
+    avatarKind: "org",
     title: "Dev tools pack",
     description: "CLI helpers, scaffolding, and local dev ergonomics.",
     browseQuery: "dev tools",
@@ -152,6 +170,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
   },
   {
     id: "coll-data-apis",
+    avatarKind: "org",
     title: "Data & APIs",
     description: "Fetch, integrate, and reconcile external services.",
     browseQuery: "api integration",
@@ -160,6 +179,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
   },
   {
     id: "coll-research",
+    avatarKind: "org",
     title: "Web & research",
     description: "Browse, scrape, and synthesize the open web.",
     browseQuery: "web research",
@@ -171,12 +191,26 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
 /** @deprecated Use {@link HOME_COLLECTION_STACKS}. */
 export const HOME_EDITORIAL_STACKS = HOME_COLLECTION_STACKS;
 
+/** Staff-curated collections shown beside the editor's pick hero (home spotlight). */
+const HOME_STAFF_CURATED_STACK_IDS = [
+  "coll-security",
+  "coll-coding",
+  "coll-automation",
+  "coll-devtools",
+  "coll-data-apis",
+] as const;
+
+export const HOME_STAFF_CURATED_STACKS: HomeStack[] = HOME_COLLECTION_STACKS.filter((stack) =>
+  (HOME_STAFF_CURATED_STACK_IDS as readonly string[]).includes(stack.id),
+);
+
 /** Single spotlight collection rendered as the editorial hero banner. */
 export const HOME_FEATURED_STACK: HomeStack = {
   id: "featured-essentials",
   title: "OpenClaw essentials",
   description:
     "The battle-tested starter pack — security, shipping, and architecture playbooks curated for production agents.",
+  avatarKind: "org",
   publisherHandle: "openclaw",
   logoUrl: OPENCLAW_LOGO_URL,
   statsLabel: "322 installs this week",
@@ -188,6 +222,10 @@ export const HOME_FEATURED_STACK: HomeStack = {
     { title: "Deepsec Audit", meta: "Security recon" },
   ],
 };
+
+export function homeStackAvatarKind(stack: HomeStack): HomeStackAvatarKind {
+  return stack.avatarKind ?? "org";
+}
 
 export function getHomeStackHref(stack: HomeStack) {
   if (stack.publisherHandle) {

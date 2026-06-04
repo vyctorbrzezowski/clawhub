@@ -1,22 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
 import { getHomeAppOrbitPlacement } from "../lib/homeAppOrbit";
-import { HOME_APPS, homeAppIconUrl, SKILLS_BROWSE_SEARCH } from "../lib/homeApps";
+import {
+  HOME_PLUGIN_SHORTCUTS,
+  HOME_SKILL_APPS,
+  homeAppIconUrl,
+  homePluginShortcutIconUrl,
+  SKILLS_BROWSE_SEARCH,
+} from "../lib/homeApps";
 
-function HomeAppPill({
+function HomeSkillAppPill({
   app,
   index,
 }: {
-  app: (typeof HOME_APPS)[number];
+  app: (typeof HOME_SKILL_APPS)[number];
   index: number;
 }) {
-  const slot = getHomeAppOrbitPlacement(index);
+  const slot = getHomeAppOrbitPlacement("left", index);
 
   return (
     <Link
       to="/skills"
       search={{ ...SKILLS_BROWSE_SEARCH, q: app.browseQuery }}
-      className="home-v2-app-pill"
+      className="home-v2-app-pill home-v2-app-pill--skill"
       style={{
         left: slot.left,
         top: slot.top,
@@ -26,7 +31,7 @@ function HomeAppPill({
         transform: "translate(-50%, -50%) scale(var(--pill-scale))",
       }}
       title={app.description}
-      aria-label={`${app.name} — ${app.description} (${app.skillsLabel})`}
+      aria-label={`${app.name} skill — ${app.description} (${app.skillsLabel})`}
     >
       <span className="home-v2-app-pill-icon" aria-hidden="true">
         <img
@@ -43,6 +48,46 @@ function HomeAppPill({
   );
 }
 
+function HomePluginAppPill({
+  plugin,
+  index,
+}: {
+  plugin: (typeof HOME_PLUGIN_SHORTCUTS)[number];
+  index: number;
+}) {
+  const slot = getHomeAppOrbitPlacement("right", index);
+
+  return (
+    <Link
+      to="/plugins/$name"
+      params={{ name: plugin.packageName }}
+      className="home-v2-app-pill home-v2-app-pill--plugin"
+      style={{
+        left: slot.left,
+        top: slot.top,
+        zIndex: slot.zIndex,
+        opacity: slot.opacity,
+        ["--pill-scale" as string]: slot.scale,
+        transform: "translate(-50%, -50%) scale(var(--pill-scale))",
+      }}
+      title={plugin.description}
+      aria-label={`${plugin.name} plugin — ${plugin.description} (Official)`}
+    >
+      <span className="home-v2-app-pill-icon" aria-hidden="true">
+        <img
+          src={homePluginShortcutIconUrl(plugin)}
+          alt=""
+          width={20}
+          height={20}
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
+      <span className="home-v2-app-pill-name">{plugin.name}</span>
+    </Link>
+  );
+}
+
 export function HomeAppsSection() {
   return (
     <section className="home-v2-apps" aria-labelledby="home-v2-apps-title">
@@ -53,17 +98,10 @@ export function HomeAppsSection() {
             Skills for your apps
           </h2>
           <p className="home-v2-apps-lede">
-            Jump straight into skills for tools you already run — each pill opens a focused search,
-            not the full catalog.
+            Skills for the tools you run on the left; official OpenClaw gateway plugins on the
+            right. Each pill opens a focused browse path.
           </p>
         </div>
-        <Link
-          to="/skills"
-          search={SKILLS_BROWSE_SEARCH}
-          className="home-v2-discover-eyebrow home-v2-discover-link"
-        >
-          Open full search <ArrowRight size={14} aria-hidden="true" />
-        </Link>
       </div>
 
       <div className="home-v2-apps-stage">
@@ -71,11 +109,15 @@ export function HomeAppsSection() {
         <div className="home-v2-apps-stage-fade home-v2-apps-stage-fade--left" aria-hidden="true" />
         <div className="home-v2-apps-stage-fade home-v2-apps-stage-fade--right" aria-hidden="true" />
 
-        <div className="home-v2-apps-orbit" role="group" aria-label="App shortcuts">
+        <div className="home-v2-apps-orbit" role="group" aria-label="Skills and plugin shortcuts">
           <div className="home-v2-apps-orbit-guides" aria-hidden="true">
             <span className="home-v2-apps-orbit-arc home-v2-apps-orbit-arc--left" />
             <span className="home-v2-apps-orbit-arc home-v2-apps-orbit-arc--right" />
           </div>
+
+          <span className="home-v2-apps-orbit-cap home-v2-apps-orbit-cap--left">Skills</span>
+          <span className="home-v2-apps-orbit-cap home-v2-apps-orbit-cap--right">Plugins</span>
+
           <div className="home-v2-apps-hub" aria-hidden="true">
             <span className="home-v2-apps-hub-ring" />
             <span className="home-v2-apps-hub-core">
@@ -87,11 +129,13 @@ export function HomeAppsSection() {
                 decoding="async"
               />
             </span>
-            <span className="home-v2-apps-hub-count">{HOME_APPS.length} apps</span>
           </div>
 
-          {HOME_APPS.map((app, index) => (
-            <HomeAppPill key={app.id} app={app} index={index} />
+          {HOME_SKILL_APPS.map((app, index) => (
+            <HomeSkillAppPill key={app.id} app={app} index={index} />
+          ))}
+          {HOME_PLUGIN_SHORTCUTS.map((plugin, index) => (
+            <HomePluginAppPill key={plugin.id} plugin={plugin} index={index} />
           ))}
         </div>
       </div>

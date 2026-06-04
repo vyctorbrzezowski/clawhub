@@ -17,6 +17,15 @@ import { api } from "../../convex/_generated/api";
 import { convexHttp } from "../convex/client";
 import { isSkillHighlighted, isSkillOfficial } from "../lib/badges";
 import { formatCompactStat } from "../lib/numberFormat";
+import {
+  filterOpenClawOfficialPlugins,
+  HOME_OPENCLAW_OFFICIAL_PLUGINS_FALLBACK,
+  homePluginBrandIconUrl,
+  mergeHomeOpenClawOfficialPlugins,
+  OPENCLAW_PUBLISHER_HANDLE,
+  resolveHomePluginBrand,
+  sortHomeOpenClawPlugins,
+} from "../lib/homePluginBrands";
 import { fetchPluginCatalog, type PackageListItem } from "../lib/packageApi";
 import type { PublicSkill, PublicUser } from "../lib/publicUser";
 import { HomeListingCategorySelect } from "./HomeListingCategorySelect";
@@ -41,6 +50,7 @@ const LISTING_TABS: Array<{ id: ListingTab; label: string }> = [
 
 const LISTING_PAGE_SIZE = 20;
 const LISTING_SEARCH_DEBOUNCE_MS = 220;
+const OPENCLAW_PLUGIN_FETCH_BATCH = 64;
 
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -70,9 +80,35 @@ function filterSkillsByTab(entries: SkillPageEntry[], tab: ListingTab) {
 
 function filterPluginsByTab(items: PackageListItem[], tab: ListingTab) {
   if (tab === "officials") {
-    return items.filter((item) => item.isOfficial);
+    const filtered = filterOpenClawOfficialPlugins(items);
+    return filtered.length > 0
+      ? sortHomeOpenClawPlugins(filtered)
+      : sortHomeOpenClawPlugins(HOME_OPENCLAW_OFFICIAL_PLUGINS_FALLBACK);
   }
   return items;
+}
+
+function HomeListingPluginIcon({
+  plugin,
+  size = "sm",
+}: {
+  plugin: PackageListItem;
+  size?: "xs" | "sm" | "md";
+}) {
+  const name = plugin.displayName || plugin.name;
+  const brand = resolveHomePluginBrand(plugin);
+  if (!brand) {
+    return <MarketplaceIcon kind="plugin" label={name} size={size} />;
+  }
+  return (
+    <MarketplaceIcon
+      kind="plugin"
+      label={name}
+      size={size}
+      imageUrl={homePluginBrandIconUrl(brand)}
+      brandColor={`#${brand.color}`}
+    />
+  );
 }
 
 function HomeListingEmptyPanel({
@@ -109,6 +145,7 @@ function HomeListingEmptyPanel({
       <p className="home-v2-listing-empty-body">{body}</p>
       {variant === "search" && onFullSearch ? (
         <button type="button" className="home-v2-listing-empty-action" onClick={onFullSearch}>
+          <Search size={15} aria-hidden="true" />
           Search the full hub
         </button>
       ) : null}
@@ -166,24 +203,35 @@ async function fetchSkillListing(
     officialOnly: tab === "officials" ? true : undefined,
     categorySlug: categorySlug ?? undefined,
   });
-  const page = Array.isArray(result)
-    ? []
-    : ((result as { page?: SkillPageEntry[] }).page ?? []);
-  return page;
+  if (Array.isArray(result)) {
+    return { page: [], hasMore: false };
+  }
+  const typed = result as { page?: SkillPageEntry[]; hasMore?: boolean };
+  return { page: typed.page ?? [], hasMore: typed.hasMore ?? false };
 }
 
 async function fetchPluginListing(tab: ListingTab, limit: number, signal: AbortSignal) {
+  const openClawOfficials = tab === "officials";
+  const requestLimit = openClawOfficials ? Math.max(limit, OPENCLAW_PLUGIN_FETCH_BATCH) : limit;
   const result = await fetchPluginCatalog({
     featured: tab === "featured" ? true : undefined,
-    isOfficial: tab === "officials" ? true : undefined,
-    limit,
+    isOfficial: openClawOfficials ? true : undefined,
+    limit: requestLimit,
     signal,
   });
-  const items = [...result.items];
-  if (tab === "popular" || tab === "officials") {
+  let items = [...result.items];
+  if (openClawOfficials) {
+    items = mergeHomeOpenClawOfficialPlugins(items);
+  } else if (tab === "popular") {
     items.sort((a, b) => (b.stats?.downloads ?? 0) - (a.stats?.downloads ?? 0));
   }
-  return items.slice(0, limit);
+  const page = items.slice(0, limit);
+  return {
+    items: page,
+    hasMore: openClawOfficials
+      ? items.length > limit
+      : result.nextCursor != null || result.items.length > limit,
+  };
 }
 
 function HomeListingSkillRow({ entry }: { entry: SkillPageEntry }) {
@@ -224,14 +272,16 @@ function HomeListingPluginRow({ plugin }: { plugin: PackageListItem }) {
   return (
     <Link to="/plugins/$name" params={{ name: plugin.name }} className="home-v2-listing-row">
       <span className="home-v2-listing-row-icon" aria-hidden="true">
-        <MarketplaceIcon kind="plugin" label={name} size="sm" />
+        <HomeListingPluginIcon plugin={plugin} size="sm" />
       </span>
       <div className="home-v2-listing-row-body">
         <div className="home-v2-listing-row-title">
           <span className="home-v2-listing-row-name">{name}</span>
           {plugin.ownerHandle ? (
             <span className="home-v2-listing-row-by">@{plugin.ownerHandle}</span>
-          ) : null}
+          ) : (
+            <span className="home-v2-listing-row-by">@{OPENCLAW_PUBLISHER_HANDLE}</span>
+          )}
           {plugin.isOfficial ? <OfficialBadge /> : null}
         </div>
         <p className="home-v2-listing-row-summary">
@@ -295,7 +345,7 @@ function HomeListingPluginCard({ plugin }: { plugin: PackageListItem }) {
     >
       <div className="home-v2-listing-card-head">
         <span className="home-v2-listing-card-icon" aria-hidden="true">
-          <MarketplaceIcon kind="plugin" label={name} size="sm" />
+          <HomeListingPluginIcon plugin={plugin} size="sm" />
         </span>
         <div className="home-v2-listing-card-id">
           <span className="home-v2-listing-card-name">{name}</span>
@@ -342,6 +392,7 @@ export function HomeListingSection() {
   const [searchSkills, setSearchSkills] = useState<SkillPageEntry[]>([]);
   const [searchPlugins, setSearchPlugins] = useState<PackageListItem[]>([]);
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [listingHasMore, setListingHasMore] = useState(false);
 
   const trimmedSearch = searchQuery.trim();
   const isSearchMode = trimmedSearch.length > 0;
@@ -364,7 +415,8 @@ export function HomeListingSection() {
       : plugins;
   const activeStatus = isSearchMode ? searchStatus : status;
   const isEmpty = activeStatus === "idle" && activeItems.length === 0;
-  const showListingMore = activeStatus === "idle" && activeItems.length > visibleCount;
+  const showListingMore =
+    activeStatus === "idle" && (activeItems.length > visibleCount || listingHasMore);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -398,26 +450,39 @@ export function HomeListingSection() {
     if (isSearchMode) return;
     const controller = new AbortController();
     setStatus("loading");
+    setListingHasMore(false);
 
     const load =
       kind === "skills"
         ? fetchSkillListing(tab, categorySlug, fetchLimit)
-            .then((page) => {
+            .then((result) => {
               if (controller.signal.aborted) return;
-              setSkills(page);
+              setSkills(result.page);
+              setListingHasMore(result.hasMore);
               setStatus("idle");
             })
         : fetchPluginListing(tab, fetchLimit, controller.signal)
-            .then((items) => {
+            .then((result) => {
               if (controller.signal.aborted) return;
-              setPlugins(items);
+              setPlugins(result.items);
+              setListingHasMore(result.hasMore);
               setStatus("idle");
             });
 
     load.catch(() => {
       if (controller.signal.aborted) return;
-      if (kind === "skills") setSkills([]);
-      else setPlugins([]);
+      if (kind === "skills") {
+        setSkills([]);
+        setStatus("error");
+        return;
+      }
+      if (tab === "officials") {
+        setPlugins(HOME_OPENCLAW_OFFICIAL_PLUGINS_FALLBACK);
+        setListingHasMore(HOME_OPENCLAW_OFFICIAL_PLUGINS_FALLBACK.length > fetchLimit);
+        setStatus("idle");
+        return;
+      }
+      setPlugins([]);
       setStatus("error");
     });
 
@@ -429,6 +494,7 @@ export function HomeListingSection() {
       setSearchSkills([]);
       setSearchPlugins([]);
       setSearchStatus("idle");
+      setListingHasMore(false);
       return;
     }
 
@@ -436,6 +502,7 @@ export function HomeListingSection() {
     const requestId = searchRequestRef.current;
     const controller = new AbortController();
     setSearchStatus("loading");
+    setListingHasMore(false);
 
     const handle = window.setTimeout(() => {
       const load =
@@ -454,6 +521,7 @@ export function HomeListingSection() {
                   owner: hit.owner,
                 }));
                 setSearchSkills(rows);
+                setListingHasMore(rows.length >= fetchLimit);
                 setSearchStatus("idle");
               })
           : fetchPluginCatalog({
@@ -465,6 +533,9 @@ export function HomeListingSection() {
             }).then((result) => {
               if (controller.signal.aborted || requestId !== searchRequestRef.current) return;
               setSearchPlugins(result.items);
+              setListingHasMore(
+                result.nextCursor != null || result.items.length >= fetchLimit,
+              );
               setSearchStatus("idle");
             });
 
@@ -537,7 +608,10 @@ export function HomeListingSection() {
               type="button"
               className={`home-v2-listing-kind-btn${kind === "plugins" ? " is-active" : ""}`}
               aria-pressed={kind === "plugins"}
-              onClick={() => setKind("plugins")}
+              onClick={() => {
+                setKind("plugins");
+                setTab("officials");
+              }}
             >
               Plugins
             </button>
@@ -545,68 +619,74 @@ export function HomeListingSection() {
 
           <span className="home-v2-listing-divider" aria-hidden="true" />
 
-          <div className="home-v2-listing-sort" role="tablist" aria-label="Sort">
-            {LISTING_TABS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={tab === item.id}
-                className={`home-v2-listing-tab${tab === item.id ? " is-active" : ""}`}
-                onClick={() => setTab(item.id)}
-              >
-                {item.id === "officials" ? (
-                  <BadgeCheck
-                    size={14}
-                    strokeWidth={2.25}
-                    className="home-v2-listing-tab-icon"
-                    aria-hidden="true"
-                  />
-                ) : null}
-                {item.label}
-              </button>
-            ))}
+          <div className="home-v2-listing-sort">
+            <div className="home-v2-listing-sort-tabs" role="tablist" aria-label="Sort">
+              {LISTING_TABS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === item.id}
+                  className={`home-v2-listing-tab${tab === item.id ? " is-active" : ""}`}
+                  onClick={() => setTab(item.id)}
+                >
+                  {item.id === "officials" ? (
+                    <BadgeCheck
+                      size={14}
+                      strokeWidth={2.25}
+                      className="home-v2-listing-tab-icon"
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="home-v2-listing-actions">
-            <button
-              type="button"
-              className={`home-v2-listing-search-trigger${searchOpen ? " is-active" : ""}`}
-              aria-label="Search catalog"
-              aria-expanded={searchOpen}
-              aria-controls="home-v2-listing-search-panel"
-              title="Search catalog (/)"
-              onClick={openListingSearch}
+            <div
+              className={`home-v2-listing-actions-rail${kind === "skills" ? " has-category" : ""}`}
             >
-              <Search size={16} aria-hidden="true" />
-            </button>
-
-            {kind === "skills" ? (
-              <HomeListingCategorySelect
-                value={categorySlug}
-                onChange={setCategorySlug}
-              />
-            ) : null}
-
-            <div className="home-v2-listing-view" role="group" aria-label="Layout">
               <button
                 type="button"
-                className={`home-v2-listing-view-btn${view === "list" ? " is-active" : ""}`}
-                aria-pressed={view === "list"}
-                aria-label="List view"
-                onClick={() => setView("list")}
+                className={`home-v2-listing-search-trigger${searchOpen ? " is-active" : ""}`}
+                aria-label="Search catalog"
+                aria-expanded={searchOpen}
+                aria-controls="home-v2-listing-search-panel"
+                title="Search catalog (/)"
+                onClick={openListingSearch}
               >
-                <Rows3 size={16} aria-hidden="true" />
+                <Search size={16} aria-hidden="true" />
               </button>
-              <button
-                type="button"
-                className={`home-v2-listing-view-btn${view === "grid" ? " is-active" : ""}`}
-                aria-pressed={view === "grid"}
-                aria-label="Grid view"
-                onClick={() => setView("grid")}
-              >
-                <LayoutGrid size={16} aria-hidden="true" />
-              </button>
+
+              {kind === "skills" ? (
+                <HomeListingCategorySelect
+                  value={categorySlug}
+                  onChange={setCategorySlug}
+                />
+              ) : null}
+
+              <div className="home-v2-listing-view" role="group" aria-label="Layout">
+                <button
+                  type="button"
+                  className={`home-v2-listing-view-btn${view === "list" ? " is-active" : ""}`}
+                  aria-pressed={view === "list"}
+                  aria-label="List view"
+                  onClick={() => setView("list")}
+                >
+                  <Rows3 size={16} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={`home-v2-listing-view-btn${view === "grid" ? " is-active" : ""}`}
+                  aria-pressed={view === "grid"}
+                  aria-label="Grid view"
+                  onClick={() => setView("grid")}
+                >
+                  <LayoutGrid size={16} aria-hidden="true" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
