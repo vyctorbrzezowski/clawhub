@@ -13611,7 +13611,6 @@ a.publisher-profile-detail:hover {
   gap: 20px;
   min-height: 44px;
   padding: 0;
-  border-bottom: 1px solid var(--hv2-border);
   margin-bottom: 28px;
 }
 
@@ -13678,7 +13677,6 @@ a.publisher-profile-detail:hover {
   border: none;
   background: none;
   padding: 0 2px;
-  margin-bottom: -1px;
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
