@@ -139,6 +139,12 @@ export const SECONDARY_NAV_ITEMS: NavItem[] = [
 // Footer sections
 // ---------------------------------------------------------------------------
 
+export const OPENCLAW_SITE_URL = "https://openclaw.ai";
+export const OPENCLAW_ECOSYSTEM_URL = `${OPENCLAW_SITE_URL}/ecosystem`;
+export const OPENCLAW_CLAWHUB_DOCS_URL = "https://docs.openclaw.ai/clawhub/";
+/** Compact mark for stack avatars (not the full wordmark). */
+export const OPENCLAW_LOGO_URL = `${OPENCLAW_SITE_URL}/favicon.svg`;
+
 interface FooterNavSection {
   title: string;
   items: FooterNavItem[];
@@ -196,20 +202,102 @@ export const FOOTER_NAV_SECTIONS: FooterNavSection[] = [
     ],
   },
   {
-    title: "Community",
+    title: "Ecosystem",
     items: [
-      { kind: "external", label: "GitHub", href: "https://github.com/openclaw/clawhub" },
+      { kind: "external", label: "Overview", href: OPENCLAW_ECOSYSTEM_URL },
       { kind: "external", label: "OpenClaw", href: "https://openclaw.ai" },
+      { kind: "external", label: "Docs", href: "https://docs.openclaw.ai/" },
     ],
   },
   {
-    title: "Platform",
+    title: "Community",
     items: [
-      { kind: "external", label: "Deployed on Vercel", href: "https://vercel.com" },
-      { kind: "external", label: "Powered by Convex", href: "https://www.convex.dev" },
+      { kind: "external", label: "GitHub", href: "https://github.com/openclaw/clawhub" },
+      { kind: "external", label: "Discord", href: "https://discord.gg/clawd" },
     ],
   },
 ];
+
+export const FOOTER_PLATFORM_LINKS = [
+  { label: "Deployed on Vercel", href: "https://vercel.com" },
+  { label: "Powered by Convex", href: "https://www.convex.dev" },
+] as const;
+
+export type FooterEcosystemProject = {
+  label: string;
+  href: string;
+  blurb: string;
+  /** Logo URL from https://openclaw.ai/ecosystem assets. */
+  logoUrl: string;
+  internal?: boolean;
+};
+
+/** @deprecated Use {@link FooterEcosystemProject}. */
+export type FooterEcosystemTile = FooterEcosystemProject;
+
+/** Build a URL for logos/banners published on the OpenClaw ecosystem page. */
+export function openclawEcosystemAsset(path: string) {
+  return `${OPENCLAW_SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+/** Curated highlights from https://openclaw.ai/ecosystem */
+export const FOOTER_ECOSYSTEM_PROJECTS: FooterEcosystemProject[] = [
+  {
+    label: "ClawHub",
+    href: "/",
+    blurb: "Skills & plugins",
+    logoUrl: openclawEcosystemAsset("/ecosystem/logos/clawhub.png"),
+    internal: true,
+  },
+  {
+    label: "Lobster",
+    href: "https://docs.openclaw.ai/tools/lobster",
+    blurb: "Workflow shell",
+    logoUrl: openclawEcosystemAsset("/ecosystem/banners/lobster.png"),
+  },
+  {
+    label: "Crabbox",
+    href: "https://crabbox.sh",
+    blurb: "Agent sandboxes",
+    logoUrl: openclawEcosystemAsset("/ecosystem/logos/crabbox.svg"),
+  },
+  {
+    label: "ClickClack",
+    href: "https://clickclack.chat",
+    blurb: "Chat for claws",
+    logoUrl: openclawEcosystemAsset("/ecosystem/logos/clickclack.svg"),
+  },
+  {
+    label: "Crabfleet",
+    href: "https://crabfleet.ai",
+    blurb: "Fleet control",
+    logoUrl: openclawEcosystemAsset("/ecosystem/banners/crabfleet.png"),
+  },
+  {
+    label: "Octopool",
+    href: "https://octopool.dev",
+    blurb: "GitHub relay",
+    logoUrl: openclawEcosystemAsset("/ecosystem/logos/octopool.svg"),
+  },
+  {
+    label: "ClawSweeper",
+    href: "https://clawsweeper.bot",
+    blurb: "Issue triage",
+    logoUrl: openclawEcosystemAsset("/ecosystem/logos/clawsweeper.svg"),
+  },
+  {
+    label: "agent-skills",
+    href: "https://github.com/openclaw/agent-skills",
+    blurb: "Shared skills",
+    logoUrl: openclawEcosystemAsset("/ecosystem/banners/agent-skills.png"),
+  },
+];
+
+/** @deprecated Use {@link FOOTER_ECOSYSTEM_PROJECTS}. */
+export const FOOTER_ECOSYSTEM_TILES = FOOTER_ECOSYSTEM_PROJECTS;
+
+/** @deprecated Use {@link FOOTER_ECOSYSTEM_PROJECTS}. */
+export const FOOTER_ECOSYSTEM_PILLS = FOOTER_ECOSYSTEM_PROJECTS;
 
 // ---------------------------------------------------------------------------
 // Helpers
