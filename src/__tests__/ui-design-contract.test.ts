@@ -127,6 +127,7 @@ describe("restored UI design contract", () => {
     expect(homeSource).not.toContain("Trending Now");
     expect(homeSource).not.toContain("Featured skills");
     expect(homeSource).not.toContain("home-v2-proof-bar");
+    expect(homeSource).toContain("HomeDiscoverSection");
     expect(homeSource).toContain("HomeListingSection");
     expect(homeListing()).toContain("home-v2-listing-toolbar");
     expect(homeListing()).toContain("home-v2-listing-row");

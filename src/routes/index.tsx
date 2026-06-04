@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
+import { HomeDiscoverSection } from "../components/HomeDiscoverSection";
 import { HomeListingSection } from "../components/HomeListingSection";
 import { SoulCard } from "../components/SoulCard";
 import { SoulStatsTripletLine } from "../components/SoulStats";
@@ -381,6 +382,7 @@ function SkillsHome() {
         </p>
       </section>
 
+      <HomeDiscoverSection />
       <HomeListingSection />
     </main>
   );
