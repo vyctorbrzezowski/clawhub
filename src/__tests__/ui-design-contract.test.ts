@@ -63,6 +63,7 @@ describe("restored UI design contract", () => {
   const header = () => read("src/components/Header.tsx");
   const footer = () => read("src/components/Footer.tsx");
   const home = () => read("src/routes/index.tsx");
+  const homeListing = () => read("src/components/HomeListingSection.tsx");
   const navItems = () => read("src/lib/nav-items.ts");
   const settings = () => read("src/routes/settings.tsx");
   const styles = () => read("src/styles.css");
@@ -126,6 +127,9 @@ describe("restored UI design contract", () => {
     expect(homeSource).not.toContain("Trending Now");
     expect(homeSource).not.toContain("Featured skills");
     expect(homeSource).not.toContain("home-v2-proof-bar");
+    expect(homeSource).toContain("HomeListingSection");
+    expect(homeListing()).toContain("home-v2-listing-toolbar");
+    expect(styles()).toContain(".home-v2-listing-kind-btn.is-active");
     expect(homeSource).not.toContain("api.skills.listHighlightedPublic");
 
     const searchShell = cssRule(css, ".home-v2-search-bar");

@@ -47,6 +47,10 @@ vi.mock("../components/SoulStats", () => ({
   SoulStatsTripletLine: () => <div />,
 }));
 
+vi.mock("../components/HomeListingSection", () => ({
+  HomeListingSection: () => <section data-testid="home-listing-stub" />,
+}));
+
 describe("home route", () => {
   beforeEach(() => {
     siteModeMock.mockReturnValue("skills");
@@ -83,6 +87,7 @@ describe("home route", () => {
     expect(screen.getByText("BUILT BY THE COMMUNITY.")).toBeTruthy();
     expect(screen.getByRole("link", { name: "200k+ publishers" })).toBeTruthy();
     expect(screen.getByText(/ready in one search\./)).toBeTruthy();
+    expect(screen.getByTestId("home-listing-stub")).toBeTruthy();
     expect(document.querySelector(".home-v2-carousel-section")).toBeNull();
     expect(document.querySelector(".home-v2-categories")).toBeNull();
     expect(document.querySelector(".home-v2-proof-bar")).toBeNull();

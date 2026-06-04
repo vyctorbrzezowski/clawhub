@@ -13597,6 +13597,165 @@ a.publisher-profile-detail:hover {
   background: var(--hv2-border);
 }
 
+/* ═══ HOME LISTING (Mobbin-style toolbar) ═══ */
+.home-v2-listing {
+  padding: 0 48px 80px;
+  max-width: 1296px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.home-v2-listing-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 4px 0 24px;
+  border-bottom: 1px solid var(--hv2-border);
+  margin-bottom: 28px;
+}
+
+.home-v2-listing-kind {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--hv2-text) 7%, transparent);
+}
+
+.home-v2-listing-kind-btn {
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  background: transparent;
+  color: var(--hv2-text-tertiary);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.home-v2-listing-kind-btn:hover {
+  color: var(--hv2-text-secondary);
+}
+
+.home-v2-listing-kind-btn.is-active {
+  background: var(--hv2-text);
+  color: var(--hv2-bg);
+}
+
+.home-v2-listing-divider {
+  width: 1px;
+  height: 20px;
+  flex-shrink: 0;
+  background: var(--hv2-border);
+}
+
+.home-v2-listing-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.home-v2-listing-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.home-v2-listing-tab {
+  border: none;
+  background: none;
+  padding: 0 0 12px;
+  margin-bottom: -1px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--hv2-text-tertiary);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.home-v2-listing-tab:hover {
+  color: var(--hv2-text-secondary);
+}
+
+.home-v2-listing-tab.is-active {
+  color: var(--hv2-text);
+  border-bottom-color: var(--hv2-text);
+}
+
+.home-v2-listing-filter {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  color: var(--hv2-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  padding: 8px 0 8px 12px;
+  transition: color 0.15s ease;
+}
+
+.home-v2-listing-filter:hover,
+.home-v2-listing-filter:focus-visible {
+  color: var(--hv2-text-secondary);
+}
+
+.home-v2-listing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.home-v2-listing-grid-loading {
+  pointer-events: none;
+}
+
+.home-v2-listing-skeleton {
+  min-height: 196px;
+  border-radius: var(--hv2-radius-lg);
+  border: 1px solid var(--hv2-border);
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--hv2-surface) 88%, transparent) 8%,
+    color-mix(in srgb, var(--hv2-text) 6%, transparent) 18%,
+    color-mix(in srgb, var(--hv2-surface) 88%, transparent) 33%
+  );
+  background-size: 200% 100%;
+  animation: home-v2-listing-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes home-v2-listing-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.home-v2-listing-empty {
+  margin: 0;
+  padding: 32px 0 8px;
+  text-align: center;
+  color: var(--hv2-text-tertiary);
+  font-size: 14px;
+}
+
 /* ═══ TRENDING ═══ */
 .home-v2-trending-section {
   padding: 48px 48px 80px;
@@ -13759,7 +13918,8 @@ a.publisher-profile-detail:hover {
   .home-v2-discovery-grid {
     grid-template-columns: 1fr;
   }
-  .home-v2-trending-grid {
+  .home-v2-trending-grid,
+  .home-v2-listing-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   .home-v2-proof-bar {
@@ -13809,8 +13969,25 @@ a.publisher-profile-detail:hover {
     align-items: flex-start;
     flex-direction: column;
   }
-  .home-v2-trending-grid {
+  .home-v2-trending-grid,
+  .home-v2-listing-grid {
     grid-template-columns: 1fr;
+  }
+  .home-v2-listing {
+    padding: 0 20px 64px;
+  }
+  .home-v2-listing-toolbar {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .home-v2-listing-tabs {
+    order: 3;
+    flex-basis: 100%;
+    gap: 20px;
+  }
+  .home-v2-listing-filter {
+    margin-left: 0;
+    padding-left: 0;
   }
   .home-v2-carousel-header {
     padding: 0 20px;

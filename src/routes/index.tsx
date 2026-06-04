@@ -3,6 +3,7 @@ import { useAction, useQuery } from "convex/react";
 import { ArrowRight, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
+import { HomeListingSection } from "../components/HomeListingSection";
 import { SoulCard } from "../components/SoulCard";
 import { SoulStatsTripletLine } from "../components/SoulStats";
 import type { PublicSoul } from "../lib/publicUser";
@@ -447,6 +448,8 @@ function SkillsHome() {
           </button>
         </div>
       </section>
+
+      <HomeListingSection />
     </main>
   );
 }
