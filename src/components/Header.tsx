@@ -46,6 +46,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 const THEME_MODE_SEQUENCE: Array<"system" | "light" | "dark"> = ["system", "light", "dark"];
+const CLAWHUB_BRAND_MARK_SRC = "/clawd-mark.png";
 
 function GitHubLogo({ className }: { className?: string }) {
   return (
@@ -282,7 +283,7 @@ export default function Header() {
                     <span className="mobile-nav-brand">
                       <span className="mobile-nav-brand-mark" aria-hidden="true">
                         <img
-                          src="/clawd-logo.png"
+                          src={CLAWHUB_BRAND_MARK_SRC}
                           alt=""
                           aria-hidden="true"
                           className="mobile-nav-brand-mark-image"
@@ -361,7 +362,12 @@ export default function Header() {
             className="brand"
           >
             <span className="brand-mark">
-              <img src="/clawd-logo.png" alt="" aria-hidden="true" className="brand-mark-image" />
+              <img
+                src={CLAWHUB_BRAND_MARK_SRC}
+                alt=""
+                aria-hidden="true"
+                className="brand-mark-image"
+              />
             </span>
             <span className="brand-name brand-name-responsive">{siteName}</span>
           </Link>
@@ -406,7 +412,32 @@ export default function Header() {
             ) : null}
           </div>
 
-          <div className="nav-actions">
+          <div className="navbar-calm-end">
+            <nav className="navbar-calm-rail" aria-label="Content types">
+              {isSoulMode ? (
+                <a href={clawHubUrl} className="navbar-calm-rail-link">
+                  ClawHub
+                </a>
+              ) : null}
+              {primaryItems.map((item) => (
+                <HeaderNavTab
+                  key={item.to + item.label}
+                  item={item}
+                  pathname={location.pathname}
+                  className="navbar-calm-rail-link"
+                />
+              ))}
+              {secondaryItems.map((item) => (
+                <HeaderNavTab
+                  key={(item.href ?? item.to ?? "") + item.label}
+                  item={item}
+                  pathname={location.pathname}
+                  className="navbar-calm-rail-link navbar-calm-rail-link-secondary"
+                />
+              ))}
+            </nav>
+
+            <div className="nav-actions">
             <button
               className="navbar-search-mobile-trigger"
               type="button"
@@ -415,7 +446,7 @@ export default function Header() {
             >
               <Search size={18} aria-hidden="true" />
             </button>
-            <div className="theme-toggle">
+            <div className="theme-toggle theme-toggle-calm">
               <div className="theme-cycle-group" aria-label="Theme controls">
                 <button
                   type="button"
@@ -539,6 +570,7 @@ export default function Header() {
                 </Button>
               </>
             )}
+            </div>
           </div>
         </div>
 
@@ -556,62 +588,45 @@ export default function Header() {
             />
           </form>
         ) : null}
-
-        <nav className="navbar-tabs" aria-label="Content types">
-          <div className="navbar-tabs-primary">
-            {isSoulMode ? (
-              <a href={clawHubUrl} className="navbar-tab">
-                ClawHub
-              </a>
-            ) : null}
-            {primaryItems.map((item) => {
-              const Icon = item.icon ? NAV_ICONS[item.icon] : null;
-              const isActiveByPrefix = item.activePathPrefixes?.some((prefix) =>
-                location.pathname.startsWith(prefix),
-              );
-              return (
-                <Link
-                  key={item.to + item.label}
-                  to={item.to}
-                  className="navbar-tab"
-                  search={(item.search ?? {}) as never}
-                  data-status={isActiveByPrefix ? "active" : undefined}
-                >
-                  {Icon ? <Icon size={14} className="opacity-50" aria-hidden="true" /> : null}
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-          <div className="navbar-tabs-secondary">
-            {secondaryItems.map((item) => {
-              const isActiveByPrefix = item.activePathPrefixes?.some((prefix) =>
-                location.pathname.startsWith(prefix),
-              );
-              return item.href ? (
-                <a
-                  key={item.href + item.label}
-                  href={item.href}
-                  className="navbar-tab navbar-tab-secondary"
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={(item.to ?? "") + item.label}
-                  to={item.to}
-                  search={(item.search ?? {}) as never}
-                  className="navbar-tab navbar-tab-secondary"
-                  data-status={isActiveByPrefix ? "active" : undefined}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
       </div>
     </header>
+  );
+}
+
+type FilteredNavItem = ReturnType<typeof filterNavItems>[number];
+
+function HeaderNavTab({
+  className,
+  item,
+  pathname,
+  showIcon = false,
+}: {
+  className: string;
+  item: FilteredNavItem;
+  pathname: string;
+  showIcon?: boolean;
+}) {
+  const isActiveByPrefix = item.activePathPrefixes?.some((prefix) => pathname.startsWith(prefix));
+  const Icon = showIcon && item.icon ? NAV_ICONS[item.icon] : null;
+
+  if (item.href) {
+    return (
+      <a href={item.href} className={className}>
+        {item.label}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      to={item.to}
+      search={(item.search ?? {}) as never}
+      className={className}
+      data-status={isActiveByPrefix ? "active" : undefined}
+    >
+      {Icon ? <Icon size={14} className="opacity-50" aria-hidden="true" /> : null}
+      {item.label}
+    </Link>
   );
 }
 

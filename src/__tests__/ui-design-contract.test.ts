@@ -81,8 +81,9 @@ describe("restored UI design contract", () => {
     expect(headerSource).toContain('className="sign-in-full-copy"');
     expect(headerSource).toContain('className="sign-in-compact-copy"');
     expect(headerSource).toContain("Search skills and plugins");
-    expect(headerSource).toContain('className="navbar-tabs-primary"');
-    expect(headerSource).toContain('className="navbar-tabs-secondary"');
+    expect(headerSource).toContain('className="navbar navbar-calm"');
+    expect(headerSource).toContain('className="navbar-calm-rail"');
+    expect(headerSource).toContain("/clawd-mark.png");
 
     expect(navSource).toContain("export const SECONDARY_NAV_ITEMS");
     expect(navSource).toContain('label: "Publishers"');

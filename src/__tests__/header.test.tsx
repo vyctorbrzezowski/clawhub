@@ -217,20 +217,20 @@ describe("Header", () => {
     expect(screen.queryByText("Packages")).toBeNull();
   });
 
-  it("renders restored desktop nav rows and segmented theme controls", () => {
+  it("renders calm desktop rail nav while keeping search and GitHub sign-in", () => {
     siteModeMock.mockReturnValue("skills");
     setModeMock.mockClear();
 
     render(<Header />);
 
-    expect(document.querySelector(".navbar-tabs")).toBeTruthy();
-    expect(document.querySelector(".navbar-tabs-secondary")).toBeTruthy();
+    expect(document.querySelector(".navbar-calm")).toBeTruthy();
+    expect(document.querySelector(".navbar-calm-rail")).toBeTruthy();
     expect(document.querySelector(".theme-mode-toggle")).toBeTruthy();
-    expect(screen.getByLabelText("Theme mode").className).toContain("theme-mode-toggle");
     expect(screen.getByRole("button", { name: /Cycle theme mode/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "System theme" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Light theme" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Dark theme" })).toBeTruthy();
+    expect(screen.getByPlaceholderText("Search skills and plugins")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Sign in with GitHub" })).toBeTruthy();
+    expect(document.querySelector(".github-sign-in-logo")).toBeTruthy();
+    expect(document.querySelector('.brand-mark-image[src="/clawd-mark.png"]')).toBeTruthy();
     expect(screen.getAllByText("Skills")).toHaveLength(1);
     expect(screen.getAllByText("Plugins")).toHaveLength(1);
     expect(screen.getAllByText("Publishers")).toHaveLength(1);
@@ -432,7 +432,7 @@ describe("Header", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
 
-    expect(document.querySelector(".mobile-nav-brand-mark-image")).toBeTruthy();
+    expect(document.querySelector('.mobile-nav-brand-mark-image[src="/clawd-mark.png"]')).toBeTruthy();
 
     const labels = Array.from(document.querySelectorAll(".mobile-nav-section .mobile-nav-link"))
       .map((element) => element.textContent?.trim())
