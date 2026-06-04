@@ -1,3 +1,5 @@
+import { OPENCLAW_LOGO_URL } from "./nav-items";
+
 /** Design-time curated stacks for the home discoverability prototype. */
 
 export type HomeStackPreview = {
@@ -15,6 +17,12 @@ export type HomeStack = {
   browseQuery?: string;
   statsLabel: string;
   growthLabel?: string;
+  /** Momentum direction for growth label coloring. */
+  growthDirection?: "up" | "down";
+  /** Optional brand logo (e.g. publisher site favicon). */
+  logoUrl?: string;
+  /** Short topic chips shown on collection cards. */
+  collectionTags?: string[];
   previews?: HomeStackPreview[];
 };
 
@@ -26,6 +34,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     publisherHandle: "steipete",
     statsLabel: "24 skills",
     growthLabel: "+43%",
+    growthDirection: "up",
   },
   {
     id: "nvidia",
@@ -34,6 +43,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     publisherHandle: "nvidia",
     statsLabel: "18 skills",
     growthLabel: "+28%",
+    growthDirection: "up",
   },
   {
     id: "gary-tan",
@@ -42,6 +52,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     publisherHandle: "garytan",
     statsLabel: "11 skills",
     growthLabel: "+19%",
+    growthDirection: "up",
   },
   {
     id: "openclaw",
@@ -50,6 +61,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     publisherHandle: "openclaw",
     statsLabel: "32 skills",
     growthLabel: "+12%",
+    growthDirection: "up",
   },
   {
     id: "security",
@@ -58,6 +70,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     browseQuery: "security",
     statsLabel: "46 skills",
     growthLabel: "+36%",
+    growthDirection: "up",
   },
   {
     id: "coding-agents",
@@ -66,37 +79,115 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     browseQuery: "coding agent",
     statsLabel: "58 skills",
     growthLabel: "+51%",
+    growthDirection: "up",
   },
 ];
 
-export const HOME_EDITORIAL_STACKS: HomeStack[] = [
+/** Curated collections grid (compact cards; featured hero is separate). */
+export const HOME_COLLECTION_STACKS: HomeStack[] = [
   {
-    id: "stack-peter",
-    title: "Peter Steinberger's stack",
-    description: "Install the skills Peter uses to run OpenClaw in production.",
+    id: "coll-peter",
+    title: "Peter Steinberger",
+    description: "Production OpenClaw skills from the ecosystem architect.",
     publisherHandle: "steipete",
     statsLabel: "24 skills",
-    previews: [
-      { title: "OpenClaw", meta: "Gateway + agent runtime" },
-      { title: "Skill Creator", meta: "Scaffold and publish skills" },
-      { title: "Convex", meta: "Backend patterns for agents" },
-      { title: "GitHub", meta: "PR and repo automation" },
-    ],
+    collectionTags: ["Publishing", "PR review", "Architecture"],
   },
   {
-    id: "stack-nvidia",
-    title: "NVIDIA AI stack",
-    description: "Models, inference, and GPU workflows from NVIDIA builders.",
+    id: "coll-nvidia",
+    title: "NVIDIA AI",
+    description: "Inference, speech, and GPU workflows from NVIDIA builders.",
     publisherHandle: "nvidia",
     statsLabel: "18 skills",
-    previews: [
-      { title: "NIM", meta: "Inference microservices" },
-      { title: "Riva", meta: "Speech and translation" },
-      { title: "NeMo", meta: "LLM training toolkit" },
-      { title: "CUDA", meta: "GPU development helpers" },
-    ],
+    collectionTags: ["Inference", "CUDA", "Speech"],
+  },
+  {
+    id: "coll-gary",
+    title: "Gary Tan",
+    description: "Startup ops, growth, and founder workflows.",
+    publisherHandle: "garytan",
+    statsLabel: "11 skills",
+    collectionTags: ["Growth", "Fundraising", "Ops"],
+  },
+  {
+    id: "coll-openclaw",
+    title: "OpenClaw gateway",
+    description: "Official gateway, plugins, and reference agents.",
+    publisherHandle: "openclaw",
+    logoUrl: OPENCLAW_LOGO_URL,
+    statsLabel: "32 skills",
+    collectionTags: ["Gateway", "Plugins", "CLI"],
+  },
+  {
+    id: "coll-security",
+    title: "Security essentials",
+    description: "Auditing, secrets, and safe agent execution.",
+    browseQuery: "security audit",
+    statsLabel: "46 skills",
+    collectionTags: ["Audit", "Secrets", "SBOM"],
+  },
+  {
+    id: "coll-coding",
+    title: "Coding agents",
+    description: "Repo tools, reviews, and shipping automation.",
+    browseQuery: "coding agent",
+    statsLabel: "58 skills",
+    collectionTags: ["Code review", "CI", "Refactor"],
+  },
+  {
+    id: "coll-automation",
+    title: "Automation workflows",
+    description: "Cron, pipelines, and multi-step agent runs.",
+    browseQuery: "automation workflow",
+    statsLabel: "34 skills",
+    collectionTags: ["Cron", "Pipelines", "Hooks"],
+  },
+  {
+    id: "coll-devtools",
+    title: "Dev tools pack",
+    description: "CLI helpers, scaffolding, and local dev ergonomics.",
+    browseQuery: "dev tools",
+    statsLabel: "41 skills",
+    collectionTags: ["CLI", "Scaffold", "Lint"],
+  },
+  {
+    id: "coll-data-apis",
+    title: "Data & APIs",
+    description: "Fetch, integrate, and reconcile external services.",
+    browseQuery: "api integration",
+    statsLabel: "38 skills",
+    collectionTags: ["REST", "Webhooks", "ETL"],
+  },
+  {
+    id: "coll-research",
+    title: "Web & research",
+    description: "Browse, scrape, and synthesize the open web.",
+    browseQuery: "web research",
+    statsLabel: "29 skills",
+    collectionTags: ["Browse", "Scrape", "Summarize"],
   },
 ];
+
+/** @deprecated Use {@link HOME_COLLECTION_STACKS}. */
+export const HOME_EDITORIAL_STACKS = HOME_COLLECTION_STACKS;
+
+/** Single spotlight collection rendered as the editorial hero banner. */
+export const HOME_FEATURED_STACK: HomeStack = {
+  id: "featured-essentials",
+  title: "OpenClaw essentials",
+  description:
+    "The battle-tested starter pack — security, shipping, and architecture playbooks curated for production agents.",
+  publisherHandle: "openclaw",
+  logoUrl: OPENCLAW_LOGO_URL,
+  statsLabel: "322 installs this week",
+  growthLabel: "+18%",
+  growthDirection: "up",
+  previews: [
+    { title: "Skill Creator", meta: "Scaffold + publish" },
+    { title: "Codereview", meta: "PR review agent" },
+    { title: "Deepsec Audit", meta: "Security recon" },
+  ],
+};
 
 export function getHomeStackHref(stack: HomeStack) {
   if (stack.publisherHandle) {
