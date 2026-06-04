@@ -48,6 +48,15 @@ import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 const THEME_MODE_SEQUENCE: Array<"system" | "light" | "dark"> = ["system", "light", "dark"];
 const CLAWHUB_BRAND_MARK_SRC = "/og-clawhub-watermark.png";
 
+function useSearchShortcutLabel() {
+  const [label, setLabel] = useState("⌘K");
+  useEffect(() => {
+    const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+    setLabel(isApple ? "⌘K" : "Ctrl+K");
+  }, []);
+  return label;
+}
+
 function GitHubLogo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
@@ -108,6 +117,8 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const searchWrapRef = useRef<HTMLDivElement | null>(null);
+  const navSearchInputRef = useRef<HTMLInputElement | null>(null);
+  const searchShortcutLabel = useSearchShortcutLabel();
   const ThemeModeIcon = getThemeModeIcon(mode);
   const trimmedNavSearchQuery = navSearchQuery.trim();
   const showTypeahead = !isSoulMode && typeaheadOpen && trimmedNavSearchQuery.length > 0;
@@ -188,6 +199,28 @@ export default function Header() {
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, [location.pathname]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return;
+      if (event.defaultPrevented) return;
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT")
+      ) {
+        return;
+      }
+      event.preventDefault();
+      navSearchInputRef.current?.focus();
+      setTypeaheadOpen(true);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const setThemeMode = (next: "system" | "light" | "dark") => {
     applyTheme(next, theme);
@@ -428,6 +461,7 @@ export default function Header() {
             >
               <Search size={16} className="navbar-search-icon" aria-hidden="true" />
               <input
+                ref={navSearchInputRef}
                 className="navbar-search-input"
                 type="search"
                 role="combobox"
@@ -446,6 +480,11 @@ export default function Header() {
                 aria-activedescendant={activeTypeaheadId}
                 autoComplete="off"
               />
+              {!isSoulMode ? (
+                <kbd className="navbar-search-kbd" aria-hidden="true">
+                  {searchShortcutLabel}
+                </kbd>
+              ) : null}
             </form>
             {showTypeahead ? (
               <SearchTypeahead

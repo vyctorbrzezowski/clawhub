@@ -1183,12 +1183,40 @@ code {
 }
 
 .navbar-calm .navbar-search {
-  height: 28px;
-  padding: 0 12px;
+  height: 34px;
+  padding: 0 10px 0 12px;
   gap: 8px;
   border-radius: var(--r-pill);
   border-color: color-mix(in srgb, var(--ink) 8%, transparent);
   background: color-mix(in srgb, var(--surface) 65%, transparent);
+}
+
+.navbar-search-kbd {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  color: var(--ink-soft);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  pointer-events: none;
+}
+
+.navbar-calm .navbar-search-kbd {
+  opacity: 0.72;
+}
+
+.navbar-search:focus-within .navbar-search-kbd,
+.navbar-search:has(.navbar-search-input:not(:placeholder-shown)) .navbar-search-kbd {
+  display: none;
 }
 
 .navbar-calm .navbar-search-icon {
