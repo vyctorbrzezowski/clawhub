@@ -2,17 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
+import { HomeAppsSection } from "../components/HomeAppsSection";
 import { HomeDiscoverSection } from "../components/HomeDiscoverSection";
 import { HomeListingSection } from "../components/HomeListingSection";
 import { SoulCard } from "../components/SoulCard";
 import { SoulStatsTripletLine } from "../components/SoulStats";
 import type { PublicSoul } from "../lib/publicUser";
-import { formatCompactStat } from "../lib/numberFormat";
+import { HOME_PUBLISHER_STAT } from "../lib/homeProof";
 import { getSiteMode } from "../lib/site";
-
-/** Marketing floor for hero social proof; swap for a live count when available. */
-const HOME_PUBLISHER_COUNT = 200_000;
-const HOME_PUBLISHER_STAT = `${formatCompactStat(HOME_PUBLISHER_COUNT)}+`;
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -382,8 +379,9 @@ function SkillsHome() {
         </p>
       </section>
 
-      <HomeDiscoverSection />
       <HomeListingSection />
+      <HomeAppsSection />
+      <HomeDiscoverSection />
     </main>
   );
 }

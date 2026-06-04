@@ -77,7 +77,7 @@ describe("restored UI design contract", () => {
     expect(headerSource).toContain("Row 1: Brand + Search + Actions");
     expect(headerSource).toContain('className="navbar-top"');
     expect(headerSource).toContain('className="navbar-search-wrap"');
-    expect(headerSource).toContain('className="theme-mode-toggle"');
+    expect(headerSource).toContain('className="navbar-theme-switcher"');
     expect(headerSource).toContain('className="github-sign-in-button"');
     expect(headerSource).toContain('className="sign-in-full-copy"');
     expect(headerSource).toContain('className="sign-in-compact-copy"');
@@ -100,10 +100,9 @@ describe("restored UI design contract", () => {
     expect(headerShell).toContain("max-width: var(--page-max)");
     expect(headerShell).toContain("padding: 0 var(--space-5)");
 
-    const themeControl = cssRule(css, ".theme-mode-toggle");
-    expect(themeControl).toContain("min-width: 124px");
-    expect(themeControl).toContain("min-height: 32px");
-    expect(themeControl).toContain("border: 1px solid var(--line)");
+    const themeControl = cssRule(css, ".navbar-theme-switcher");
+    expect(themeControl).toContain("height: 36px");
+    expect(themeControl).toContain("border-radius: 10px");
     expect(css).toContain("--r-btn: var(--r-sm)");
 
     const compact = cssMediaContaining(css, "(max-width: 760px)", [
@@ -129,9 +128,16 @@ describe("restored UI design contract", () => {
     expect(homeSource).not.toContain("home-v2-proof-bar");
     expect(homeSource).toContain("HomeDiscoverSection");
     expect(homeSource).toContain("HomeListingSection");
+    expect(homeListing()).toContain("home-v2-listing-controls");
     expect(homeListing()).toContain("home-v2-listing-toolbar");
+    expect(homeListing()).toContain("home-v2-listing-sort");
+    expect(homeListing()).toContain("HomeListingCategorySelect");
+    expect(read("src/components/HomeListingCategorySelect.tsx")).toContain("BROWSE_TAXONOMY");
+    expect(homeListing()).not.toContain("Other");
     expect(homeListing()).toContain("home-v2-listing-row");
     expect(styles()).toContain(".home-v2-listing-kind-btn.is-active");
+    expect(styles()).toContain(".home-v2-listing-category-menu");
+    expect(styles()).toContain(".home-v2-listing-category-panel");
     expect(homeSource).not.toContain("api.skills.listHighlightedPublic");
     expect(homeSource).not.toContain("home-v2-search-container");
     expect(homeSource).not.toContain("home-v2-suggestions");
@@ -142,6 +148,14 @@ describe("restored UI design contract", () => {
 
     const searchFocus = cssRule(css, ".home-v2-search-bar:focus-within");
     expect(searchFocus).toContain("border-color: var(--hv2-accent-border)");
+
+    expect(css).toContain(".app-shell:has(.home-v2-main) {");
+    expect(css).toContain('[data-theme-resolved="light"] .app-shell:has(.home-v2-main),');
+    expect(cssRule(css, ".app-shell:has(.home-v2-main) .home-v2-closing")).toContain(
+      "background:",
+    );
+    expect(css).toContain(".home-v2-proof-stats");
+    expect(css).toContain(".home-v2-faq-item");
   });
 
   it("requires the restored footer columns and mobile section toggles", () => {
@@ -152,14 +166,18 @@ describe("restored UI design contract", () => {
     expect(navSource).toContain('title: "Browse"');
     expect(navSource).toContain('title: "Publish"');
     expect(navSource).toContain('title: "Community"');
-    expect(navSource).toContain('title: "Platform"');
+    expect(navSource).toContain('title: "Ecosystem"');
+    expect(navSource).toContain("OPENCLAW_ECOSYSTEM_URL");
+    expect(navSource).toContain("FOOTER_ECOSYSTEM_TILES");
     expect(navSource).toContain('label: "Publish Skill"');
     expect(navSource).toContain('label: "Publish Plugin"');
     expect(navSource).toContain('label: "GitHub"');
-    expect(navSource).toContain('label: "OpenClaw"');
-    expect(navSource).toContain('label: "Deployed on Vercel"');
-    expect(navSource).toContain('label: "Powered by Convex"');
-
+    expect(navSource).toContain('label: "Overview"');
+    expect(footerSource).toContain("site-footer-v2");
+    expect(footerSource).toContain("footer-v2-eco-marks");
+    expect(footerSource).toContain("Built alongside");
+    expect(footerSource).not.toContain("footer-eco-band");
+    expect(footerSource).not.toContain("footer-brand-illustration");
     expect(footerSource).toContain('className="footer-col-toggle"');
     expect(footerSource).toContain("const ariaExpanded = isMobile ? isOpen : true");
     expect(footerSource).toContain("aria-expanded={ariaExpanded}");

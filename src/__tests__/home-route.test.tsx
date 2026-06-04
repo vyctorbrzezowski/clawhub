@@ -47,6 +47,10 @@ vi.mock("../components/SoulStats", () => ({
   SoulStatsTripletLine: () => <div />,
 }));
 
+vi.mock("../components/HomeAppsSection", () => ({
+  HomeAppsSection: () => <section data-testid="home-apps-stub" />,
+}));
+
 vi.mock("../components/HomeDiscoverSection", () => ({
   HomeDiscoverSection: () => <section data-testid="home-discover-stub" />,
 }));
@@ -91,11 +95,12 @@ describe("home route", () => {
     expect(screen.getByText("BUILT BY THE COMMUNITY.")).toBeTruthy();
     expect(screen.getByRole("link", { name: "200k+ publishers" })).toBeTruthy();
     expect(screen.getByText(/ready in one search\./)).toBeTruthy();
+    expect(screen.getByTestId("home-apps-stub")).toBeTruthy();
     expect(screen.getByTestId("home-discover-stub")).toBeTruthy();
     expect(screen.getByTestId("home-listing-stub")).toBeTruthy();
     expect(document.querySelector(".home-v2-carousel-section")).toBeNull();
     expect(document.querySelector(".home-v2-categories")).toBeNull();
-    expect(document.querySelector(".home-v2-proof-bar")).toBeNull();
+    expect(document.querySelector(".home-v2-proof")).toBeNull();
     expect(document.querySelector(".home-v2-trending-section")).toBeNull();
   });
 
