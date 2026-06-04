@@ -10,16 +10,14 @@ test("home search and browse entry points work", async ({ page }) => {
   await expect(page.getByRole("tab", { name: "Latest" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Filter" })).toBeVisible();
   await waitForHydration(page);
-  await expect(page.getByRole("button", { name: "Search" })).toBeEnabled();
 
-  await page.getByPlaceholder("What are you looking for?").fill("gifgrep");
-  await page.getByPlaceholder("What are you looking for?").press("Enter");
+  await page.getByRole("combobox", { name: "Search" }).fill("gifgrep");
+  await page.getByRole("combobox", { name: "Search" }).press("Enter");
   await expect(page).toHaveURL(/\/search\?q=gifgrep/);
   await expect(page.getByRole("heading", { name: /Search results for "gifgrep"/ })).toBeVisible();
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await waitForHydration(page);
-  await expect(page.getByRole("button", { name: "Search" })).toBeEnabled();
   await page.getByRole("link", { name: /Skills Agent skill bundles/ }).click();
   await expect(page).toHaveURL(/\/skills/);
   await expect(page.getByRole("heading", { name: /^Skills/ })).toBeVisible();

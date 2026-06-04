@@ -1,6 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
-import { ArrowRight, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { HomeListingSection } from "../components/HomeListingSection";
@@ -41,26 +40,6 @@ const SLOT_WORDS = [
 const HACK_INDEX = SLOT_WORDS.indexOf("Hack");
 
 function SkillsHome() {
-  const [query, setQuery] = useState("");
-  const navigate = useNavigate();
-
-  const trimmedQuery = useMemo(() => query.trim(), [query]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    void navigate({
-      to: "/search",
-      search: { q: trimmedQuery || undefined },
-    });
-  };
-
-  const handleSuggestion = (term: string) => {
-    void navigate({
-      to: "/search",
-      search: { q: term },
-    });
-  };
-
   const clickTimesRef = useRef<number[]>([]);
   const [slotState, setSlotState] = useState<
     | null
@@ -400,53 +379,6 @@ function SkillsHome() {
           </Link>
           , ready in one search.
         </p>
-
-        <div className="home-v2-search-container">
-          <form className="home-v2-search-bar" onSubmit={handleSearch}>
-            <Search className="home-v2-search-icon" size={20} />
-            <input
-              autoFocus
-              type="text"
-              placeholder="What are you looking for?"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <button type="submit" className="home-v2-search-go" aria-label="Search">
-              <span className="home-v2-search-go-label">Search</span> <ArrowRight size={16} />
-            </button>
-          </form>
-        </div>
-
-        <div className="home-v2-suggestions">
-          <button
-            type="button"
-            className="home-v2-suggestion"
-            onClick={() => handleSuggestion("self-improving agent")}
-          >
-            self-improving agent
-          </button>
-          <button
-            type="button"
-            className="home-v2-suggestion"
-            onClick={() => handleSuggestion("GitHub integration")}
-          >
-            GitHub integration
-          </button>
-          <button
-            type="button"
-            className="home-v2-suggestion"
-            onClick={() => handleSuggestion("security soul")}
-          >
-            security soul
-          </button>
-          <button
-            type="button"
-            className="home-v2-suggestion"
-            onClick={() => handleSuggestion("dashboard builder")}
-          >
-            dashboard builder
-          </button>
-        </div>
       </section>
 
       <HomeListingSection />

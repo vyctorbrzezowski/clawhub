@@ -131,6 +131,8 @@ describe("restored UI design contract", () => {
     expect(homeListing()).toContain("home-v2-listing-toolbar");
     expect(styles()).toContain(".home-v2-listing-kind-btn.is-active");
     expect(homeSource).not.toContain("api.skills.listHighlightedPublic");
+    expect(homeSource).not.toContain("home-v2-search-container");
+    expect(homeSource).not.toContain("home-v2-suggestions");
 
     const searchShell = cssRule(css, ".home-v2-search-bar");
     expect(searchShell).toContain("border: 1px solid var(--hv2-border-strong)");
