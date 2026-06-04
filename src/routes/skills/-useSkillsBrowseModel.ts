@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } fro
 import { api } from "../../../convex/_generated/api";
 import { convexHttp } from "../../convex/client";
 import {
-  ALL_CATEGORY_KEYWORDS,
   getSkillCategoryByKeyword,
   getSkillCategoryBySlug,
   getSkillCategoryForSkill,
@@ -85,15 +84,11 @@ export function useSkillsBrowseModel({
 
   const trimmedQuery = useMemo(() => query.trim(), [query]);
   const legacyQueryCategory = useMemo(() => {
-    if (query === "__other__") return getSkillCategoryBySlug("other");
     return getSkillCategoryByKeyword(trimmedQuery);
-  }, [query, trimmedQuery]);
+  }, [trimmedQuery]);
   const urlCategory = useMemo(() => getSkillCategoryBySlug(search.category), [search.category]);
   const activeCategory = urlCategory ?? legacyQueryCategory;
-  const categoryKeywords =
-    activeCategory && activeCategory.slug !== "other" ? activeCategory.keywords : undefined;
-  const excludeCategoryKeywords =
-    activeCategory?.slug === "other" ? ALL_CATEGORY_KEYWORDS : undefined;
+  const categoryKeywords = activeCategory ? activeCategory.keywords : undefined;
   const hasQuery = trimmedQuery.length > 0 && (Boolean(urlCategory) || !legacyQueryCategory);
   const requestedSort = search.sort === "default" ? "recommended" : search.sort;
   const sort: SortKey =
@@ -126,7 +121,6 @@ export function useSkillsBrowseModel({
           capabilityTag,
           categorySlug: activeCategory?.slug,
           categoryKeywords,
-          excludeCategoryKeywords,
         });
         if (generation !== fetchGeneration.current) return;
         setListResults((prev) => (cursor ? [...prev, ...result.page] : result.page));
@@ -147,7 +141,6 @@ export function useSkillsBrowseModel({
       capabilityTag,
       categoryKeywords,
       dir,
-      excludeCategoryKeywords,
       featuredOnly,
       listSort,
     ],

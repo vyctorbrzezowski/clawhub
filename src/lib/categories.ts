@@ -1,4 +1,5 @@
 import { PLUGIN_CATEGORY_DEFINITIONS } from "clawhub-schema";
+import { BROWSE_TAXONOMY_DEFINITIONS } from "../../convex/lib/browseTaxonomy";
 
 export type SkillCategory = {
   slug: string;
@@ -13,46 +14,32 @@ export type BrowseCategory = {
   icon: string;
 };
 
-export const SKILL_CATEGORIES: SkillCategory[] = [
-  { slug: "mcp-tools", label: "MCP Tools", icon: "plug", keywords: ["mcp", "tool", "server"] },
-  {
-    slug: "prompts",
-    label: "Prompts",
-    icon: "message-square",
-    keywords: ["prompt", "template", "system"],
-  },
-  {
-    slug: "workflows",
-    label: "Workflows",
-    icon: "git-branch",
-    keywords: ["workflow", "pipeline", "chain"],
-  },
-  {
-    slug: "dev-tools",
-    label: "Dev Tools",
-    icon: "wrench",
-    keywords: ["dev", "debug", "lint", "test", "build"],
-  },
-  {
-    slug: "data",
-    label: "Data & APIs",
-    icon: "database",
-    keywords: ["api", "data", "fetch", "http", "rest", "graphql"],
-  },
-  {
-    slug: "security",
-    label: "Security",
-    icon: "shield",
-    keywords: ["security", "scan", "auth", "encrypt"],
-  },
-  {
-    slug: "automation",
-    label: "Automation",
-    icon: "zap",
-    keywords: ["auto", "cron", "schedule", "bot"],
-  },
-  { slug: "other", label: "Other", icon: "package", keywords: [] },
-];
+const BROWSE_SKILL_CATEGORY_ICONS: Record<string, string> = {
+  "data-apis": "database",
+  "agent-behavior": "brain",
+  "media-creative": "palette",
+  "automation-workflows": "git-branch",
+  "finance-commerce": "coins",
+  "web-research": "globe",
+  "docs-knowledge": "file-text",
+  "dev-tools": "wrench",
+  "communication-social": "message-circle",
+  "monitoring-ops": "activity",
+  "productivity-tasks": "check-square",
+  "security-review": "shield",
+  "education-learning": "graduation-cap",
+  "local-system": "hard-drive",
+  "domain-utilities": "box",
+};
+
+export const SKILL_CATEGORIES: SkillCategory[] = BROWSE_TAXONOMY_DEFINITIONS.map(
+  (category) => ({
+    slug: category.slug,
+    label: category.label,
+    icon: BROWSE_SKILL_CATEGORY_ICONS[category.slug] ?? "package",
+    keywords: [...category.keywords],
+  }),
+);
 
 export const PLUGIN_CATEGORIES: BrowseCategory[] = PLUGIN_CATEGORY_DEFINITIONS.map(
   ({ slug, label, icon }) => ({
@@ -70,8 +57,6 @@ type SkillCategoryCandidate = {
   summary?: string | null;
   capabilityTags?: string[] | null;
 };
-
-const OTHER_SKILL_CATEGORY = SKILL_CATEGORIES.find((category) => category.slug === "other") ?? null;
 
 function normalizeCategoryText(value: string) {
   return value.trim().toLowerCase();
@@ -136,7 +121,6 @@ export function getSkillCategoryForSkill(skill: SkillCategoryCandidate): SkillCa
   let bestScore = 0;
 
   for (const category of SKILL_CATEGORIES) {
-    if (category.slug === "other") continue;
     const score = scoreSkillCategory(primaryTokens, slugTokens, category);
     if (score > bestScore) {
       bestCategory = category;
@@ -144,7 +128,7 @@ export function getSkillCategoryForSkill(skill: SkillCategoryCandidate): SkillCa
     }
   }
 
-  return bestCategory ?? OTHER_SKILL_CATEGORY;
+  return bestCategory;
 }
 
 export function getSkillCategoryBySlug(slug: string | null | undefined) {

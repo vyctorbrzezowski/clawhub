@@ -719,6 +719,7 @@ type CatalogListItem = {
   capabilityTags?: string[];
   executesCode?: boolean;
   verificationTier?: string | null;
+  stats?: { downloads: number; installs: number; stars: number; versions: number };
 };
 
 type CatalogSearchEntry = {

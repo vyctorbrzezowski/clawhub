@@ -1,14 +1,22 @@
 import {
+  Activity,
   ArrowDownUp,
+  Box,
+  Brain,
   Check,
+  CheckSquare,
+  Coins,
   Database,
+  FileText,
   GitBranch,
+  Globe,
+  GraduationCap,
   Grid3X3,
+  HardDrive,
   List,
-  MessageSquare,
+  MessageCircle,
   Package,
-  Plug,
-  RefreshCw,
+  Palette,
   Search,
   Shield,
   Wrench,
@@ -59,14 +67,21 @@ const SKILL_CAPABILITY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  "mcp-tools": <Plug size={13} />,
-  prompts: <MessageSquare size={13} />,
-  workflows: <GitBranch size={13} />,
+  "data-apis": <Database size={13} />,
+  "agent-behavior": <Brain size={13} />,
+  "media-creative": <Palette size={13} />,
+  "automation-workflows": <GitBranch size={13} />,
+  "finance-commerce": <Coins size={13} />,
+  "web-research": <Globe size={13} />,
+  "docs-knowledge": <FileText size={13} />,
   "dev-tools": <Wrench size={13} />,
-  data: <Database size={13} />,
-  security: <Shield size={13} />,
-  automation: <RefreshCw size={13} />,
-  other: <Package size={13} />,
+  "communication-social": <MessageCircle size={13} />,
+  "monitoring-ops": <Activity size={13} />,
+  "productivity-tasks": <CheckSquare size={13} />,
+  "security-review": <Shield size={13} />,
+  "education-learning": <GraduationCap size={13} />,
+  "local-system": <HardDrive size={13} />,
+  "domain-utilities": <Box size={13} />,
 };
 
 export function SkillsToolbar({
@@ -86,7 +101,6 @@ export function SkillsToolbar({
   onToggleView,
 }: SkillsToolbarProps) {
   const activeCategory = useMemo(() => {
-    if (query === "__other__") return "other";
     if (!query) return undefined;
     return SKILL_CATEGORIES.find((c) => c.keywords.some((k) => k === query.trim().toLowerCase()))
       ?.slug;
@@ -95,8 +109,6 @@ export function SkillsToolbar({
   const handleCategoryChange = (cat: SkillCategory | undefined) => {
     if (!cat) {
       onQueryChange("");
-    } else if (cat.slug === "other") {
-      onQueryChange("__other__");
     } else if (cat.keywords[0]) {
       onQueryChange(cat.keywords[0]);
     } else {

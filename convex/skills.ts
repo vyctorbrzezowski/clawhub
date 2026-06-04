@@ -33,6 +33,10 @@ import {
 } from "./lib/artifactModeration";
 import { getSkillBadgeMap, getSkillBadgeMaps, isSkillHighlighted } from "./lib/badges";
 import { scheduleNextBatchIfNeeded } from "./lib/batching";
+import {
+  BROWSE_TAXONOMY_SERVER_CATEGORIES,
+  type BrowseTaxonomySlug,
+} from "./lib/browseTaxonomy";
 import { generateChangelogPreview as buildChangelogPreview } from "./lib/changelog";
 import { mergeDepRegistryFinding } from "./lib/depRegistryScan";
 import { embeddingVisibilityFor } from "./lib/embeddingVisibility";
@@ -4757,6 +4761,7 @@ export const listPublicPageV4 = query({
     ),
     dir: v.optional(v.union(v.literal("asc"), v.literal("desc"))),
     highlightedOnly: v.optional(v.boolean()),
+    officialOnly: v.optional(v.boolean()),
     nonSuspiciousOnly: v.optional(v.boolean()),
     capabilityTag: v.optional(v.string()),
     categorySlug: v.optional(v.string()),
@@ -4843,7 +4848,8 @@ export const listPublicPageV4 = query({
       Boolean(args.capabilityTag) ||
       Boolean(categorySlug) ||
       categoryKeywords.length > 0 ||
-      excludeCategoryKeywords.length > 0;
+      excludeCategoryKeywords.length > 0 ||
+      Boolean(args.officialOnly);
 
     if (!hasDigestFilters) {
       const result = await getPage(ctx, {
@@ -4860,6 +4866,7 @@ export const listPublicPageV4 = query({
 
       const items: PublicSkillEntry[] = [];
       for (const digest of result.page) {
+        if (args.officialOnly && !isSkillCatalogOfficial(digest)) continue;
         const item = await buildPublicSkillEntryFromDigest(ctx, digest);
         if (item) items.push(item);
       }
@@ -4911,6 +4918,7 @@ export const listPublicPageV4 = query({
             categorySlug,
             categoryKeywords,
             excludeCategoryKeywords,
+            officialOnly: args.officialOnly,
           })
         ) {
           const item = await buildPublicSkillEntryFromDigest(ctx, digest);
@@ -4939,22 +4947,14 @@ export const listPublicPageV4 = query({
   },
 });
 
-const SERVER_SKILL_CATEGORIES = [
-  { slug: "mcp-tools", keywords: ["mcp", "tool", "server"] },
-  { slug: "prompts", keywords: ["prompt", "template", "system"] },
-  { slug: "workflows", keywords: ["workflow", "pipeline", "chain"] },
-  { slug: "dev-tools", keywords: ["dev", "debug", "lint", "test", "build"] },
-  { slug: "data", keywords: ["api", "data", "fetch", "http", "rest", "graphql"] },
-  { slug: "security", keywords: ["security", "scan", "auth", "encrypt"] },
-  { slug: "automation", keywords: ["auto", "cron", "schedule", "bot"] },
-] as const;
+const SERVER_SKILL_CATEGORIES = BROWSE_TAXONOMY_SERVER_CATEGORIES;
 
 const SERVER_SKILL_CATEGORY_SLUGS = new Set<string>([
   ...SERVER_SKILL_CATEGORIES.map((category) => category.slug),
   "other",
 ]);
 
-type ServerSkillCategorySlug = (typeof SERVER_SKILL_CATEGORIES)[number]["slug"] | "other";
+type ServerSkillCategorySlug = BrowseTaxonomySlug | "other";
 
 function normalizeRelatedCategorySlug(categorySlug: string | undefined) {
   const value = categorySlug?.trim().toLowerCase();
@@ -5058,8 +5058,12 @@ function digestPassesPublicListFilters(
     categorySlug: ServerSkillCategorySlug | null;
     categoryKeywords: string[];
     excludeCategoryKeywords: string[];
+    officialOnly?: boolean;
   },
 ) {
+  if (opts.officialOnly && !isSkillCatalogOfficial(digest)) {
+    return false;
+  }
   if (opts.capabilityTag && !(digest.capabilityTags ?? []).includes(opts.capabilityTag)) {
     return false;
   }

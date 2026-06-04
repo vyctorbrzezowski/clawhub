@@ -331,6 +331,12 @@ type PublicPackageListItem = {
   capabilityTags: string[];
   executesCode: boolean;
   verificationTier: PackageVerificationTier | null;
+  stats: {
+    downloads: number;
+    installs: number;
+    stars: number;
+    versions: number;
+  };
 };
 type PackageReleaseScanStatus = ReturnType<typeof resolvePackageReleaseScanStatus>;
 type PackageReleaseModerationQueueDoc = Omit<Doc<"packageReleases">, "createdAt"> & {
@@ -1003,7 +1009,18 @@ async function removePackageBadge(
   if (existing) await ctx.db.delete(existing._id);
 }
 
-function toPublicPackageListItem(digest: PackageDigestLike): PublicPackageListItem {
+const EMPTY_PACKAGE_LIST_STATS = {
+  downloads: 0,
+  installs: 0,
+  stars: 0,
+  versions: 0,
+} as const;
+
+async function toPublicPackageListItem(
+  ctx: DbReaderCtx,
+  digest: PackageDigestLike,
+): Promise<PublicPackageListItem> {
+  const pkg = await ctx.db.get(digest.packageId);
   return {
     name: digest.name,
     displayName: digest.displayName,
@@ -1019,6 +1036,7 @@ function toPublicPackageListItem(digest: PackageDigestLike): PublicPackageListIt
     capabilityTags: digest.capabilityTags ?? [],
     executesCode: digest.executesCode ?? false,
     verificationTier: digest.verificationTier ?? null,
+    stats: pkg?.stats ?? EMPTY_PACKAGE_LIST_STATS,
   };
 }
 
@@ -1831,15 +1849,19 @@ async function fetchHighlightedPackagePage(
   },
 ) {
   const digests = await fetchHighlightedPackageDigests(ctx, args);
-  return digests
+  const selected = digests
     .sort(
       (a, b) =>
         Number(b.isOfficial) - Number(a.isOfficial) ||
         b.updatedAt - a.updatedAt ||
         a.name.localeCompare(b.name),
     )
-    .slice(0, args.numItems)
-    .map(toPublicPackageListItem);
+    .slice(0, args.numItems);
+  const page: PublicPackageListItem[] = [];
+  for (const digest of selected) {
+    page.push(await toPublicPackageListItem(ctx, digest));
+  }
+  return page;
 }
 
 async function getPackageByNormalizedName(ctx: DbReaderCtx, normalizedName: string) {
@@ -2427,7 +2449,7 @@ async function listPackagePageImpl(
       continue;
     }
     if (!digestMatchesFilters(digest, args)) continue;
-    collected.push(toPublicPackageListItem(digest));
+    collected.push(await toPublicPackageListItem(ctx, digest));
     if (collected.length >= targetCount) {
       const nextOffset = index + 1;
       const nextState =
@@ -2533,7 +2555,7 @@ async function searchPackagesImpl(
     await canViewerReadPackage(ctx, digest, viewerUserId, membershipCache);
   if (args.highlightedOnly) {
     const digests = await fetchHighlightedPackageDigests(ctx, args);
-    return digests
+    const highlightedMatches = digests
       .map((digest) => {
         const match = packageSearchMatch(digest, queryText);
         return match ? { ...match, package: digest } : null;
@@ -2542,12 +2564,16 @@ async function searchPackagesImpl(
         Boolean(entry),
       )
       .sort(comparePackageSearchMatches)
-      .slice(0, targetCount)
-      .map((entry) => ({
+      .slice(0, targetCount);
+    const highlightedResults = [];
+    for (const entry of highlightedMatches) {
+      highlightedResults.push({
         score: entry.score,
         rankTier: entry.rankTier,
-        package: toPublicPackageListItem(entry.package),
-      }));
+        package: await toPublicPackageListItem(ctx, entry.package),
+      });
+    }
+    return highlightedResults;
   }
 
   const category = isPluginCategorySlug(args.category) ? args.category : undefined;
@@ -2588,7 +2614,7 @@ async function searchPackagesImpl(
     seen.add(digest.packageId);
     matches.push({
       ...match,
-      package: toPublicPackageListItem(digest),
+      package: await toPublicPackageListItem(ctx, digest),
     });
   }
 
@@ -2606,7 +2632,7 @@ async function searchPackagesImpl(
       seen.add(digest.packageId);
       matches.push({
         ...match,
-        package: toPublicPackageListItem(digest),
+        package: await toPublicPackageListItem(ctx, digest),
       });
       if (matches.length >= targetCount) break;
     }

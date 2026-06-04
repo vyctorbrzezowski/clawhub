@@ -414,8 +414,8 @@ describe("public skill list deterministic cursors", () => {
       .mockResolvedValueOnce(emptySecurityWindow(27));
 
     const result = await listPublicPageV4Handler({} as never, {
-      categoryKeywords: ["security", "scan", "auth", "encrypt"],
-      categorySlug: "security",
+      categoryKeywords: ["security", "audit", "vetting", "vulnerability", "malware", "secret"],
+      categorySlug: "security-review",
       nonSuspiciousOnly: false,
       numItems: 10,
       sort: "downloads",

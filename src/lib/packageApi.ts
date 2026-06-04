@@ -23,6 +23,12 @@ export type PackageListItem = {
   capabilityTags?: string[];
   executesCode?: boolean;
   verificationTier?: string | null;
+  stats?: {
+    downloads: number;
+    installs: number;
+    stars: number;
+    versions: number;
+  };
 };
 
 export type PackageDetailResponse = ApiV1PackageResponse;

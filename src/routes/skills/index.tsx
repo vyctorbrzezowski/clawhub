@@ -5,6 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { BrowseSidebar } from "../../components/BrowseSidebar";
 import { SKILL_CATEGORIES } from "../../lib/categories";
+import { isBrowseTaxonomySlug } from "../../lib/browseTaxonomy";
 import { formatCompactStat } from "../../lib/numberFormat";
 import { parseDir, parseSort } from "./-params";
 import { SkillsResults } from "./-SkillsResults";
@@ -33,10 +34,8 @@ const SEARCH_SORT_OPTIONS = [
   { value: "name", label: "Name" },
 ];
 
-const SKILL_CATEGORY_SLUGS = new Set(SKILL_CATEGORIES.map((category) => category.slug));
-
 function parseSkillCategorySlug(value: unknown) {
-  return typeof value === "string" && SKILL_CATEGORY_SLUGS.has(value) ? value : undefined;
+  return typeof value === "string" && isBrowseTaxonomySlug(value) ? value : undefined;
 }
 
 export const Route = createFileRoute("/skills/")({
