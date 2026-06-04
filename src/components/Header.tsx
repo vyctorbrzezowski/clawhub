@@ -262,7 +262,7 @@ export default function Header() {
   };
 
   return (
-    <header className="navbar">
+    <header className="navbar navbar-calm">
       <div className="navbar-inner">
         {/* Row 1: Brand + Search + Actions */}
         <div className="navbar-top">
