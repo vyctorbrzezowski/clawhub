@@ -7,6 +7,8 @@ import { ClientOnly } from "../components/ClientOnly";
 import { DeploymentDriftBanner } from "../components/DeploymentDriftBanner";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { Footer } from "../components/Footer";
+import { HomeFaqSection } from "../components/HomeFaqSection";
+import { HomeProofSection } from "../components/HomeProofSection";
 import { GenericNotFoundPage } from "../components/GenericNotFoundPage";
 import Header from "../components/Header";
 import { getSiteDescription, getSiteMode, getSiteName, getSiteUrlForMode } from "../lib/site";
@@ -144,6 +146,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               <DeploymentDriftBanner />
             </ClientOnly>
             <RouteErrorBoundary>{children}</RouteErrorBoundary>
+            <div className="home-v2-closing">
+              <HomeProofSection />
+              <HomeFaqSection />
+            </div>
             <Footer />
           </div>
           <Toaster
