@@ -6,7 +6,7 @@ test("home search and browse entry points work", async ({ page }) => {
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: /Equip.*Install/i })).toBeVisible();
-  await expect(page.getByText("Tools built by thousands, ready in one search.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "200k+ publishers" })).toBeVisible();
   await waitForHydration(page);
   await expect(page.getByRole("button", { name: "Search" })).toBeEnabled();
 

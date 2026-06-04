@@ -81,7 +81,8 @@ describe("home route", () => {
     await renderHome();
 
     expect(screen.getByText("BUILT BY THE COMMUNITY.")).toBeTruthy();
-    expect(screen.getByText("Tools built by thousands, ready in one search.")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "200k+ publishers" })).toBeTruthy();
+    expect(screen.getByText(/ready in one search\./)).toBeTruthy();
     expect(document.querySelector(".home-v2-carousel-section")).toBeNull();
     expect(document.querySelector(".home-v2-categories")).toBeNull();
     expect(document.querySelector(".home-v2-proof-bar")).toBeNull();

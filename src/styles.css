@@ -13057,6 +13057,21 @@ a.publisher-profile-detail:hover {
   font-weight: 400;
 }
 
+.home-v2-sub-stat {
+  color: var(--hv2-text);
+  font-weight: 500;
+  text-decoration: underline dashed color-mix(in srgb, var(--hv2-text) 45%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.32em;
+  transition: color 0.15s ease;
+}
+
+.home-v2-sub-stat:hover,
+.home-v2-sub-stat:focus-visible {
+  color: var(--hv2-text);
+  text-decoration-color: color-mix(in srgb, var(--hv2-text) 70%, transparent);
+}
+
 .home-v2-motto {
   display: flex;
   flex-direction: column;

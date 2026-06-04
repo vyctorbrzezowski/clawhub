@@ -119,7 +119,9 @@ describe("restored UI design contract", () => {
     const css = styles();
 
     expect(homeSource).toContain("BUILT BY THE COMMUNITY.");
-    expect(homeSource).toContain("Tools built by thousands, ready in one search.");
+    expect(homeSource).toContain("home-v2-sub-stat");
+    expect(homeSource).toContain("HOME_PUBLISHER_STAT");
+    expect(homeSource).toContain('to="/publishers"');
     expect(homeSource).toContain('className="home-v2-hero"');
     expect(homeSource).not.toContain("Trending Now");
     expect(homeSource).not.toContain("Featured skills");

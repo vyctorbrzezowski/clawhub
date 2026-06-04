@@ -6,7 +6,12 @@ import { api } from "../../convex/_generated/api";
 import { SoulCard } from "../components/SoulCard";
 import { SoulStatsTripletLine } from "../components/SoulStats";
 import type { PublicSoul } from "../lib/publicUser";
+import { formatCompactStat } from "../lib/numberFormat";
 import { getSiteMode } from "../lib/site";
+
+/** Marketing floor for hero social proof; swap for a live count when available. */
+const HOME_PUBLISHER_COUNT = 200_000;
+const HOME_PUBLISHER_STAT = `${formatCompactStat(HOME_PUBLISHER_COUNT)}+`;
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -387,7 +392,13 @@ function SkillsHome() {
           </h1>
         )}
 
-        <p className="home-v2-sub">Tools built by thousands, ready in one search.</p>
+        <p className="home-v2-sub">
+          Discover skills and plugins from{" "}
+          <Link to="/publishers" className="home-v2-sub-stat">
+            {HOME_PUBLISHER_STAT} publishers
+          </Link>
+          , ready in one search.
+        </p>
 
         <div className="home-v2-search-container">
           <form className="home-v2-search-bar" onSubmit={handleSearch}>
