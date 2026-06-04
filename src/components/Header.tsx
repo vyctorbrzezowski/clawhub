@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
   ChevronDown,
+  Command,
   LayoutDashboard,
   Menu,
   Monitor,
@@ -48,13 +49,31 @@ import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 const THEME_MODE_SEQUENCE: Array<"system" | "light" | "dark"> = ["system", "light", "dark"];
 const CLAWHUB_BRAND_MARK_SRC = "/og-clawhub-watermark.png";
 
-function useSearchShortcutLabel() {
-  const [label, setLabel] = useState("⌘K");
+function useAppleSearchShortcut() {
+  const [isApple, setIsApple] = useState(true);
   useEffect(() => {
-    const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
-    setLabel(isApple ? "⌘K" : "Ctrl+K");
+    setIsApple(/Mac|iPhone|iPad|iPod/.test(navigator.userAgent));
   }, []);
-  return label;
+  return isApple;
+}
+
+function NavSearchShortcutKbd({ isApple }: { isApple: boolean }) {
+  return (
+    <kbd className="navbar-search-kbd" aria-hidden="true">
+      {isApple ? (
+        <>
+          <Command className="navbar-search-kbd-icon" aria-hidden="true" />
+          <span className="navbar-search-kbd-key">K</span>
+        </>
+      ) : (
+        <>
+          <span className="navbar-search-kbd-key">Ctrl</span>
+          <span className="navbar-search-kbd-plus">+</span>
+          <span className="navbar-search-kbd-key">K</span>
+        </>
+      )}
+    </kbd>
+  );
 }
 
 function GitHubLogo({ className }: { className?: string }) {
@@ -118,7 +137,7 @@ export default function Header() {
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const searchWrapRef = useRef<HTMLDivElement | null>(null);
   const navSearchInputRef = useRef<HTMLInputElement | null>(null);
-  const searchShortcutLabel = useSearchShortcutLabel();
+  const isAppleSearchShortcut = useAppleSearchShortcut();
   const ThemeModeIcon = getThemeModeIcon(mode);
   const trimmedNavSearchQuery = navSearchQuery.trim();
   const showTypeahead = !isSoulMode && typeaheadOpen && trimmedNavSearchQuery.length > 0;
@@ -480,11 +499,7 @@ export default function Header() {
                 aria-activedescendant={activeTypeaheadId}
                 autoComplete="off"
               />
-              {!isSoulMode ? (
-                <kbd className="navbar-search-kbd" aria-hidden="true">
-                  {searchShortcutLabel}
-                </kbd>
-              ) : null}
+              {!isSoulMode ? <NavSearchShortcutKbd isApple={isAppleSearchShortcut} /> : null}
             </form>
             {showTypeahead ? (
               <SearchTypeahead

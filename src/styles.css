@@ -1196,18 +1196,37 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 3px;
   min-height: 22px;
   padding: 2px 7px;
   border-radius: 6px;
   border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
   background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--ink-soft);
-  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.03em;
   pointer-events: none;
+}
+
+.navbar-search-kbd-icon {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  stroke-width: 2.25;
+}
+
+.navbar-search-kbd-key {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.navbar-search-kbd-plus {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  line-height: 1;
+  opacity: 0.72;
 }
 
 .navbar-calm .navbar-search-kbd {
