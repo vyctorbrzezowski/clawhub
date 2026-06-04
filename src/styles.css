@@ -13828,6 +13828,22 @@ a.publisher-profile-detail:hover {
   text-decoration: none;
 }
 
+.home-v2-listing-row .marketplace-icon {
+  opacity: 0.48;
+  filter: saturate(0.25);
+  box-shadow: none;
+}
+
+.home-v2-listing-row:hover .marketplace-icon,
+.home-v2-listing-row:focus-visible .marketplace-icon {
+  opacity: 0.62;
+  filter: saturate(0.4);
+}
+
+.home-v2-listing-row-stats svg {
+  opacity: 0.5;
+}
+
 .home-v2-listing-row-body {
   min-width: 0;
   display: grid;
