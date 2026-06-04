@@ -81,7 +81,7 @@ describe("restored UI design contract", () => {
     expect(headerSource).toContain('className="sign-in-full-copy"');
     expect(headerSource).toContain('className="sign-in-compact-copy"');
     expect(headerSource).toContain("Search skills and plugins");
-    expect(headerSource).toContain('className="navbar navbar-calm"');
+    expect(headerSource).toContain("navbar-calm");
     expect(headerSource).toContain('className="navbar-calm-rail"');
     expect(headerSource).toContain("/clawd-mark.png");
 
@@ -111,24 +111,17 @@ describe("restored UI design contract", () => {
     expect(compact).not.toContain(".navbar-search {\n    display: none;");
   });
 
-  it("requires the restored home hero, carousel, category grid, and Trending Now sections", () => {
+  it("requires the design home hero without catalog feed sections", () => {
     const homeSource = home();
     const css = styles();
 
     expect(homeSource).toContain("BUILT BY THE COMMUNITY.");
     expect(homeSource).toContain("Tools built by thousands, ready in one search.");
-    expect(homeSource).toContain("api.skills.listHighlightedPublic");
-    expect(homeSource).toContain("api.skills.listPublicPageV4");
-    expect(homeSource).toContain("const [popular, setPopular]");
-    expect(homeSource).toContain('className="home-v2-carousel-section"');
-    expect(homeSource).toContain(
-      'data-source={carouselUsesHighlighted ? "highlighted" : "popular"}',
-    );
-    expect(homeSource).toContain("Featured skills");
-    expect(homeSource).toContain("const categoryCount = FEATURE_SOULS ? 4 : 3");
-    expect(homeSource).toContain("data-layout={categoryLayout}");
-    expect(homeSource).toContain("Trending Now");
-    expect(homeSource).toContain('className="home-v2-trending-grid"');
+    expect(homeSource).toContain('className="home-v2-hero"');
+    expect(homeSource).not.toContain("Trending Now");
+    expect(homeSource).not.toContain("Featured skills");
+    expect(homeSource).not.toContain("home-v2-proof-bar");
+    expect(homeSource).not.toContain("api.skills.listHighlightedPublic");
 
     const searchShell = cssRule(css, ".home-v2-search-bar");
     expect(searchShell).toContain("border: 1px solid var(--hv2-border-strong)");
@@ -136,22 +129,6 @@ describe("restored UI design contract", () => {
 
     const searchFocus = cssRule(css, ".home-v2-search-bar:focus-within");
     expect(searchFocus).toContain("border-color: var(--hv2-accent-border)");
-
-    const categories = cssRule(css, ".home-v2-categories-grid");
-    expect(categories).toContain("--home-v2-category-columns: 3");
-    expect(categories).toContain("grid-template-columns: repeat(var(--home-v2-category-columns)");
-    expect(cssRule(css, '.home-v2-categories-grid[data-count="4"]')).toContain(
-      "--home-v2-category-columns: 4",
-    );
-
-    const trending = cssRule(css, ".home-v2-trending-grid");
-    expect(trending).toContain("grid-template-columns: repeat(3, 1fr)");
-    cssMediaContaining(css, "(max-width: 1024px)", [
-      ".home-v2-trending-grid {\n    grid-template-columns: repeat(2, 1fr);",
-    ]);
-    cssMediaContaining(css, "(max-width: 768px)", [
-      ".home-v2-trending-grid {\n    grid-template-columns: 1fr;",
-    ]);
   });
 
   it("requires the restored footer columns and mobile section toggles", () => {
