@@ -11716,10 +11716,10 @@ a.search-empty-action {
   width: fit-content;
   min-height: 36px;
   padding: 0 12px;
-  border: 1px solid var(--hv2-border-strong);
+  border: 1px solid color-mix(in srgb, #5865f2 26%, var(--hv2-border-strong));
   border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--hv2-surface) 42%, transparent);
-  color: var(--hv2-text-secondary);
+  background: color-mix(in srgb, #5865f2 8%, var(--hv2-surface) 42%);
+  color: color-mix(in srgb, #cfd3ff 72%, var(--hv2-text-secondary));
   font-size: 13px;
   font-weight: 650;
   text-decoration: none;
@@ -11731,9 +11731,9 @@ a.search-empty-action {
 
 .home-v2-faq-discord:hover,
 .home-v2-faq-discord:focus-visible {
-  border-color: color-mix(in srgb, var(--hv2-text) 18%, var(--hv2-border));
-  background: color-mix(in srgb, var(--hv2-surface-hover) 58%, transparent);
-  color: var(--hv2-text);
+  border-color: color-mix(in srgb, #5865f2 42%, var(--hv2-border));
+  background: color-mix(in srgb, #5865f2 13%, var(--hv2-surface-hover) 58%);
+  color: color-mix(in srgb, #eef0ff 86%, var(--hv2-text));
   text-decoration: none;
   outline: none;
 }
