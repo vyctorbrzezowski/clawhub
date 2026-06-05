@@ -736,35 +736,45 @@ function SearchTypeahead({
   return (
     <div className="navbar-search-typeahead" id="navbar-search-typeahead">
       {hasMatches || loading ? (
-        <div
-          className="navbar-search-typeahead-tabs clawhub-segmented"
-          role="tablist"
-          aria-label="Result type"
-        >
-          <button
-            type="button"
-            role="tab"
-            id="navbar-search-typeahead-tab-skills"
-            aria-selected={activeTab === "skills"}
-            aria-controls="navbar-search-typeahead-panel"
-            className={`navbar-search-typeahead-tab clawhub-segmented-btn${activeTab === "skills" ? " is-active" : ""}`}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => onTabChange("skills")}
+        <div className="navbar-search-typeahead-top">
+          <div
+            className="navbar-search-typeahead-tabs clawhub-segmented"
+            role="tablist"
+            aria-label="Result type"
           >
-            Skills
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="navbar-search-typeahead-tab-plugins"
-            aria-selected={activeTab === "plugins"}
-            aria-controls="navbar-search-typeahead-panel"
-            className={`navbar-search-typeahead-tab clawhub-segmented-btn${activeTab === "plugins" ? " is-active" : ""}`}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => onTabChange("plugins")}
-          >
-            Plugins
-          </button>
+            <button
+              type="button"
+              role="tab"
+              id="navbar-search-typeahead-tab-skills"
+              aria-selected={activeTab === "skills"}
+              aria-controls="navbar-search-typeahead-panel"
+              className={`navbar-search-typeahead-tab clawhub-segmented-btn${activeTab === "skills" ? " is-active" : ""}`}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => onTabChange("skills")}
+            >
+              Skills
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="navbar-search-typeahead-tab-plugins"
+              aria-selected={activeTab === "plugins"}
+              aria-controls="navbar-search-typeahead-panel"
+              className={`navbar-search-typeahead-tab clawhub-segmented-btn${activeTab === "plugins" ? " is-active" : ""}`}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => onTabChange("plugins")}
+            >
+              Plugins
+            </button>
+          </div>
+          <div className="navbar-search-typeahead-hint" aria-hidden="true">
+            <kbd>←</kbd>
+            <kbd>→</kbd>
+            <span>tabs</span>
+            <kbd>↑</kbd>
+            <kbd>↓</kbd>
+            <span>results</span>
+          </div>
         </div>
       ) : null}
       <div
