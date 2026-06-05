@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   HOME_PLUGIN_SHORTCUTS,
   HOME_SKILL_APPS,
@@ -9,125 +11,280 @@ import {
   type HomeSkillApp,
 } from "../lib/homeApps";
 
-function HomeSkillAppCard({ app }: { app: HomeSkillApp }) {
+function HomeAppsCompactSkill({ app }: { app: HomeSkillApp }) {
   return (
     <Link
       to="/skills"
       search={{ ...SKILLS_BROWSE_SEARCH, q: app.browseQuery }}
-      className="home-v2-app-shortcut home-v2-app-shortcut--skill"
+      className="home-v2-apps-tile"
       title={app.description}
-      aria-label={`${app.name} skill — ${app.description} (${app.skillsLabel})`}
     >
-      <span className="home-v2-app-shortcut-icon" aria-hidden="true">
+      <span className="home-v2-apps-tile-icon" aria-hidden="true">
         <img
           src={homeAppIconUrl(app.iconDomain)}
           alt=""
-          width={20}
-          height={20}
+          width={40}
+          height={40}
           loading="lazy"
           decoding="async"
         />
       </span>
-      <span className="home-v2-app-shortcut-copy">
-        <span className="home-v2-app-shortcut-name">{app.name}</span>
-        <span className="home-v2-app-shortcut-meta">{app.skillsLabel}</span>
+      <span className="home-v2-apps-tile-copy">
+        <span className="home-v2-apps-tile-name">{app.name}</span>
+        <span className="home-v2-apps-tile-meta">{app.description}</span>
       </span>
+      <ArrowRight className="home-v2-apps-tile-arrow" size={14} aria-hidden="true" />
     </Link>
   );
 }
 
-function HomePluginAppCard({ plugin }: { plugin: HomePluginShortcut }) {
+function HomeAppsCompactPlugin({ plugin }: { plugin: HomePluginShortcut }) {
   return (
     <Link
       to="/plugins/$name"
       params={{ name: plugin.packageName }}
-      className="home-v2-app-shortcut home-v2-app-shortcut--plugin"
+      className="home-v2-apps-tile"
       title={plugin.description}
-      aria-label={`${plugin.name} plugin — ${plugin.description} (Official)`}
     >
-      <span className="home-v2-app-shortcut-icon" aria-hidden="true">
+      <span className="home-v2-apps-tile-icon" aria-hidden="true">
         <img
           src={homePluginShortcutIconUrl(plugin)}
           alt=""
-          width={20}
-          height={20}
+          width={40}
+          height={40}
           loading="lazy"
           decoding="async"
         />
       </span>
-      <span className="home-v2-app-shortcut-copy">
-        <span className="home-v2-app-shortcut-name">{plugin.name}</span>
-        <span className="home-v2-app-shortcut-meta">Official plugin</span>
+      <span className="home-v2-apps-tile-copy">
+        <span className="home-v2-apps-tile-name">{plugin.name}</span>
+        <span className="home-v2-apps-tile-meta">{plugin.description}</span>
       </span>
+      <ArrowRight className="home-v2-apps-tile-arrow" size={14} aria-hidden="true" />
     </Link>
   );
 }
 
-function HomeAppsShortcutPanel({
-  title,
-  countLabel,
-  side,
-  items,
-}: {
-  title: string;
-  countLabel: string;
-  side: "skills" | "plugins";
-  items: readonly HomeSkillApp[] | readonly HomePluginShortcut[];
-}) {
-  return (
-    <div className={`home-v2-apps-panel home-v2-apps-panel--${side}`}>
-      <div className="home-v2-apps-panel-head">
-        <h3 className="home-v2-apps-panel-title">{title}</h3>
-        <span className="home-v2-apps-panel-count">{countLabel}</span>
-      </div>
-      <div className="home-v2-apps-shortcut-grid" aria-label={`${title} shortcuts`}>
-        {items.map((item) =>
-          side === "skills" ? (
-            <HomeSkillAppCard key={item.id} app={item as HomeSkillApp} />
-          ) : (
-            <HomePluginAppCard key={item.id} plugin={item as HomePluginShortcut} />
-          ),
-        )}
-      </div>
-    </div>
-  );
+type HomeAppsItemRef = {
+  kind: "skill" | "plugin";
+  id: string;
+};
+
+function skill(id: string): HomeAppsItemRef {
+  return { kind: "skill", id };
 }
 
+function plugin(id: string): HomeAppsItemRef {
+  return { kind: "plugin", id };
+}
+
+const appCategories = [
+  {
+    id: "browsers",
+    label: "Browsers",
+    items: [
+      skill("chrome"),
+      plugin("brave"),
+      skill("github"),
+      skill("notion"),
+      skill("linear"),
+      skill("figma"),
+      skill("raycast"),
+      plugin("whatsapp"),
+      plugin("matrix"),
+      plugin("codex"),
+      plugin("discord"),
+      plugin("slack"),
+      plugin("msteams"),
+      plugin("googlechat"),
+      skill("aws"),
+    ],
+  },
+  {
+    id: "editors",
+    label: "Editors",
+    items: [
+      skill("vscode"),
+      skill("cursor"),
+      skill("raycast"),
+      plugin("codex"),
+      skill("github"),
+      skill("notion"),
+      skill("figma"),
+      skill("linear"),
+      plugin("slack"),
+      plugin("matrix"),
+      plugin("discord"),
+      plugin("googlechat"),
+      plugin("msteams"),
+      skill("chrome"),
+      plugin("brave"),
+    ],
+  },
+  {
+    id: "code",
+    label: "Code",
+    items: [
+      skill("github"),
+      skill("vscode"),
+      skill("cursor"),
+      plugin("codex"),
+      skill("aws"),
+      skill("raycast"),
+      skill("chrome"),
+      plugin("matrix"),
+      plugin("discord"),
+      plugin("slack"),
+      plugin("msteams"),
+      plugin("googlechat"),
+      skill("notion"),
+      skill("linear"),
+      plugin("brave"),
+    ],
+  },
+  {
+    id: "docs",
+    label: "Docs",
+    items: [
+      skill("notion"),
+      skill("github"),
+      skill("chrome"),
+      skill("linear"),
+      skill("figma"),
+      skill("raycast"),
+      plugin("slack"),
+      plugin("googlechat"),
+      plugin("msteams"),
+      plugin("matrix"),
+      plugin("discord"),
+      plugin("whatsapp"),
+      plugin("codex"),
+      skill("vscode"),
+      plugin("brave"),
+    ],
+  },
+  {
+    id: "design",
+    label: "Design",
+    items: [
+      skill("figma"),
+      skill("notion"),
+      skill("chrome"),
+      skill("linear"),
+      skill("vscode"),
+      skill("cursor"),
+      plugin("discord"),
+      plugin("slack"),
+      plugin("matrix"),
+      plugin("googlechat"),
+      plugin("msteams"),
+      plugin("whatsapp"),
+      plugin("codex"),
+      skill("github"),
+      plugin("brave"),
+    ],
+  },
+  {
+    id: "chat",
+    label: "Chat",
+    items: [
+      plugin("whatsapp"),
+      plugin("matrix"),
+      plugin("discord"),
+      plugin("slack"),
+      plugin("msteams"),
+      plugin("googlechat"),
+      skill("chrome"),
+      skill("raycast"),
+      skill("notion"),
+      skill("linear"),
+      skill("github"),
+      plugin("codex"),
+      skill("vscode"),
+      skill("cursor"),
+      plugin("brave"),
+    ],
+  },
+  {
+    id: "cloud",
+    label: "Cloud",
+    items: [
+      skill("aws"),
+      skill("github"),
+      skill("vscode"),
+      skill("cursor"),
+      plugin("codex"),
+      plugin("slack"),
+      plugin("googlechat"),
+      plugin("msteams"),
+      plugin("matrix"),
+      plugin("discord"),
+      plugin("brave"),
+      skill("chrome"),
+      skill("raycast"),
+      skill("notion"),
+      skill("linear"),
+    ],
+  },
+] as const;
+
 export function HomeAppsSection() {
+  const [activeCategoryId, setActiveCategoryId] = useState<(typeof appCategories)[number]["id"]>(appCategories[0].id);
+  const compactItems = useMemo(() => {
+    const activeCategory = appCategories.find((category) => category.id === activeCategoryId) ?? appCategories[0];
+    return activeCategory.items
+      .map((item) => {
+        if (item.kind === "skill") {
+          const app = HOME_SKILL_APPS.find((candidate) => candidate.id === item.id);
+          return app ? ({ kind: "skill" as const, app }) : null;
+        }
+        const matchedPlugin = HOME_PLUGIN_SHORTCUTS.find((candidate) => candidate.id === item.id);
+        return matchedPlugin ? ({ kind: "plugin" as const, plugin: matchedPlugin }) : null;
+      })
+      .filter((item): item is { kind: "skill"; app: HomeSkillApp } | { kind: "plugin"; plugin: HomePluginShortcut } =>
+        Boolean(item)
+      );
+  }, [activeCategoryId]);
+
   return (
     <section className="home-v2-apps" aria-labelledby="home-v2-apps-title">
-      <div className="home-v2-apps-header">
-        <div className="home-v2-apps-heading">
-          <h2 id="home-v2-apps-title" className="home-v2-apps-title">
-            Skills for your apps
-          </h2>
-        </div>
-      </div>
-
       <div className="home-v2-apps-stage">
-        <div className="home-v2-apps-orbit" role="group" aria-label="Skills and plugin shortcuts">
-          <div className="home-v2-apps-hub" aria-hidden="true">
-            <span className="home-v2-apps-hub-core">
-              <img src="/og-clawhub-watermark.png" alt="" width={28} height={28} decoding="async" />
-            </span>
-            <span className="home-v2-apps-hub-label">ClawHub</span>
-            <span className="home-v2-apps-hub-count">18 paths</span>
-          </div>
+        <div className="home-v2-apps-intro">
+          <span className="home-v2-apps-intro-copy">
+            <h2 id="home-v2-apps-title" className="home-v2-apps-title">
+              Skills for your apps
+            </h2>
+            <p>Grouped by app surface — pick where your agent works.</p>
+          </span>
+          <Link to="/skills" search={SKILLS_BROWSE_SEARCH} className="home-v2-apps-view-all">
+            View all skills
+            <ArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </div>
 
-          <div className="home-v2-apps-flow">
-            <HomeAppsShortcutPanel
-              title="Skills"
-              countLabel="Browse by tool"
-              side="skills"
-              items={HOME_SKILL_APPS}
-            />
-            <HomeAppsShortcutPanel
-              title="Plugins"
-              countLabel="Official gateways"
-              side="plugins"
-              items={HOME_PLUGIN_SHORTCUTS}
-            />
-          </div>
+        <div className="home-v2-apps-categories" role="tablist" aria-label="App categories">
+          {appCategories.map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              role="tab"
+              aria-selected={category.id === activeCategoryId}
+              className="home-v2-apps-category-tab"
+              onClick={() => setActiveCategoryId(category.id)}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="home-v2-apps-tile-grid" aria-label="App and plugin shortcuts">
+          {compactItems.map((item) =>
+            item.kind === "skill" ? (
+              <HomeAppsCompactSkill key={`skill-${item.app.id}`} app={item.app} />
+            ) : (
+              <HomeAppsCompactPlugin key={`plugin-${item.plugin.id}`} plugin={item.plugin} />
+            )
+          )}
         </div>
       </div>
     </section>

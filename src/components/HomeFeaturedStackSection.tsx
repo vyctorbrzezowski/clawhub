@@ -13,11 +13,12 @@ import {
   type HomeStack,
   type HomeStackPreview,
 } from "../lib/homeStacks";
+import { OPENCLAW_LOGO_URL } from "../lib/nav-items";
 import { StackAvatar } from "./homeStackAvatar";
 
 const FEATURE_DECK_INTERVAL_MS = 4200;
 const FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX = 6;
-const FEATURE_DECK_SWIPE_THRESHOLD_PX = 38;
+const FEATURE_DECK_SWIPE_THRESHOLD_PX = 26;
 
 type FeaturedPreviewCardProps = {
   preview: HomeStackPreview;
@@ -121,11 +122,11 @@ function FeaturedPreviewDeck({
     setIsDragging(false);
     setHoverPaused(false);
 
-    if (absDeltaX > FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX) {
+    if (drag.dragged || absDeltaX > FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX) {
       suppressClickRef.current = true;
       window.setTimeout(() => {
         suppressClickRef.current = false;
-      }, 0);
+      }, 120);
     }
     if (absDeltaX < FEATURE_DECK_SWIPE_THRESHOLD_PX) return;
     if (deltaX < 0) onNext();
@@ -151,15 +152,22 @@ function FeaturedPreviewDeck({
         const drag = dragRef.current;
         if (!drag || drag.pointerId !== event.pointerId) return;
         drag.lastX = event.clientX;
-        if (Math.abs(drag.lastX - drag.startX) > FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX) {
+        const deltaX = drag.lastX - drag.startX;
+        if (Math.abs(deltaX) > FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX) {
           drag.dragged = true;
         }
+        if (Math.abs(deltaX) < FEATURE_DECK_SWIPE_THRESHOLD_PX) return;
+        if (deltaX < 0) onNext();
+        else onPrevious();
+        drag.startX = event.clientX;
+        drag.lastX = event.clientX;
       }}
       onPointerUp={finishDrag}
       onPointerCancel={finishDrag}
     >
       {previews.map((preview, index) => {
         const layer = (index - activeIndex + count) % count;
+        if (layer > 2) return null;
         return (
           <FeaturedPreviewCard
             key={preview.title}
@@ -271,7 +279,8 @@ function FeaturedStackBanner({ stack }: { stack: HomeStack }) {
 
 function StaffCuratedRow({ stack }: { stack: HomeStack }) {
   const href = getHomeStackHref(stack);
-  const tags = stack.collectionTags ?? [];
+  const ownerName = stack.ownerName ?? "@openclaw";
+  const ownerLogoUrl = stack.ownerLogoUrl ?? OPENCLAW_LOGO_URL;
 
   return (
     <Link {...href} className="home-v2-staff-curated-row">
@@ -283,11 +292,11 @@ function StaffCuratedRow({ stack }: { stack: HomeStack }) {
       />
       <span className="home-v2-staff-curated-copy">
         <span className="home-v2-staff-curated-title">{stack.title}</span>
-        {tags[0] ? (
-          <span className="home-v2-staff-curated-meta">{tags.slice(0, 2).join(" · ")}</span>
-        ) : (
-          <span className="home-v2-staff-curated-meta">{stack.statsLabel}</span>
-        )}
+        <span className="home-v2-staff-curated-meta">
+          by
+          {ownerLogoUrl ? <img src={ownerLogoUrl} alt="" width={14} height={14} decoding="async" /> : null}
+          {ownerName}
+        </span>
       </span>
       <span className="home-v2-staff-curated-stat">{stack.statsLabel}</span>
     </Link>

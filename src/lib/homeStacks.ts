@@ -7,6 +7,38 @@ const PETER_STEINBERGER_AVATAR_URL = `${GITHUB_AVATAR_URL}/steipete.png`;
 const NVIDIA_AVATAR_URL = `${GITHUB_AVATAR_URL}/NVIDIA.png`;
 const GARY_TAN_AVATAR_URL = `${GITHUB_AVATAR_URL}/garytan.png`;
 
+function svgDataUrl(svg: string) {
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+const SECURITY_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 13l15 6v11c0 10.2-6.4 17.1-15 20.8-8.6-3.7-15-10.6-15-20.8V19l15-6z" fill="#2b2b2d" stroke="#b7b2ad" stroke-width="3"/><path d="M32 19l9 3.6v7.3c0 6.1-3.4 10.7-9 13.6V19z" fill="#8f8a84" opacity=".5"/></svg>',
+);
+const CODING_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M25 22L15 32l10 10" fill="none" stroke="#b7b2ad" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M39 22l10 10-10 10" fill="none" stroke="#8f8a84" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+);
+const DATA_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><ellipse cx="32" cy="20" rx="14" ry="6" fill="#8f8a84"/><path d="M18 20v18c0 3.6 6.3 6.5 14 6.5S46 41.6 46 38V20" fill="none" stroke="#b7b2ad" stroke-width="4"/><path d="M18 29.5c0 3.6 6.3 6.5 14 6.5s14-2.9 14-6.5" fill="none" stroke="#74716d" stroke-width="3"/></svg>',
+);
+const AUTOMATION_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="22" cy="22" r="6" fill="#8f8a84"/><circle cx="42" cy="22" r="6" fill="#74716d"/><circle cx="32" cy="43" r="7" fill="#b7b2ad"/><path d="M28 22h8M25 28l5 8M39 28l-5 8" stroke="#2b2b2d" stroke-width="3.5" stroke-linecap="round" opacity=".8"/></svg>',
+);
+const DEVTOOLS_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="15" y="19" width="34" height="26" rx="7" fill="#202124" stroke="#b7b2ad" stroke-width="3"/><path d="M21 28h8M21 35h17" stroke="#8f8a84" stroke-width="3.5" stroke-linecap="round"/><circle cx="42" cy="28" r="3" fill="#74716d"/></svg>',
+);
+const OSS_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M20 24h24v18H20z" fill="#202124" stroke="#b7b2ad" stroke-width="3"/><path d="M24 19h16l4 5H20l4-5z" fill="#74716d"/><path d="M25 31h14M25 37h8" stroke="#8f8a84" stroke-width="3.5" stroke-linecap="round"/></svg>',
+);
+const INFERENCE_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M21 21h22v22H21z" fill="none" stroke="#b7b2ad" stroke-width="4.5"/><path d="M28 17v7M36 17v7M28 40v7M36 40v7M17 28h7M17 36h7M40 28h7M40 36h7" stroke="#74716d" stroke-width="3.5" stroke-linecap="round"/><circle cx="32" cy="32" r="5.5" fill="#8f8a84"/></svg>',
+);
+const VISION_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M14 32s7-13 18-13 18 13 18 13-7 13-18 13-18-13-18-13z" fill="none" stroke="#b7b2ad" stroke-width="4.5" stroke-linejoin="round"/><circle cx="32" cy="32" r="7" fill="#8f8a84"/><circle cx="32" cy="32" r="3" fill="#202124"/></svg>',
+);
+const SESSION_COLLECTION_ICON = svgDataUrl(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M21 22h22v20H21z" fill="#202124" stroke="#b7b2ad" stroke-width="3.5"/><path d="M27 29h10M27 35h6" stroke="#8f8a84" stroke-width="3.5" stroke-linecap="round"/><circle cx="43" cy="42" r="7" fill="#74716d"/><path d="M43 38.5V42l3 3" stroke="#d0cbc4" stroke-width="2.8" stroke-linecap="round"/></svg>',
+);
+
 export type HomeStackPreview = {
   title: string;
   meta: string;
@@ -32,6 +64,9 @@ export type HomeStack = {
   growthDirection?: "up" | "down";
   /** Optional brand logo (e.g. publisher site favicon). */
   logoUrl?: string;
+  /** Collection owner attribution shown as metadata. */
+  ownerName?: string;
+  ownerLogoUrl?: string;
   /** Short topic chips shown on collection cards. */
   collectionTags?: string[];
   previews?: HomeStackPreview[];
@@ -108,31 +143,49 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
 export const HOME_COLLECTION_STACKS: HomeStack[] = [
   {
     id: "coll-peter",
-    title: "Peter Steinberger",
-    description: "Production OpenClaw skills from the ecosystem architect.",
-    avatarKind: "user",
-    publisherHandle: "steipete",
-    logoUrl: PETER_STEINBERGER_AVATAR_URL,
+    title: "OSS repo management",
+    description: "Issues, PR review, release hygiene, and maintainer workflows.",
+    avatarKind: "org",
+    browseQuery: "open source repo management",
+    logoUrl: OSS_COLLECTION_ICON,
+    ownerName: "@steipete",
+    ownerLogoUrl: PETER_STEINBERGER_AVATAR_URL,
     statsLabel: "24 skills",
-    collectionTags: ["Publishing", "PR review", "Architecture"],
+    collectionTags: ["Issues", "PR review", "Releases"],
   },
   {
     id: "coll-nvidia",
-    title: "NVIDIA AI",
-    description: "Inference, speech, and GPU workflows from NVIDIA builders.",
+    title: "Vision AI",
+    description: "Image, video, perception, and visual inspection workflows.",
     avatarKind: "org",
-    publisherHandle: "nvidia",
-    logoUrl: NVIDIA_AVATAR_URL,
+    browseQuery: "vision ai computer vision",
+    logoUrl: VISION_COLLECTION_ICON,
+    ownerName: "@nvidia",
+    ownerLogoUrl: NVIDIA_AVATAR_URL,
     statsLabel: "18 skills",
-    collectionTags: ["Inference", "CUDA", "Speech"],
+    collectionTags: ["Vision", "Video", "Inspection"],
+  },
+  {
+    id: "coll-nvidia-agentic",
+    title: "Agentic AI",
+    description: "Autonomous planning, tool use, and agent runtime workflows.",
+    avatarKind: "org",
+    browseQuery: "agentic ai agents",
+    logoUrl: INFERENCE_COLLECTION_ICON,
+    ownerName: "@nvidia",
+    ownerLogoUrl: NVIDIA_AVATAR_URL,
+    statsLabel: "22 skills",
+    collectionTags: ["Agents", "Tools", "Runtime"],
   },
   {
     id: "coll-gary",
-    title: "Gary Tan",
-    description: "Startup ops, growth, and founder workflows.",
-    avatarKind: "user",
-    publisherHandle: "garytan",
-    logoUrl: GARY_TAN_AVATAR_URL,
+    title: "Startup ops",
+    description: "Fundraising, growth loops, hiring, and founder workflows.",
+    avatarKind: "org",
+    browseQuery: "startup ops growth founder",
+    logoUrl: SESSION_COLLECTION_ICON,
+    ownerName: "@garytan",
+    ownerLogoUrl: GARY_TAN_AVATAR_URL,
     statsLabel: "11 skills",
     collectionTags: ["Growth", "Fundraising", "Ops"],
   },
@@ -152,6 +205,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     title: "Security essentials",
     description: "Auditing, secrets, and safe agent execution.",
     browseQuery: "security audit",
+    logoUrl: SECURITY_COLLECTION_ICON,
     statsLabel: "46 skills",
     collectionTags: ["Audit", "Secrets", "SBOM"],
   },
@@ -161,6 +215,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     title: "Coding agents",
     description: "Repo tools, reviews, and shipping automation.",
     browseQuery: "coding agent",
+    logoUrl: CODING_COLLECTION_ICON,
     statsLabel: "58 skills",
     collectionTags: ["Code review", "CI", "Refactor"],
   },
@@ -170,6 +225,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     title: "Automation workflows",
     description: "Cron, pipelines, and multi-step agent runs.",
     browseQuery: "automation workflow",
+    logoUrl: AUTOMATION_COLLECTION_ICON,
     statsLabel: "34 skills",
     collectionTags: ["Cron", "Pipelines", "Hooks"],
   },
@@ -179,6 +235,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     title: "Dev tools pack",
     description: "CLI helpers, scaffolding, and local dev ergonomics.",
     browseQuery: "dev tools",
+    logoUrl: DEVTOOLS_COLLECTION_ICON,
     statsLabel: "41 skills",
     collectionTags: ["CLI", "Scaffold", "Lint"],
   },
@@ -188,17 +245,9 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     title: "Data & APIs",
     description: "Fetch, integrate, and reconcile external services.",
     browseQuery: "api integration",
+    logoUrl: DATA_COLLECTION_ICON,
     statsLabel: "38 skills",
     collectionTags: ["REST", "Webhooks", "ETL"],
-  },
-  {
-    id: "coll-research",
-    avatarKind: "org",
-    title: "Web & research",
-    description: "Browse, scrape, and synthesize the open web.",
-    browseQuery: "web research",
-    statsLabel: "29 skills",
-    collectionTags: ["Browse", "Scrape", "Summarize"],
   },
 ];
 
@@ -207,11 +256,12 @@ export const HOME_EDITORIAL_STACKS = HOME_COLLECTION_STACKS;
 
 /** Staff-curated collections shown beside the editor's pick hero (home spotlight). */
 const HOME_STAFF_CURATED_STACK_IDS = [
+  "coll-peter",
+  "coll-nvidia",
+  "coll-nvidia-agentic",
+  "coll-gary",
   "coll-security",
   "coll-coding",
-  "coll-automation",
-  "coll-devtools",
-  "coll-data-apis",
 ] as const;
 
 export const HOME_STAFF_CURATED_STACKS: HomeStack[] = HOME_COLLECTION_STACKS.filter((stack) =>

@@ -9,6 +9,7 @@ import {
   type FooterEcosystemProject,
   OPENCLAW_CLAWHUB_DOCS_URL,
   OPENCLAW_ECOSYSTEM_URL,
+  OPENCLAW_LOGO_URL,
   OPENCLAW_SITE_URL,
 } from "../lib/nav-items";
 
@@ -224,15 +225,16 @@ export function Footer() {
         <div className="footer-v2-eco" aria-label="OpenClaw ecosystem">
           <p className="footer-v2-eco-label">
             Built alongside{" "}
-            <span className="footer-v2-eco-label-accent">the OpenClaw ecosystem</span>
+            <span className="footer-v2-eco-label-accent">
+              <img src={OPENCLAW_LOGO_URL} alt="" width={14} height={14} decoding="async" />
+              the OpenClaw ecosystem
+            </span>
           </p>
           <div className="footer-v2-eco-marks">
-            {FOOTER_ECOSYSTEM_PROJECTS.map((project) => (
+            {FOOTER_ECOSYSTEM_PROJECTS.filter((project) => project.label !== "ClawHub").map((project) => (
               <FooterEcoMark key={project.label} project={project} />
             ))}
             <span className="footer-v2-eco-all">
-              <span className="footer-v2-eco-all-intro">Explore our ecosystem</span>
-              <span className="footer-v2-eco-all-sep" aria-hidden="true" />
               <a
                 className="footer-v2-eco-mark footer-v2-eco-mark-all"
                 href={OPENCLAW_ECOSYSTEM_URL}

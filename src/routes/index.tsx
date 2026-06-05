@@ -383,8 +383,8 @@ function SkillsHome() {
 
       <HomeListingSection />
       <HomeFeaturedStackSection />
-      <HomeAppsSection />
       <HomeDiscoverSection />
+      <HomeAppsSection />
     </main>
   );
 }
