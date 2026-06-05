@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles } from "lucide-react";
 import type { PointerEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { InstallCopyButton } from "./InstallCopyButton";
 
 const BYOS_ASCII = [
@@ -21,46 +21,11 @@ const BYOS_ASCII_FIELD = Array.from({ length: 56 }, (_, row) => {
   return `${a}   ${b}   ${c}`;
 }).join("\n");
 
-// Same composition as the footer easter egg, rendered full-bleed: layered
-// base + transparent artwork that drifts in on scroll, plus the pointer-tracked
-// ASCII glow that reveals on hover.
+// Same composition as the footer easter egg, rendered full-bleed with a static
+// image stack plus the pointer-tracked ASCII glow that reveals on hover.
 function ByosRevealBackdrop() {
-  const revealRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = revealRef.current;
-    if (!el) return undefined;
-    if (
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      el.style.setProperty("--byos-reveal", "1");
-      return undefined;
-    }
-
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const rect = el.getBoundingClientRect();
-      const viewportH = window.innerHeight || 1;
-      const progress = (viewportH - rect.top) / (rect.height || viewportH);
-      el.style.setProperty("--byos-reveal", String(Math.max(0, Math.min(1, progress))));
-    };
-    const onScroll = () => {
-      if (!frame) frame = window.requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
   return (
-    <div ref={revealRef} className="home-v2-byos-reveal" aria-hidden="true">
+    <div className="home-v2-byos-reveal" aria-hidden="true">
       <div className="home-v2-byos-reveal-image home-v2-byos-reveal-image--base" />
       <div className="home-v2-byos-reveal-scrim" />
       <pre className="home-v2-byos-reveal-ascii">{BYOS_ASCII_FIELD}</pre>

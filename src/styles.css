@@ -16402,7 +16402,6 @@ a.home-v2-apps-see-all:focus-visible svg {
   --byos-x: 50%;
   --byos-y: 42%;
   --byos-intensity: 0;
-  --byos-reveal: 0;
   --byos-art-size: 112%;
   --byos-art-x: 22%;
   --byos-art-y: 50%;
@@ -16435,13 +16434,10 @@ a.home-v2-apps-see-all:focus-visible svg {
   background-repeat: no-repeat;
   background-size: var(--byos-art-size, 112%) auto;
   pointer-events: none;
-  will-change: transform, opacity;
 }
 
 .home-v2-byos-reveal-image--base {
   background-image: url("/footer-openclaw-easter-egg.png");
-  transform: translate3d(0, calc((1 - var(--byos-reveal, 0)) * 64px), 0);
-  opacity: calc(0.35 + 0.65 * var(--byos-reveal, 0));
 }
 
 /* Legibility overlay: darken toward the center where the copy + card sit and
@@ -16512,7 +16508,6 @@ a.home-v2-apps-see-all:focus-visible svg {
   z-index: 3;
   background-image: url("/footer-openclaw-easter-egg-transparent.png");
   opacity: 0.95;
-  transform: translate3d(0, calc((1 - var(--byos-reveal, 0)) * 128px), 0);
 }
 
 .home-v2-byos-content {
