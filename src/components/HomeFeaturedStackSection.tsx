@@ -57,7 +57,7 @@ function FeaturedPreviewCard({
       onFocus={onPause}
       onBlur={onResume}
     >
-      <StackAvatar label={preview.title} size="sm" kind="org" />
+      <StackAvatar label={preview.title} patternKey={preview.title} size="sm" kind="org" variant="pattern" />
       <span className="home-v2-stack-feature-item-copy">
         <span className="home-v2-stack-feature-item-title">{preview.title}</span>
         <span className="home-v2-stack-feature-item-meta">{preview.meta}</span>
@@ -258,7 +258,11 @@ function FeaturedStackBanner({ stack }: { stack: HomeStack }) {
           aria-label={paused ? "Resume featured skills" : "Pause featured skills"}
           aria-pressed={manualPaused}
         >
-          {paused ? <Play size={13} aria-hidden="true" /> : <Pause size={13} aria-hidden="true" />}
+          {paused ? (
+            <Play size={13} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+          ) : (
+            <Pause size={13} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+          )}
         </button>
         <button type="button" onClick={showNext} aria-label="Next featured skill">
           <ChevronRight size={15} aria-hidden="true" />
@@ -277,9 +281,10 @@ function StaffCuratedRow({ stack }: { stack: HomeStack }) {
     <Link {...href} className="home-v2-staff-curated-row">
       <StackAvatar
         label={stack.title}
-        logoUrl={stack.logoUrl}
+        patternKey={stack.id}
         size="sm"
-        kind={homeStackAvatarKind(stack)}
+        kind="org"
+        variant="pattern"
       />
       <span className="home-v2-staff-curated-copy">
         <span className="home-v2-staff-curated-title">{stack.title}</span>

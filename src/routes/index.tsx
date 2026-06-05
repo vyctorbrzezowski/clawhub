@@ -3,6 +3,7 @@ import { useAction, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { HomeAppsSection } from "../components/HomeAppsSection";
+import { HomeBringSkillsSection } from "../components/HomeBringSkillsSection";
 import { HomeDiscoverSection } from "../components/HomeDiscoverSection";
 import { HomeFeaturedStackSection } from "../components/HomeFeaturedStackSection";
 import { HomeListingSection } from "../components/HomeListingSection";
@@ -385,6 +386,7 @@ function SkillsHome() {
       <HomeFeaturedStackSection />
       <HomeDiscoverSection />
       <HomeAppsSection />
+      <HomeBringSkillsSection />
     </main>
   );
 }

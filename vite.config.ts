@@ -167,7 +167,17 @@ function patchArkSafariInOperator(): Plugin {
   };
 }
 
+const usePolling = process.env.CHOKIDAR_USEPOLLING === "true";
+
 const config = defineConfig({
+  server: usePolling
+    ? {
+        watch: {
+          usePolling: true,
+          interval: Number(process.env.CHOKIDAR_INTERVAL) || 250,
+        },
+      }
+    : undefined,
   resolve: {
     dedupe: ["convex", "@convex-dev/auth", "react", "react-dom"],
     alias: {

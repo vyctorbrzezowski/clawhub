@@ -1,22 +1,5 @@
 import type { HomeStackAvatarKind } from "../lib/homeStacks";
-
-const STACK_AVATAR_PATTERNS = [
-  "home-v2-stack-avatar--tone-red",
-  "home-v2-stack-avatar--tone-amber",
-  "home-v2-stack-avatar--tone-green",
-  "home-v2-stack-avatar--tone-cyan",
-  "home-v2-stack-avatar--tone-violet",
-  "home-v2-stack-avatar--tone-slate",
-] as const;
-
-function avatarPatternClass(patternKey?: string) {
-  if (!patternKey) return "";
-  let hash = 0;
-  for (const char of patternKey) {
-    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-  }
-  return STACK_AVATAR_PATTERNS[hash % STACK_AVATAR_PATTERNS.length];
-}
+import { SvgAvatar } from "./SvgAvatar";
 
 export function StackAvatar({
   label,
@@ -24,26 +7,29 @@ export function StackAvatar({
   patternKey,
   size = "md",
   kind = "org",
+  variant = "initials",
 }: {
   label: string;
   logoUrl?: string;
   patternKey?: string;
   size?: "md" | "sm";
   kind?: HomeStackAvatarKind;
+  variant?: "initials" | "pattern";
 }) {
   const shapeClass =
     kind === "user" ? "home-v2-stack-avatar--user" : "home-v2-stack-avatar--org";
+  // Pattern avatars are always generated — they intentionally replace any logo.
+  const useGenerated = variant === "pattern" || !logoUrl;
   const className = [
     "home-v2-stack-avatar",
     shapeClass,
-    logoUrl ? "home-v2-stack-avatar--image" : "",
-    !logoUrl ? avatarPatternClass(patternKey ?? label) : "",
+    useGenerated ? "home-v2-stack-avatar--generated" : "home-v2-stack-avatar--image",
     size === "sm" ? "home-v2-stack-avatar--sm" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
-  if (logoUrl) {
+  if (!useGenerated && logoUrl) {
     return (
       <span className={className}>
         <img
@@ -56,6 +42,9 @@ export function StackAvatar({
       </span>
     );
   }
-  const initial = label.trim().charAt(0).toUpperCase() || "?";
-  return <span className={className}>{initial}</span>;
+  return (
+    <span className={className}>
+      <SvgAvatar label={label} seed={patternKey ?? label} variant={variant} />
+    </span>
+  );
 }

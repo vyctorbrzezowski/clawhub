@@ -5,6 +5,7 @@ import {
   Binoculars,
   CloudOff,
   LayoutGrid,
+  Loader2,
   Moon,
   Plus,
   Rows3,
@@ -31,9 +32,21 @@ import {
 } from "../lib/homePluginBrands";
 import { fetchPluginCatalog, type PackageListItem } from "../lib/packageApi";
 import type { PublicSkill, PublicUser } from "../lib/publicUser";
+import { ALLOWED_LUCIDE_ICON_NAMES, makeLucideIconValue } from "../lib/skillIcon";
 import { HomeListingCategorySelect } from "./HomeListingCategorySelect";
 import { MarketplaceIcon } from "./MarketplaceIcon";
 import { OfficialBadge } from "./OfficialBadge";
+
+// Prototype helper: when a skill has no custom icon, pick a deterministic glyph
+// from the curated lucide allow-list so listing rows show varied icons instead
+// of the same default box. Real custom icons always win.
+function variedSkillIcon(seed: string, existing?: string | null) {
+  if (existing) return existing;
+  let hash = 0;
+  for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  const name = ALLOWED_LUCIDE_ICON_NAMES[hash % ALLOWED_LUCIDE_ICON_NAMES.length];
+  return makeLucideIconValue(name);
+}
 
 type ListingKind = "skills" | "plugins";
 type ListingTab = "popular" | "officials" | "featured";
@@ -165,11 +178,13 @@ function HomeListingEmptyPanel({
 function HomeListingResults({
   view,
   showMore,
+  loadingMore,
   onSeeMore,
   children,
 }: {
   view: ListingView;
   showMore: boolean;
+  loadingMore: boolean;
   onSeeMore: () => void;
   children: ReactNode;
 }) {
@@ -181,9 +196,19 @@ function HomeListingResults({
       {showMore ? (
         <div className="home-v2-listing-more">
           <div className="home-v2-listing-more-fade" aria-hidden="true" />
-          <button type="button" className="home-v2-listing-more-btn" onClick={onSeeMore}>
-            <Plus size={14} aria-hidden="true" />
-            See more
+          <button
+            type="button"
+            className="home-v2-listing-more-btn"
+            onClick={onSeeMore}
+            disabled={loadingMore}
+            data-loading={loadingMore}
+          >
+            {loadingMore ? (
+              <Loader2 size={14} aria-hidden="true" className="home-v2-listing-more-spinner" />
+            ) : (
+              <Plus size={14} aria-hidden="true" />
+            )}
+            {loadingMore ? "Loading…" : "See more"}
           </button>
         </div>
       ) : null}
@@ -256,7 +281,12 @@ function HomeListingSkillRow({ entry }: { entry: SkillPageEntry }) {
   return (
     <Link to={skillLink(entry)} className="home-v2-listing-row">
       <span className="home-v2-listing-row-icon" aria-hidden="true">
-        <MarketplaceIcon kind="skill" label={name} icon={entry.skill.icon} size="sm" />
+        <MarketplaceIcon
+          kind="skill"
+          label={name}
+          icon={variedSkillIcon(entry.skill.slug || name, entry.skill.icon)}
+          size="sm"
+        />
       </span>
       <div className="home-v2-listing-row-body">
         <div className="home-v2-listing-row-title">
@@ -325,7 +355,12 @@ function HomeListingSkillCard({ entry }: { entry: SkillPageEntry }) {
     <Link to={skillLink(entry)} className="home-v2-listing-card">
       <div className="home-v2-listing-card-head">
         <span className="home-v2-listing-card-icon" aria-hidden="true">
-          <MarketplaceIcon kind="skill" label={name} icon={entry.skill.icon} size="sm" />
+          <MarketplaceIcon
+          kind="skill"
+          label={name}
+          icon={variedSkillIcon(entry.skill.slug || name, entry.skill.icon)}
+          size="sm"
+        />
         </span>
         <div className="home-v2-listing-card-id">
           <span className="home-v2-listing-card-name">{name}</span>
@@ -402,6 +437,7 @@ export function HomeListingSection() {
   const [skills, setSkills] = useState<SkillPageEntry[]>([]);
   const [plugins, setPlugins] = useState<PackageListItem[]>([]);
   const [status, setStatus] = useState<"loading" | "idle" | "error">("loading");
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSkills, setSearchSkills] = useState<SkillPageEntry[]>([]);
@@ -466,8 +502,16 @@ export function HomeListingSection() {
   useEffect(() => {
     if (isSearchMode) return;
     const controller = new AbortController();
-    setStatus("loading");
-    setListingHasMore(false);
+    // "Load more" only grows fetchLimit: keep the existing rows mounted and
+    // append, instead of swapping in the skeleton (which collapses height and
+    // throws away the scroll position).
+    const isLoadMore = fetchLimit > LISTING_PAGE_SIZE;
+    if (isLoadMore) {
+      setLoadingMore(true);
+    } else {
+      setStatus("loading");
+      setListingHasMore(false);
+    }
 
     const load =
       kind === "skills"
@@ -486,22 +530,29 @@ export function HomeListingSection() {
               setStatus("idle");
             });
 
-    load.catch(() => {
-      if (controller.signal.aborted) return;
-      if (kind === "skills") {
-        setSkills([]);
+    load
+      .catch(() => {
+        if (controller.signal.aborted) return;
+        // On a load-more failure keep what's already shown instead of wiping it.
+        if (isLoadMore) return;
+        if (kind === "skills") {
+          setSkills([]);
+          setStatus("error");
+          return;
+        }
+        if (tab === "officials") {
+          setPlugins(HOME_OPENCLAW_OFFICIAL_PLUGINS_FALLBACK);
+          setListingHasMore(HOME_OPENCLAW_OFFICIAL_PLUGINS_FALLBACK.length > fetchLimit);
+          setStatus("idle");
+          return;
+        }
+        setPlugins([]);
         setStatus("error");
-        return;
-      }
-      if (tab === "officials") {
-        setPlugins(HOME_OPENCLAW_OFFICIAL_PLUGINS_FALLBACK);
-        setListingHasMore(HOME_OPENCLAW_OFFICIAL_PLUGINS_FALLBACK.length > fetchLimit);
-        setStatus("idle");
-        return;
-      }
-      setPlugins([]);
-      setStatus("error");
-    });
+      })
+      .finally(() => {
+        if (controller.signal.aborted) return;
+        setLoadingMore(false);
+      });
 
     return () => controller.abort();
   }, [categorySlug, fetchLimit, isSearchMode, kind, tab]);
@@ -518,8 +569,13 @@ export function HomeListingSection() {
     searchRequestRef.current += 1;
     const requestId = searchRequestRef.current;
     const controller = new AbortController();
-    setSearchStatus("loading");
-    setListingHasMore(false);
+    const isLoadMore = fetchLimit > LISTING_PAGE_SIZE;
+    if (isLoadMore) {
+      setLoadingMore(true);
+    } else {
+      setSearchStatus("loading");
+      setListingHasMore(false);
+    }
 
     const handle = window.setTimeout(() => {
       const load =
@@ -557,12 +613,18 @@ export function HomeListingSection() {
               setSearchStatus("idle");
             });
 
-      load.catch(() => {
-        if (controller.signal.aborted || requestId !== searchRequestRef.current) return;
-        if (kind === "skills") setSearchSkills([]);
-        else setSearchPlugins([]);
-        setSearchStatus("error");
-      });
+      load
+        .catch(() => {
+          if (controller.signal.aborted || requestId !== searchRequestRef.current) return;
+          if (isLoadMore) return;
+          if (kind === "skills") setSearchSkills([]);
+          else setSearchPlugins([]);
+          setSearchStatus("error");
+        })
+        .finally(() => {
+          if (controller.signal.aborted || requestId !== searchRequestRef.current) return;
+          setLoadingMore(false);
+        });
     }, LISTING_SEARCH_DEBOUNCE_MS);
 
     return () => {
@@ -780,6 +842,7 @@ export function HomeListingSection() {
         <HomeListingResults
           view={view}
           showMore={showListingMore}
+          loadingMore={loadingMore}
           onSeeMore={handleSeeMore}
         >
           <div
@@ -800,6 +863,7 @@ export function HomeListingSection() {
         <HomeListingResults
           view={view}
           showMore={showListingMore}
+          loadingMore={loadingMore}
           onSeeMore={handleSeeMore}
         >
           <div

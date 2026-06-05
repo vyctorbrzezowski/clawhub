@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getHomeStackHref,
-  homeStackAvatarKind,
   HOME_COLLECTION_STACKS,
   HOME_TRENDING_STACKS,
   HOME_COLLECTIONS_HEADING,
@@ -37,9 +36,10 @@ function TrendingStackCard({
       <div className="home-v2-stack-trend-head">
         <StackAvatar
           label={stack.title}
-          logoUrl={stack.logoUrl}
-          kind={homeStackAvatarKind(stack)}
+          patternKey={stack.id}
+          kind="org"
           size="sm"
+          variant="pattern"
         />
         <span className="home-v2-stack-trend-title">{stack.title}</span>
       </div>
@@ -160,10 +160,10 @@ function CollectionCard({ stack }: { stack: HomeStack }) {
     >
       <StackAvatar
         label={stack.title}
-        logoUrl={stack.logoUrl}
         patternKey={stack.id}
         size="sm"
-        kind={homeStackAvatarKind(stack)}
+        kind="org"
+        variant="pattern"
       />
       <div className="home-v2-collection-copy">
         <h3 className="home-v2-collection-title">{stack.title}</h3>

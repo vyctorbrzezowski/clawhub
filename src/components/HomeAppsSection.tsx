@@ -99,6 +99,9 @@ const appCategories = [
       plugin("codex"),
       skill("raycast"),
       skill("aws"),
+      skill("linear"),
+      skill("notion"),
+      plugin("brave"),
     ],
   },
   {
@@ -113,6 +116,8 @@ const appCategories = [
       plugin("whatsapp"),
       plugin("matrix"),
       plugin("feishu"),
+      skill("raycast"),
+      skill("github"),
     ],
   },
   {
@@ -124,6 +129,11 @@ const appCategories = [
       skill("linear"),
       skill("github"),
       skill("figma"),
+      skill("cursor"),
+      skill("vscode"),
+      skill("chrome"),
+      skill("raycast"),
+      plugin("codex"),
     ],
   },
   {
@@ -134,6 +144,12 @@ const appCategories = [
       skill("chrome"),
       plugin("brave"),
       skill("raycast"),
+      skill("github"),
+      skill("notion"),
+      skill("figma"),
+      plugin("slack"),
+      plugin("discord"),
+      plugin("codex"),
     ],
   },
   {
@@ -144,6 +160,12 @@ const appCategories = [
       skill("aws"),
       skill("github"),
       plugin("codex"),
+      skill("vscode"),
+      skill("cursor"),
+      skill("raycast"),
+      plugin("slack"),
+      plugin("msteams"),
+      skill("linear"),
     ],
   },
 ] as const;
@@ -158,9 +180,9 @@ const workflowHeaderTiles: ReadonlyArray<{
   badge?: string;
 }> = [
   {
-    label: "Gmail",
-    src: homeAppIconUrl("gmail.com"),
-    className: "is-gmail",
+    label: "OpenAI",
+    src: homeAppIconUrl("openai.com"),
+    className: "is-openai",
   },
   {
     label: "Slack",
@@ -241,6 +263,13 @@ export function HomeAppsSection() {
               <HomeAppsCompactPlugin key={`plugin-${item.plugin.id}`} plugin={item.plugin} />
             )
           )}
+        </div>
+
+        <div className="home-v2-apps-see-all-row">
+          <Link to="/skills" search={SKILLS_BROWSE_SEARCH} className="home-v2-apps-see-all">
+            Browse all skills
+            <ArrowRight size={14} aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </section>
