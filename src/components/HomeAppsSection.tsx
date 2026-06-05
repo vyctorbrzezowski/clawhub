@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Cloud,
+  Code2,
+  FileText,
+  Globe,
+  MessagesSquare,
+  type LucideIcon,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   HOME_PLUGIN_SHORTCUTS,
@@ -10,6 +18,7 @@ import {
   type HomePluginShortcut,
   type HomeSkillApp,
 } from "../lib/homeApps";
+import { OPENCLAW_LOGO_URL } from "../lib/nav-items";
 
 function HomeAppsCompactSkill({ app }: { app: HomeSkillApp }) {
   return (
@@ -80,153 +89,91 @@ function plugin(id: string): HomeAppsItemRef {
 
 const appCategories = [
   {
-    id: "browsers",
-    label: "Browsers",
-    items: [
-      skill("chrome"),
-      plugin("brave"),
-      skill("github"),
-      skill("notion"),
-      skill("linear"),
-      skill("figma"),
-      skill("raycast"),
-      plugin("whatsapp"),
-      plugin("matrix"),
-      plugin("codex"),
-      plugin("discord"),
-      plugin("slack"),
-      plugin("msteams"),
-      plugin("googlechat"),
-      skill("aws"),
-    ],
-  },
-  {
-    id: "editors",
-    label: "Editors",
-    items: [
-      skill("vscode"),
-      skill("cursor"),
-      skill("raycast"),
-      plugin("codex"),
-      skill("github"),
-      skill("notion"),
-      skill("figma"),
-      skill("linear"),
-      plugin("slack"),
-      plugin("matrix"),
-      plugin("discord"),
-      plugin("googlechat"),
-      plugin("msteams"),
-      skill("chrome"),
-      plugin("brave"),
-    ],
-  },
-  {
     id: "code",
     label: "Code",
+    icon: Code2 as LucideIcon,
     items: [
       skill("github"),
       skill("vscode"),
       skill("cursor"),
       plugin("codex"),
+      skill("raycast"),
       skill("aws"),
-      skill("raycast"),
-      skill("chrome"),
-      plugin("matrix"),
-      plugin("discord"),
-      plugin("slack"),
-      plugin("msteams"),
-      plugin("googlechat"),
-      skill("notion"),
-      skill("linear"),
-      plugin("brave"),
-    ],
-  },
-  {
-    id: "docs",
-    label: "Docs",
-    items: [
-      skill("notion"),
-      skill("github"),
-      skill("chrome"),
-      skill("linear"),
-      skill("figma"),
-      skill("raycast"),
-      plugin("slack"),
-      plugin("googlechat"),
-      plugin("msteams"),
-      plugin("matrix"),
-      plugin("discord"),
-      plugin("whatsapp"),
-      plugin("codex"),
-      skill("vscode"),
-      plugin("brave"),
-    ],
-  },
-  {
-    id: "design",
-    label: "Design",
-    items: [
-      skill("figma"),
-      skill("notion"),
-      skill("chrome"),
-      skill("linear"),
-      skill("vscode"),
-      skill("cursor"),
-      plugin("discord"),
-      plugin("slack"),
-      plugin("matrix"),
-      plugin("googlechat"),
-      plugin("msteams"),
-      plugin("whatsapp"),
-      plugin("codex"),
-      skill("github"),
-      plugin("brave"),
     ],
   },
   {
     id: "chat",
     label: "Chat",
+    icon: MessagesSquare as LucideIcon,
     items: [
-      plugin("whatsapp"),
-      plugin("matrix"),
-      plugin("discord"),
       plugin("slack"),
+      plugin("discord"),
       plugin("msteams"),
       plugin("googlechat"),
-      skill("chrome"),
-      skill("raycast"),
+      plugin("whatsapp"),
+      plugin("matrix"),
+      plugin("feishu"),
+    ],
+  },
+  {
+    id: "docs",
+    label: "Docs & specs",
+    icon: FileText as LucideIcon,
+    items: [
       skill("notion"),
       skill("linear"),
       skill("github"),
-      plugin("codex"),
-      skill("vscode"),
-      skill("cursor"),
+      skill("figma"),
+    ],
+  },
+  {
+    id: "web",
+    label: "Web",
+    icon: Globe as LucideIcon,
+    items: [
+      skill("chrome"),
       plugin("brave"),
+      skill("raycast"),
     ],
   },
   {
     id: "cloud",
     label: "Cloud",
+    icon: Cloud as LucideIcon,
     items: [
       skill("aws"),
       skill("github"),
-      skill("vscode"),
-      skill("cursor"),
       plugin("codex"),
-      plugin("slack"),
-      plugin("googlechat"),
-      plugin("msteams"),
-      plugin("matrix"),
-      plugin("discord"),
-      plugin("brave"),
-      skill("chrome"),
-      skill("raycast"),
-      skill("notion"),
-      skill("linear"),
     ],
   },
 ] as const;
+
+const slackWorkflowPlugin =
+  HOME_PLUGIN_SHORTCUTS.find((plugin) => plugin.id === "slack") ?? HOME_PLUGIN_SHORTCUTS[0];
+
+const workflowHeaderTiles: ReadonlyArray<{
+  label: string;
+  src: string;
+  className: string;
+  badge?: string;
+}> = [
+  {
+    label: "Gmail",
+    src: homeAppIconUrl("gmail.com"),
+    className: "is-gmail",
+  },
+  {
+    label: "Slack",
+    src: homePluginShortcutIconUrl(slackWorkflowPlugin),
+    className: "is-slack",
+  },
+  {
+    label: "OpenClaw",
+    src: OPENCLAW_LOGO_URL,
+    className: "is-openclaw",
+    badge: "Exfoliate!",
+  },
+];
 
 export function HomeAppsSection() {
   const [activeCategoryId, setActiveCategoryId] = useState<(typeof appCategories)[number]["id"]>(appCategories[0].id);
@@ -249,32 +196,41 @@ export function HomeAppsSection() {
   return (
     <section className="home-v2-apps" aria-labelledby="home-v2-apps-title">
       <div className="home-v2-apps-stage">
-        <div className="home-v2-apps-intro">
-          <span className="home-v2-apps-intro-copy">
-            <h2 id="home-v2-apps-title" className="home-v2-apps-title">
-              Skills for your apps
-            </h2>
-            <p>Grouped by app surface — pick where your agent works.</p>
-          </span>
-          <Link to="/skills" search={SKILLS_BROWSE_SEARCH} className="home-v2-apps-view-all">
-            View all skills
-            <ArrowRight size={14} aria-hidden="true" />
-          </Link>
+        <div className="home-v2-apps-workflow-header">
+          <div className="home-v2-apps-workflow-copy">
+            <h2 id="home-v2-apps-title">Skills for the apps you already use</h2>
+            <p>Ready-made skills and gateway plugins that plug OpenClaw straight into your everyday tools.</p>
+          </div>
+          <div className="home-v2-apps-workflow-tiles" aria-hidden="true">
+            {workflowHeaderTiles.map((tile) => (
+              <span
+                key={tile.label}
+                className={`home-v2-apps-workflow-tile ${tile.className}`}
+              >
+                {tile.badge ? <span>{tile.badge}</span> : null}
+                <img src={tile.src} alt="" width={46} height={46} loading="lazy" decoding="async" />
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="home-v2-apps-categories" role="tablist" aria-label="App categories">
-          {appCategories.map((category) => (
-            <button
-              key={category.id}
-              type="button"
-              role="tab"
-              aria-selected={category.id === activeCategoryId}
-              className="home-v2-apps-category-tab"
-              onClick={() => setActiveCategoryId(category.id)}
-            >
-              {category.label}
-            </button>
-          ))}
+          {appCategories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <button
+                key={category.id}
+                type="button"
+                role="tab"
+                aria-selected={category.id === activeCategoryId}
+                className="home-v2-apps-category-tab"
+                onClick={() => setActiveCategoryId(category.id)}
+              >
+                <Icon className="home-v2-apps-category-tab-icon" size={14} aria-hidden="true" />
+                {category.label}
+              </button>
+            );
+          })}
         </div>
 
         <div className="home-v2-apps-tile-grid" aria-label="App and plugin shortcuts">

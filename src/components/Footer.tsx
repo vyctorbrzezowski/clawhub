@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import type { PointerEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FOOTER_ECOSYSTEM_PROJECTS,
   FOOTER_NAV_SECTIONS,
@@ -80,6 +80,44 @@ function FooterEcoMark({ project }: { project: FooterEcosystemProject }) {
 }
 
 function FooterEasterBackdrop() {
+  const easterRef = useRef<HTMLDivElement>(null);
+
+  // Scroll-driven parallax: as the reveal area below the footer scrolls into
+  // view, drift the composition into place for a depth effect. 0 = hidden
+  // below the fold, 1 = fully revealed.
+  useEffect(() => {
+    const el = easterRef.current;
+    if (!el) return undefined;
+    if (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      el.style.setProperty("--footer-easter-reveal", "1");
+      return undefined;
+    }
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = el.getBoundingClientRect();
+      const viewportH = window.innerHeight || 1;
+      const progress = (viewportH - rect.top) / (rect.height || viewportH);
+      el.style.setProperty("--footer-easter-reveal", String(Math.max(0, Math.min(1, progress))));
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     event.currentTarget.style.setProperty("--footer-easter-x", `${event.clientX - rect.left}px`);
@@ -93,6 +131,7 @@ function FooterEasterBackdrop() {
 
   return (
     <div
+      ref={easterRef}
       className="footer-v2-easter"
       aria-hidden="true"
       onPointerMove={handlePointerMove}
@@ -206,10 +245,15 @@ export function Footer() {
                               href={item.href}
                               target="_blank"
                               rel="noreferrer"
-                              className={item.icon ? "footer-col-link-with-icon" : undefined}
+                              className={`footer-col-link-external${item.icon ? " footer-col-link-with-icon" : ""}`}
                             >
                               {item.icon ? <FooterSocialIcon icon={item.icon} /> : null}
                               {item.label}
+                              <ArrowUpRight
+                                className="footer-col-link-external-icon"
+                                size={12}
+                                aria-hidden="true"
+                              />
                             </a>
                           );
                         }
@@ -262,14 +306,29 @@ export function Footer() {
               rel="noreferrer"
             >
               an OpenClaw project
+              <ArrowUpRight
+                className="footer-col-link-external-icon footer-v2-copy-link-icon"
+                size={12}
+                aria-hidden="true"
+              />
             </a>
           </p>
           <p className="footer-v2-meta">
             {FOOTER_PLATFORM_LINKS.map((link, index) => (
               <span key={link.label}>
                 {index > 0 ? <span className="footer-v2-meta-sep" aria-hidden="true">·</span> : null}
-                <a href={link.href} target="_blank" rel="noreferrer">
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer-col-link-external"
+                >
                   {link.label}
+                  <ArrowUpRight
+                    className="footer-col-link-external-icon"
+                    size={12}
+                    aria-hidden="true"
+                  />
                 </a>
               </span>
             ))}

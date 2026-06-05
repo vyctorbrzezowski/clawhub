@@ -32,8 +32,8 @@ describe("HomeFeaturedStackSection", () => {
     expect(screen.getByText("OpenClaw essentials")).toBeTruthy();
     expect(document.querySelector(".home-v2-stack-feature--hero")).toBeTruthy();
     expect(document.querySelector(".home-v2-stack-feature--muted")).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Collections", level: 2 })).toBeTruthy();
-    expect(screen.getByText(/Grouped by domain/i)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Staff picks", level: 2 })).toBeTruthy();
+    expect(screen.getByText(/Hand-picked by the OpenClaw team/i)).toBeTruthy();
     expect(screen.getByRole("link", { name: "See all" })).toBeTruthy();
     expect(screen.getByText("Security essentials")).toBeTruthy();
     expect(screen.getByText("Coding agents")).toBeTruthy();

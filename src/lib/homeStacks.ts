@@ -268,10 +268,15 @@ export const HOME_STAFF_CURATED_STACKS: HomeStack[] = HOME_COLLECTION_STACKS.fil
   (HOME_STAFF_CURATED_STACK_IDS as readonly string[]).includes(stack.id),
 );
 
-/** Home collections chapter title (spotlight + discover). */
+/** Home collections chapter title (discover section). */
 export const HOME_COLLECTIONS_HEADING = "Collections";
 
 export const HOME_COLLECTIONS_LEDE = "Grouped by domain — pick what you're building.";
+
+/** Staff-curated panel title (featured spotlight column). */
+export const HOME_STAFF_CURATED_HEADING = "Staff picks";
+
+export const HOME_STAFF_CURATED_LEDE = "Hand-picked by the OpenClaw team.";
 
 /** Hero banner eyebrow — playful, on-brand. */
 export const HOME_FEATURED_STACK_EYEBROW = "Claws for your Claw 🦞";

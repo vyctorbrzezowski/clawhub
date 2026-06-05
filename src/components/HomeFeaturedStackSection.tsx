@@ -8,8 +8,8 @@ import {
   HOME_FEATURED_STACK,
   HOME_FEATURED_STACK_EYEBROW,
   HOME_STAFF_CURATED_STACKS,
-  HOME_COLLECTIONS_HEADING,
-  HOME_COLLECTIONS_LEDE,
+  HOME_STAFF_CURATED_HEADING,
+  HOME_STAFF_CURATED_LEDE,
   type HomeStack,
   type HomeStackPreview,
 } from "../lib/homeStacks";
@@ -17,7 +17,6 @@ import { OPENCLAW_LOGO_URL } from "../lib/nav-items";
 import { StackAvatar } from "./homeStackAvatar";
 
 const FEATURE_DECK_INTERVAL_MS = 4200;
-const FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX = 6;
 const FEATURE_DECK_SWIPE_THRESHOLD_PX = 26;
 
 type FeaturedPreviewCardProps = {
@@ -44,6 +43,8 @@ function FeaturedPreviewCard({
       {...href}
       className={`home-v2-stack-feature-item is-layer-${layer}`}
       aria-label={`${preview.title} — ${preview.meta}. ${preview.description}`}
+      draggable={false}
+      onDragStart={(event) => event.preventDefault()}
       onClickCapture={(event) => {
         onClickCapture?.(event);
         if (event.defaultPrevented || layer === 0) return;
@@ -95,7 +96,6 @@ function FeaturedPreviewDeck({
     pointerId: number;
     startX: number;
     lastX: number;
-    dragged: boolean;
   } | null>(null);
   const suppressClickRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -122,13 +122,14 @@ function FeaturedPreviewDeck({
     setIsDragging(false);
     setHoverPaused(false);
 
-    if (drag.dragged || absDeltaX > FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX) {
-      suppressClickRef.current = true;
-      window.setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 120);
-    }
+    // A real swipe advances exactly one card and swallows the trailing click so
+    // it doesn't also navigate/activate. A tap (below threshold) falls through
+    // to the card's own onClickCapture (navigate active / activate inactive).
     if (absDeltaX < FEATURE_DECK_SWIPE_THRESHOLD_PX) return;
+    suppressClickRef.current = true;
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 120);
     if (deltaX < 0) onNext();
     else onPrevious();
   };
@@ -142,7 +143,6 @@ function FeaturedPreviewDeck({
           pointerId: event.pointerId,
           startX: event.clientX,
           lastX: event.clientX,
-          dragged: false,
         };
         setIsDragging(true);
         setHoverPaused(true);
@@ -151,15 +151,6 @@ function FeaturedPreviewDeck({
       onPointerMove={(event) => {
         const drag = dragRef.current;
         if (!drag || drag.pointerId !== event.pointerId) return;
-        drag.lastX = event.clientX;
-        const deltaX = drag.lastX - drag.startX;
-        if (Math.abs(deltaX) > FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX) {
-          drag.dragged = true;
-        }
-        if (Math.abs(deltaX) < FEATURE_DECK_SWIPE_THRESHOLD_PX) return;
-        if (deltaX < 0) onNext();
-        else onPrevious();
-        drag.startX = event.clientX;
         drag.lastX = event.clientX;
       }}
       onPointerUp={finishDrag}
@@ -307,8 +298,8 @@ function StaffCuratedCollectionsPanel({ stacks }: { stacks: HomeStack[] }) {
   return (
     <div className="home-v2-stack-feature home-v2-stack-feature--muted">
       <div className="home-v2-discover-heading home-v2-topics-panel-lead">
-        <h2 className="home-v2-discover-title">{HOME_COLLECTIONS_HEADING}</h2>
-        <p className="home-v2-discover-lede">{HOME_COLLECTIONS_LEDE}</p>
+        <h2 className="home-v2-discover-title">{HOME_STAFF_CURATED_HEADING}</h2>
+        <p className="home-v2-discover-lede">{HOME_STAFF_CURATED_LEDE}</p>
       </div>
       <ul className="home-v2-staff-curated-list" aria-label="Topic collections">
         {stacks.map((stack) => (
