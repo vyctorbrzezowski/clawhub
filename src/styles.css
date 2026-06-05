@@ -11987,7 +11987,15 @@ a.search-empty-action {
   right: 0;
   bottom: calc(var(--footer-easter-depth) * -1);
   left: 0;
-  background: url("/footer-openclaw-easter-egg.png") center center / 112% auto no-repeat;
+  background:
+    url("/footer-openclaw-easter-egg-transparent.png") center center / 112% auto no-repeat,
+    radial-gradient(
+      circle at 50% 34%,
+      color-mix(in srgb, #ff6a3d 28%, transparent) 0 1px,
+      color-mix(in srgb, #ff6a3d 16%, transparent) 2px 22px,
+      transparent 90px
+    ),
+    url("/footer-openclaw-easter-egg.png") center center / 112% auto no-repeat;
   opacity: 1;
   content: "";
   pointer-events: none;
