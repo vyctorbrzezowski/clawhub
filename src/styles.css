@@ -11938,11 +11938,52 @@ a.search-empty-action {
 /* ===== Home v2 footer ===== */
 
 .app-shell:has(.home-v2-main) .site-footer-v2 {
+  --footer-easter-depth: clamp(280px, 34vw, 460px);
+  position: relative;
+  isolation: isolate;
+  margin-bottom: var(--footer-easter-depth);
+  overflow: visible;
+  border-radius: 0 0 50px 50px;
   background: var(--hv2-bg);
   border-top-color: var(--hv2-border);
 }
 
+.app-shell:has(.home-v2-main) .site-footer-v2::before {
+  position: absolute;
+  z-index: -1;
+  top: calc(100% - 72px);
+  right: 0;
+  bottom: calc(var(--footer-easter-depth) * -1);
+  left: 0;
+  background:
+    linear-gradient(
+      180deg,
+      var(--hv2-bg) 0%,
+      color-mix(in srgb, var(--hv2-bg) 74%, transparent) 18%,
+      color-mix(in srgb, var(--hv2-bg) 18%, transparent) 56%,
+      color-mix(in srgb, var(--hv2-bg) 42%, transparent) 100%
+    ),
+    url("/footer-openclaw-easter-egg.png") center bottom / cover fixed;
+  opacity: 0.72;
+  content: "";
+  pointer-events: none;
+}
+
+.app-shell:has(.home-v2-main) .site-footer-v2::after {
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: calc(var(--footer-easter-depth) * -1);
+  left: 0;
+  height: 120px;
+  background: linear-gradient(180deg, transparent, var(--hv2-bg) 86%);
+  content: "";
+  pointer-events: none;
+}
+
 .app-shell:has(.home-v2-main) .site-footer-v2 .site-footer-inner {
+  position: relative;
+  z-index: 1;
   padding: 72px 48px 52px;
 }
 
