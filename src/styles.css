@@ -11995,7 +11995,7 @@ a.search-empty-action {
   position: absolute;
   z-index: -1;
   display: block;
-  top: calc(100% - 8px);
+  top: calc(100% - 48px);
   right: 0;
   bottom: calc(var(--footer-easter-depth) * -1);
   left: 0;
@@ -12033,12 +12033,28 @@ a.search-empty-action {
   opacity: calc(0.46 * var(--footer-easter-intensity));
   mix-blend-mode: screen;
   transform: translate3d(-1.5%, -1%, 0) rotate(-1deg);
-  mask-image: radial-gradient(
-    circle 176px at var(--footer-easter-x) var(--footer-easter-y),
-    #000 0 34%,
-    rgb(0 0 0 / 0.72) 48%,
-    transparent 78%
-  );
+  mask-image:
+    radial-gradient(
+      ellipse 170px 142px at calc(var(--footer-easter-x) + 14%) calc(var(--footer-easter-y) + 12%),
+      #000 0 34%,
+      rgb(0 0 0 / 0.7) 52%,
+      transparent 80%
+    ),
+    radial-gradient(
+      ellipse 82px 58px at calc(var(--footer-easter-x) + 14% - 78px) calc(var(--footer-easter-y) + 12% + 24px),
+      rgb(0 0 0 / 0.78) 0 42%,
+      transparent 76%
+    ),
+    radial-gradient(
+      ellipse 66px 92px at calc(var(--footer-easter-x) + 14% + 88px) calc(var(--footer-easter-y) + 12% - 38px),
+      rgb(0 0 0 / 0.74) 0 38%,
+      transparent 78%
+    ),
+    radial-gradient(
+      ellipse 52px 38px at calc(var(--footer-easter-x) + 14% + 28px) calc(var(--footer-easter-y) + 12% + 92px),
+      rgb(0 0 0 / 0.55) 0 34%,
+      transparent 72%
+    );
   transition: opacity 180ms ease;
   pointer-events: none;
 }
