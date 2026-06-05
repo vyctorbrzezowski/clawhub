@@ -1,9 +1,10 @@
 import { Check, ChevronDown, Search } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { BrowseCategoryIcon } from "../lib/browseCategoryIcons";
-import { BROWSE_TAXONOMY } from "../lib/browseTaxonomy";
+import type { BrowseCategory } from "../lib/categories";
 
 type HomeListingCategorySelectProps = {
+  categories: readonly BrowseCategory[];
   value: string | null;
   onChange: (slug: string | null) => void;
 };
@@ -42,7 +43,11 @@ function CategoryOption({
   );
 }
 
-export function HomeListingCategorySelect({ value, onChange }: HomeListingCategorySelectProps) {
+export function HomeListingCategorySelect({
+  categories,
+  value,
+  onChange,
+}: HomeListingCategorySelectProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -51,18 +56,18 @@ export function HomeListingCategorySelect({ value, onChange }: HomeListingCatego
 
   const selectedLabel = useMemo(() => {
     if (!value) return "All categories";
-    return BROWSE_TAXONOMY.find((category) => category.slug === value)?.label ?? "All categories";
-  }, [value]);
+    return categories.find((category) => category.slug === value)?.label ?? "All categories";
+  }, [categories, value]);
 
   const filteredCategories = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return BROWSE_TAXONOMY;
-    return BROWSE_TAXONOMY.filter(
+    if (!normalized) return categories;
+    return categories.filter(
       (category) =>
         category.label.toLowerCase().includes(normalized) ||
         category.slug.includes(normalized),
     );
-  }, [query]);
+  }, [categories, query]);
 
   const closeMenu = () => {
     setOpen(false);

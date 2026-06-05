@@ -7,6 +7,7 @@ export type HomePluginBrand = {
 };
 
 const BRANDS_BY_RUNTIME_ID: Record<string, HomePluginBrand> = {
+  telegram: { slug: "telegram", color: "26A5E4" },
   whatsapp: { slug: "whatsapp", color: "25D366" },
   matrix: { slug: "matrix", color: "0DBD8B" },
   discord: { slug: "discord", color: "5865F2" },
@@ -45,9 +46,10 @@ const BRANDS_BY_RUNTIME_ID: Record<string, HomePluginBrand> = {
 
 /** Home listing order — mirrors openclaw.ai/user/openclaw catalog emphasis. */
 export const HOME_OPENCLAW_PLUGIN_ORDER: string[] = [
+  "telegram",
   "whatsapp",
-  "matrix",
   "codex",
+  "matrix",
   "discord",
   "feishu",
   "memory-lancedb",
@@ -120,7 +122,59 @@ export function filterOpenClawOfficialPlugins(items: PackageListItem[]) {
   return items.filter((item) => item.isOfficial && isOpenClawPublisherPlugin(item));
 }
 
+type HomeOpenClawPluginDemoStats = {
+  downloads: number;
+  installs: number;
+  stars: number;
+  versions: number;
+};
+
+/** Prototype popularity for home officials when the catalog API has no stats yet. */
+const HOME_OPENCLAW_PLUGIN_DEMO_STATS: Record<string, HomeOpenClawPluginDemoStats> = {
+  telegram: { downloads: 2_840_000, installs: 412_000, stars: 186_000, versions: 48 },
+  whatsapp: { downloads: 2_120_000, installs: 318_000, stars: 142_000, versions: 52 },
+  codex: { downloads: 1_760_000, installs: 264_000, stars: 218_000, versions: 61 },
+  discord: { downloads: 1_340_000, installs: 198_000, stars: 96_000, versions: 44 },
+  matrix: { downloads: 890_000, installs: 124_000, stars: 68_000, versions: 39 },
+  feishu: { downloads: 520_000, installs: 72_000, stars: 41_000, versions: 28 },
+  slack: { downloads: 480_000, installs: 66_000, stars: 37_000, versions: 31 },
+  "memory-lancedb": { downloads: 390_000, installs: 58_000, stars: 28_000, versions: 22 },
+  brave: { downloads: 310_000, installs: 44_000, stars: 22_000, versions: 19 },
+  msteams: { downloads: 270_000, installs: 38_000, stars: 19_000, versions: 24 },
+  copilot: { downloads: 240_000, installs: 34_000, stars: 17_000, versions: 18 },
+  acpx: { downloads: 180_000, installs: 26_000, stars: 14_000, versions: 16 },
+  googlechat: { downloads: 165_000, installs: 23_000, stars: 12_000, versions: 15 },
+  qqbot: { downloads: 95_000, installs: 14_000, stars: 8_200, versions: 12 },
+  openshell: { downloads: 88_000, installs: 12_500, stars: 7_400, versions: 11 },
+  zalo: { downloads: 76_000, installs: 11_000, stars: 6_100, versions: 10 },
+  zalouser: { downloads: 71_000, installs: 9_800, stars: 5_600, versions: 9 },
+  diffs: { downloads: 64_000, installs: 9_200, stars: 5_100, versions: 14 },
+  "nextcloud-talk": { downloads: 58_000, installs: 8_400, stars: 4_700, versions: 13 },
+  twitch: { downloads: 52_000, installs: 7_600, stars: 4_200, versions: 12 },
+  line: { downloads: 47_000, installs: 6_900, stars: 3_800, versions: 11 },
+  "google-meet": { downloads: 43_000, installs: 6_200, stars: 3_400, versions: 10 },
+  "amazon-bedrock": { downloads: 39_000, installs: 5_700, stars: 3_100, versions: 17 },
+  "amazon-bedrock-mantle": { downloads: 31_000, installs: 4_500, stars: 2_600, versions: 9 },
+  "anthropic-vertex": { downloads: 28_000, installs: 4_100, stars: 2_300, versions: 14 },
+  pixverse: { downloads: 22_000, installs: 3_200, stars: 1_900, versions: 8 },
+  nostr: { downloads: 18_000, installs: 2_600, stars: 1_500, versions: 7 },
+  tlon: { downloads: 15_000, installs: 2_200, stars: 1_200, versions: 6 },
+  bluebubbles: { downloads: 41_000, installs: 5_900, stars: 3_200, versions: 11 },
+  "voice-call": { downloads: 36_000, installs: 5_200, stars: 2_900, versions: 13 },
+  lobster: { downloads: 12_000, installs: 1_700, stars: 980, versions: 5 },
+  "diagnostics-prometheus": { downloads: 24_000, installs: 3_500, stars: 2_000, versions: 10 },
+  "diagnostics-otel": { downloads: 21_000, installs: 3_100, stars: 1_750, versions: 9 },
+  "synology-chat": { downloads: 19_000, installs: 2_800, stars: 1_600, versions: 8 },
+  tokenjuice: { downloads: 9_800, installs: 1_400, stars: 820, versions: 6 },
+  "diffs-language-pack": { downloads: 14_000, installs: 2_000, stars: 1_100, versions: 7 },
+  "openclaw-kitchen-sink-fixture": { downloads: 4_200, installs: 620, stars: 340, versions: 3 },
+};
+
 const HOME_OPENCLAW_PLUGIN_META: Record<string, { displayName: string; summary: string }> = {
+  telegram: {
+    displayName: "Telegram",
+    summary: "Bot API channel for Telegram chats and groups.",
+  },
   whatsapp: {
     displayName: "WhatsApp",
     summary: "WhatsApp Web channel plugin for agent chats.",
@@ -188,8 +242,35 @@ function formatRuntimeDisplayName(runtimeId: string) {
     .join(" ");
 }
 
+function homeOpenClawPluginDemoStats(runtimeId: string): HomeOpenClawPluginDemoStats {
+  return (
+    HOME_OPENCLAW_PLUGIN_DEMO_STATS[runtimeId] ?? {
+      downloads: 8_400,
+      installs: 1_200,
+      stars: 720,
+      versions: 4,
+    }
+  );
+}
+
+export function enrichHomeOpenClawPluginDemoStats(item: PackageListItem): PackageListItem {
+  const runtimeId = pluginRuntimeKey(item);
+  if ((item.stats?.downloads ?? 0) > 0) return item;
+  const demo = homeOpenClawPluginDemoStats(runtimeId);
+  return {
+    ...item,
+    stats: {
+      versions: item.stats?.versions ?? demo.versions,
+      installs: item.stats?.installs ?? demo.installs,
+      downloads: demo.downloads,
+      stars: demo.stars,
+    },
+  };
+}
+
 export function createHomeOpenClawPluginFallback(runtimeId: string): PackageListItem {
   const meta = HOME_OPENCLAW_PLUGIN_META[runtimeId];
+  const demo = homeOpenClawPluginDemoStats(runtimeId);
   return {
     name: `@openclaw/${runtimeId}`,
     displayName: meta?.displayName ?? formatRuntimeDisplayName(runtimeId),
@@ -201,7 +282,7 @@ export function createHomeOpenClawPluginFallback(runtimeId: string): PackageList
     summary: meta?.summary ?? "Official OpenClaw gateway plugin.",
     createdAt: 0,
     updatedAt: 0,
-    stats: { downloads: 0, installs: 0, stars: 0, versions: 0 },
+    stats: { ...demo },
   };
 }
 
@@ -214,8 +295,9 @@ export function mergeHomeOpenClawOfficialPlugins(apiItems: PackageListItem[]) {
   for (const item of filterOpenClawOfficialPlugins(apiItems)) {
     apiByKey.set(pluginRuntimeKey(item), item);
   }
-  const merged = HOME_OPENCLAW_PLUGIN_ORDER.map(
-    (runtimeId) => apiByKey.get(runtimeId) ?? createHomeOpenClawPluginFallback(runtimeId),
-  );
+  const merged = HOME_OPENCLAW_PLUGIN_ORDER.map((runtimeId) => {
+    const item = apiByKey.get(runtimeId) ?? createHomeOpenClawPluginFallback(runtimeId);
+    return enrichHomeOpenClawPluginDemoStats(item);
+  });
   return sortHomeOpenClawPlugins(merged);
 }

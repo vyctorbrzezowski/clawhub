@@ -12,10 +12,13 @@ import {
   Star,
   X,
 } from "lucide-react";
+import { isPluginCategorySlug } from "clawhub-schema";
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { convexHttp } from "../convex/client";
 import { isSkillHighlighted, isSkillOfficial } from "../lib/badges";
+import { BROWSE_TAXONOMY, isBrowseTaxonomySlug } from "../lib/browseTaxonomy";
+import { PLUGIN_CATEGORIES, SKILL_CATEGORIES, type BrowseCategory } from "../lib/categories";
 import { formatCompactStat } from "../lib/numberFormat";
 import {
   filterOpenClawOfficialPlugins,
@@ -51,6 +54,12 @@ const LISTING_TABS: Array<{ id: ListingTab; label: string }> = [
 const LISTING_PAGE_SIZE = 20;
 const LISTING_SEARCH_DEBOUNCE_MS = 220;
 const OPENCLAW_PLUGIN_FETCH_BATCH = 64;
+
+const HOME_SKILL_LISTING_CATEGORIES: BrowseCategory[] = BROWSE_TAXONOMY.map(({ slug, label }) => ({
+  slug,
+  label,
+  icon: SKILL_CATEGORIES.find((category) => category.slug === slug)?.icon ?? "package",
+}));
 
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -210,12 +219,18 @@ async function fetchSkillListing(
   return { page: typed.page ?? [], hasMore: typed.hasMore ?? false };
 }
 
-async function fetchPluginListing(tab: ListingTab, limit: number, signal: AbortSignal) {
+async function fetchPluginListing(
+  tab: ListingTab,
+  categorySlug: string | null,
+  limit: number,
+  signal: AbortSignal,
+) {
   const openClawOfficials = tab === "officials";
   const requestLimit = openClawOfficials ? Math.max(limit, OPENCLAW_PLUGIN_FETCH_BATCH) : limit;
   const result = await fetchPluginCatalog({
     featured: tab === "featured" ? true : undefined,
     isOfficial: openClawOfficials ? true : undefined,
+    category: categorySlug ?? undefined,
     limit: requestLimit,
     signal,
   });
@@ -396,6 +411,8 @@ export function HomeListingSection() {
 
   const trimmedSearch = searchQuery.trim();
   const isSearchMode = trimmedSearch.length > 0;
+  const listingCategories =
+    kind === "skills" ? HOME_SKILL_LISTING_CATEGORIES : PLUGIN_CATEGORIES;
 
   const filteredSearchSkills = useMemo(
     () => filterSkillsByTab(searchSkills, tab),
@@ -461,7 +478,7 @@ export function HomeListingSection() {
               setListingHasMore(result.hasMore);
               setStatus("idle");
             })
-        : fetchPluginListing(tab, fetchLimit, controller.signal)
+        : fetchPluginListing(tab, categorySlug, fetchLimit, controller.signal)
             .then((result) => {
               if (controller.signal.aborted) return;
               setPlugins(result.items);
@@ -528,6 +545,7 @@ export function HomeListingSection() {
               q: trimmedSearch,
               featured: tab === "featured" ? true : undefined,
               isOfficial: tab === "officials" ? true : undefined,
+              category: categorySlug ?? undefined,
               limit: fetchLimit,
               signal: controller.signal,
             }).then((result) => {
@@ -551,7 +569,18 @@ export function HomeListingSection() {
       controller.abort();
       window.clearTimeout(handle);
     };
-  }, [fetchLimit, isSearchMode, kind, tab, trimmedSearch]);
+  }, [categorySlug, fetchLimit, isSearchMode, kind, tab, trimmedSearch]);
+
+  useEffect(() => {
+    if (!categorySlug) return;
+    if (kind === "skills" && !isBrowseTaxonomySlug(categorySlug)) {
+      setCategorySlug(null);
+      return;
+    }
+    if (kind === "plugins" && !isPluginCategorySlug(categorySlug)) {
+      setCategorySlug(null);
+    }
+  }, [categorySlug, kind]);
 
   useEffect(() => {
     setVisibleCount(LISTING_PAGE_SIZE);
@@ -592,7 +621,7 @@ export function HomeListingSection() {
   };
 
   return (
-    <section className="home-v2-listing" aria-label="Browse catalog">
+    <section id="home-v2-listing" className="home-v2-listing" aria-label="Browse catalog">
       <div className="home-v2-listing-controls">
         <div className="home-v2-listing-toolbar">
           <div className="home-v2-listing-kind" role="group" aria-label="Content type">
@@ -645,9 +674,7 @@ export function HomeListingSection() {
           </div>
 
           <div className="home-v2-listing-actions">
-            <div
-              className={`home-v2-listing-actions-rail${kind === "skills" ? " has-category" : ""}`}
-            >
+            <div className="home-v2-listing-actions-rail has-category">
               <button
                 type="button"
                 className={`home-v2-listing-search-trigger${searchOpen ? " is-active" : ""}`}
@@ -660,12 +687,11 @@ export function HomeListingSection() {
                 <Search size={16} aria-hidden="true" />
               </button>
 
-              {kind === "skills" ? (
-                <HomeListingCategorySelect
-                  value={categorySlug}
-                  onChange={setCategorySlug}
-                />
-              ) : null}
+              <HomeListingCategorySelect
+                categories={listingCategories}
+                value={categorySlug}
+                onChange={setCategorySlug}
+              />
 
               <div className="home-v2-listing-view" role="group" aria-label="Layout">
                 <button
@@ -724,6 +750,7 @@ export function HomeListingSection() {
 
       {activeStatus === "idle" && view === "list" && activeItems.length > 0 ? (
         <div className="home-v2-listing-head" aria-hidden="true">
+          <span className="home-v2-listing-head-icon-spacer" />
           <span className="home-v2-listing-head-label">
             {kind === "skills" ? "Skill" : "Plugin"}
           </span>

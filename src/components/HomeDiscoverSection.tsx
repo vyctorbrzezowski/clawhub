@@ -1,24 +1,18 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getHomeStackHref,
   homeStackAvatarKind,
   HOME_COLLECTION_STACKS,
   HOME_TRENDING_STACKS,
+  HOME_COLLECTIONS_HEADING,
+  HOME_COLLECTIONS_LEDE,
   type HomeStack,
 } from "../lib/homeStacks";
 import { StackAvatar } from "./homeStackAvatar";
 
-const TREND_TRACK_GAP_PX = 10;
 const TREND_DRAG_CLICK_THRESHOLD_PX = 6;
-
-function trendingCardsPerView(viewportWidth: number) {
-  if (viewportWidth < 560) return 1;
-  if (viewportWidth < 900) return 2;
-  if (viewportWidth < 1200) return 3;
-  return 4;
-}
 
 function TrendingStackCard({
   stack,
@@ -65,15 +59,9 @@ function TrendingStacksCarousel({ stacks }: { stacks: HomeStack[] }) {
     startScrollLeft: number;
     moved: boolean;
   } | null>(null);
-  const [cardsPerView, setCardsPerView] = useState(4);
   const [canScrollNext, setCanScrollNext] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [suppressCardClick, setSuppressCardClick] = useState(false);
-
-  const measure = useCallback(() => {
-    if (typeof window === "undefined") return;
-    setCardsPerView(trendingCardsPerView(window.innerWidth));
-  }, []);
 
   const updateScrollEdges = useCallback(() => {
     const viewport = viewportRef.current;
@@ -83,33 +71,12 @@ function TrendingStacksCarousel({ stacks }: { stacks: HomeStack[] }) {
   }, []);
 
   useEffect(() => {
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [measure]);
-
-  useEffect(() => {
     updateScrollEdges();
     const viewport = viewportRef.current;
     if (!viewport) return;
     viewport.addEventListener("scroll", updateScrollEdges, { passive: true });
     return () => viewport.removeEventListener("scroll", updateScrollEdges);
-  }, [updateScrollEdges, stacks.length, cardsPerView]);
-
-  const showNav = stacks.length > cardsPerView;
-
-  const scrollByStep = (direction: 1 | -1) => {
-    const viewport = viewportRef.current;
-    const card = viewport?.querySelector<HTMLElement>(".home-v2-stack-trend-card");
-    if (!viewport || !card) return;
-    const prefersReducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    viewport.scrollBy({
-      left: direction * (card.offsetWidth + TREND_TRACK_GAP_PX),
-      behavior: prefersReducedMotion ? "auto" : "smooth",
-    });
-  };
+  }, [updateScrollEdges, stacks.length]);
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     const viewport = viewportRef.current;
@@ -158,9 +125,7 @@ function TrendingStacksCarousel({ stacks }: { stacks: HomeStack[] }) {
   };
 
   return (
-    <div
-      className={`home-v2-stack-trend-rail${showNav ? " has-nav" : ""}${canScrollNext ? " can-next" : ""}`}
-    >
+    <div className={`home-v2-stack-trend-rail${canScrollNext ? " can-next" : ""}`}>
       <div
         ref={viewportRef}
         className={`home-v2-stack-trend-viewport${isDragging ? " is-dragging" : ""}`}
@@ -179,17 +144,6 @@ function TrendingStacksCarousel({ stacks }: { stacks: HomeStack[] }) {
           ))}
         </div>
       </div>
-      {showNav ? (
-        <button
-          type="button"
-          className="home-v2-stack-trend-nav home-v2-stack-trend-nav--next"
-          aria-label="Show more trending stacks"
-          disabled={!canScrollNext}
-          onClick={() => scrollByStep(1)}
-        >
-          <ChevronRight size={18} aria-hidden="true" />
-        </button>
-      ) : null}
     </div>
   );
 }
@@ -207,6 +161,7 @@ function CollectionCard({ stack }: { stack: HomeStack }) {
       <StackAvatar
         label={stack.title}
         logoUrl={stack.logoUrl}
+        patternKey={stack.id}
         size="sm"
         kind={homeStackAvatarKind(stack)}
       />
@@ -233,7 +188,9 @@ export function HomeDiscoverSection() {
         <div className="home-v2-discover-header">
           <div className="home-v2-discover-heading">
             <h2 className="home-v2-discover-title">Trending stacks</h2>
-            <p className="home-v2-discover-lede">Publishers and themes from the catalog.</p>
+            <p className="home-v2-discover-lede">
+              Use the same stacks trusted by standout engineers and builders.
+            </p>
           </div>
           <Link
             to="/skills"
@@ -256,8 +213,8 @@ export function HomeDiscoverSection() {
       <div className="home-v2-discover-chapter">
         <div className="home-v2-discover-header">
           <div className="home-v2-discover-heading">
-            <h2 className="home-v2-discover-title">More collections</h2>
-            <p className="home-v2-discover-lede">Curated starting points — not another full browse.</p>
+            <h2 className="home-v2-discover-title">{HOME_COLLECTIONS_HEADING}</h2>
+            <p className="home-v2-discover-lede">{HOME_COLLECTIONS_LEDE}</p>
           </div>
           <Link to="/publishers" className="home-v2-discover-eyebrow home-v2-discover-link">
             Browse publishers <ArrowRight size={14} aria-hidden="true" />

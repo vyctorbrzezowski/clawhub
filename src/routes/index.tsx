@@ -6,6 +6,7 @@ import { HomeAppsSection } from "../components/HomeAppsSection";
 import { HomeDiscoverSection } from "../components/HomeDiscoverSection";
 import { HomeFeaturedStackSection } from "../components/HomeFeaturedStackSection";
 import { HomeListingSection } from "../components/HomeListingSection";
+import { HomeV2FoldBottomFade } from "../components/HomeV2FoldBottomFade";
 import { SoulCard } from "../components/SoulCard";
 import { SoulStatsTripletLine } from "../components/SoulStats";
 import type { PublicSoul } from "../lib/publicUser";
@@ -305,6 +306,7 @@ function SkillsHome() {
 
   return (
     <main className="home-v2-main">
+      <HomeV2FoldBottomFade />
       <canvas ref={confettiRef} className="home-v2-confetti" style={{ display: "none" }} />
 
       {/* ═══ HERO ═══ */}
@@ -322,7 +324,7 @@ function SkillsHome() {
           type="button"
           onClick={handleLabelClick}
         >
-          BUILT BY THE COMMUNITY.
+          BUILT BY THE COMMUNITY
         </button>
 
         {slotState ? (
@@ -376,7 +378,6 @@ function SkillsHome() {
           <Link to="/publishers" className="home-v2-sub-stat">
             {HOME_PUBLISHER_STAT} publishers
           </Link>
-          , ready in one search.
         </p>
       </section>
 

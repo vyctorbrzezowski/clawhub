@@ -45,6 +45,8 @@ describe("HomeProofSection", () => {
 
     render(<HomeProofSection />);
 
+    expect(document.querySelector('.home-v2-proof-eyebrow-mark[src="/og-clawhub-watermark.png"]')).toBeTruthy();
+    expect(screen.getByText("About ClawHub")).toBeTruthy();
     expect(screen.getByText("The registry for OpenClaw agents")).toBeTruthy();
     expect(screen.getByText("One catalog, every surface")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Skills" })).toBeTruthy();

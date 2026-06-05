@@ -2,9 +2,16 @@ import { OPENCLAW_LOGO_URL } from "./nav-items";
 
 /** Design-time curated stacks for the home discoverability prototype. */
 
+const GITHUB_AVATAR_URL = "https://github.com";
+const PETER_STEINBERGER_AVATAR_URL = `${GITHUB_AVATAR_URL}/steipete.png`;
+const NVIDIA_AVATAR_URL = `${GITHUB_AVATAR_URL}/NVIDIA.png`;
+const GARY_TAN_AVATAR_URL = `${GITHUB_AVATAR_URL}/garytan.png`;
+
 export type HomeStackPreview = {
   title: string;
   meta: string;
+  description: string;
+  signals: string[];
 };
 
 /** User publishers render round avatars; orgs and thematic collections stay square. */
@@ -37,6 +44,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     description: "Core OpenClaw skills from the ecosystem architect.",
     avatarKind: "user",
     publisherHandle: "steipete",
+    logoUrl: PETER_STEINBERGER_AVATAR_URL,
     statsLabel: "24 skills",
     growthLabel: "+43%",
     growthDirection: "up",
@@ -47,6 +55,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     description: "GPU, inference, and agent tooling from NVIDIA publishers.",
     avatarKind: "org",
     publisherHandle: "nvidia",
+    logoUrl: NVIDIA_AVATAR_URL,
     statsLabel: "18 skills",
     growthLabel: "+28%",
     growthDirection: "up",
@@ -57,6 +66,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     description: "Startup ops, growth, and founder workflows.",
     avatarKind: "user",
     publisherHandle: "garytan",
+    logoUrl: GARY_TAN_AVATAR_URL,
     statsLabel: "11 skills",
     growthLabel: "+19%",
     growthDirection: "up",
@@ -67,6 +77,7 @@ export const HOME_TRENDING_STACKS: HomeStack[] = [
     description: "Official gateway, plugins, and reference agents.",
     avatarKind: "org",
     publisherHandle: "openclaw",
+    logoUrl: OPENCLAW_LOGO_URL,
     statsLabel: "32 skills",
     growthLabel: "+12%",
     growthDirection: "up",
@@ -101,6 +112,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     description: "Production OpenClaw skills from the ecosystem architect.",
     avatarKind: "user",
     publisherHandle: "steipete",
+    logoUrl: PETER_STEINBERGER_AVATAR_URL,
     statsLabel: "24 skills",
     collectionTags: ["Publishing", "PR review", "Architecture"],
   },
@@ -110,6 +122,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     description: "Inference, speech, and GPU workflows from NVIDIA builders.",
     avatarKind: "org",
     publisherHandle: "nvidia",
+    logoUrl: NVIDIA_AVATAR_URL,
     statsLabel: "18 skills",
     collectionTags: ["Inference", "CUDA", "Speech"],
   },
@@ -119,6 +132,7 @@ export const HOME_COLLECTION_STACKS: HomeStack[] = [
     description: "Startup ops, growth, and founder workflows.",
     avatarKind: "user",
     publisherHandle: "garytan",
+    logoUrl: GARY_TAN_AVATAR_URL,
     statsLabel: "11 skills",
     collectionTags: ["Growth", "Fundraising", "Ops"],
   },
@@ -204,6 +218,14 @@ export const HOME_STAFF_CURATED_STACKS: HomeStack[] = HOME_COLLECTION_STACKS.fil
   (HOME_STAFF_CURATED_STACK_IDS as readonly string[]).includes(stack.id),
 );
 
+/** Home collections chapter title (spotlight + discover). */
+export const HOME_COLLECTIONS_HEADING = "Collections";
+
+export const HOME_COLLECTIONS_LEDE = "Grouped by domain — pick what you're building.";
+
+/** Hero banner eyebrow — playful, on-brand. */
+export const HOME_FEATURED_STACK_EYEBROW = "Claws for your Claw 🦞";
+
 /** Single spotlight collection rendered as the editorial hero banner. */
 export const HOME_FEATURED_STACK: HomeStack = {
   id: "featured-essentials",
@@ -213,13 +235,30 @@ export const HOME_FEATURED_STACK: HomeStack = {
   avatarKind: "org",
   publisherHandle: "openclaw",
   logoUrl: OPENCLAW_LOGO_URL,
-  statsLabel: "322 installs this week",
-  growthLabel: "+18%",
-  growthDirection: "up",
+  statsLabel: "30 skills · 12 plugins",
+  growthLabel: "322k downloads · 18k installs this week",
   previews: [
-    { title: "Skill Creator", meta: "Scaffold + publish" },
-    { title: "Codereview", meta: "PR review agent" },
-    { title: "Deepsec Audit", meta: "Security recon" },
+    {
+      title: "Skill Creator",
+      meta: "Scaffold + publish",
+      description:
+        "Create a skill package, validate the shape, and publish with fewer manual steps.",
+      signals: ["Templates", "Publish flow"],
+    },
+    {
+      title: "Codereview",
+      meta: "PR review agent",
+      description:
+        "Reads diffs like a release gate: regressions, missing tests, and merge blockers first.",
+      signals: ["Risk scan", "Test gaps"],
+    },
+    {
+      title: "Deepsec Audit",
+      meta: "Security recon",
+      description:
+        "Maps exposed surfaces, trust boundaries, and exploit paths before the fix plan starts.",
+      signals: ["Threat model", "Attack paths"],
+    },
   ],
 };
 

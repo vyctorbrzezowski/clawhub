@@ -12,6 +12,8 @@ import {
 } from "../lib/homeProof";
 import { formatCompactStat } from "../lib/numberFormat";
 
+const CLAWHUB_BRAND_MARK_SRC = "/og-clawhub-watermark.png";
+
 type ProofStat = {
   value: string;
   label: string;
@@ -101,7 +103,17 @@ export function HomeProofSection() {
 
         <div className="home-v2-proof-main">
           <header className="home-v2-proof-header">
-            <p className="home-v2-proof-eyebrow">Why ClawHub</p>
+            <p className="home-v2-proof-eyebrow">
+              <img
+                className="home-v2-proof-eyebrow-mark"
+                src={CLAWHUB_BRAND_MARK_SRC}
+                alt=""
+                width={18}
+                height={18}
+                decoding="async"
+              />
+              <span>About ClawHub</span>
+            </p>
             <h2 id="home-v2-proof-title" className="home-v2-proof-title">
               The registry for OpenClaw agents
             </h2>

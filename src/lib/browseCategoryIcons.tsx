@@ -14,11 +14,14 @@ import {
   MessageCircle,
   Package,
   Palette,
+  Plug,
+  Rocket,
   Shield,
   Wrench,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
-import { SKILL_CATEGORIES } from "./categories";
+import { PLUGIN_CATEGORIES, SKILL_CATEGORIES } from "./categories";
 
 const ICON_COMPONENTS: Record<string, LucideIcon> = {
   activity: Activity,
@@ -35,8 +38,11 @@ const ICON_COMPONENTS: Record<string, LucideIcon> = {
   "message-circle": MessageCircle,
   package: Package,
   palette: Palette,
+  plug: Plug,
+  rocket: Rocket,
   shield: Shield,
   wrench: Wrench,
+  zap: Zap,
 };
 
 type BrowseCategoryIconProps = {
@@ -49,7 +55,10 @@ export function BrowseCategoryIcon({ slug, size = 16, className }: BrowseCategor
   if (!slug) {
     return <Layers size={size} className={className} aria-hidden="true" />;
   }
-  const iconKey = SKILL_CATEGORIES.find((category) => category.slug === slug)?.icon ?? "package";
+  const iconKey =
+    SKILL_CATEGORIES.find((category) => category.slug === slug)?.icon ??
+    PLUGIN_CATEGORIES.find((category) => category.slug === slug)?.icon ??
+    "package";
   const Icon = ICON_COMPONENTS[iconKey] ?? Package;
   return <Icon size={size} className={className} aria-hidden="true" />;
 }

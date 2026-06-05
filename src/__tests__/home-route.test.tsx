@@ -80,7 +80,7 @@ describe("home route", () => {
   }
 
   function clickHeroLabelTriple() {
-    const label = screen.getByText("BUILT BY THE COMMUNITY.");
+    const label = screen.getByText("BUILT BY THE COMMUNITY");
     act(() => {
       fireEvent.click(label);
       fireEvent.click(label);
@@ -92,9 +92,9 @@ describe("home route", () => {
   it("renders the community hero without catalog sections", async () => {
     await renderHome();
 
-    expect(screen.getByText("BUILT BY THE COMMUNITY.")).toBeTruthy();
+    expect(screen.getByText("BUILT BY THE COMMUNITY")).toBeTruthy();
     expect(screen.getByRole("link", { name: "200k+ publishers" })).toBeTruthy();
-    expect(screen.getByText(/ready in one search\./)).toBeTruthy();
+    expect(screen.getByText(/Discover skills and plugins from/i)).toBeTruthy();
     expect(screen.getByTestId("home-apps-stub")).toBeTruthy();
     expect(screen.getByTestId("home-discover-stub")).toBeTruthy();
     expect(screen.getByTestId("home-listing-stub")).toBeTruthy();

@@ -13,7 +13,11 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 import { Footer } from "./Footer";
-import { OPENCLAW_CLAWHUB_DOCS_URL, OPENCLAW_ECOSYSTEM_URL } from "../lib/nav-items";
+import {
+  OPENCLAW_BLOG_CLAWHUB_URL,
+  OPENCLAW_CLAWHUB_DOCS_URL,
+  OPENCLAW_ECOSYSTEM_URL,
+} from "../lib/nav-items";
 
 describe("Footer", () => {
   afterEach(() => {
@@ -38,14 +42,18 @@ describe("Footer", () => {
     expect(container.querySelector(".footer-v2-eco-link")?.getAttribute("href")).toBe(
       OPENCLAW_CLAWHUB_DOCS_URL,
     );
-    expect(screen.getByRole("link", { name: /Built alongside/i }).getAttribute("href")).toBe(
-      OPENCLAW_ECOSYSTEM_URL,
-    );
+    expect(screen.queryByRole("link", { name: /Built alongside/i })).toBeNull();
+    expect(screen.getByText(/Built alongside/i)).toBeTruthy();
+    expect(screen.getByText("Explore our ecosystem")).toBeTruthy();
     expect(container.querySelector(".footer-v2-eco-mark-all")?.getAttribute("href")).toBe(
       OPENCLAW_ECOSYSTEM_URL,
     );
     expect(container.querySelector('.footer-v2-eco-mark img[src*="clawhub.png"]')).toBeTruthy();
     expect(container.querySelector('.footer-v2-eco-mark img[src*="crabbox.svg"]')).toBeTruthy();
+    expect(container.querySelectorAll(".footer-v2-eco-mark:not(.footer-v2-eco-mark-all)").length).toBeGreaterThan(
+      8,
+    );
+    expect(screen.getByRole("link", { name: /discrawl/i })).toBeTruthy();
 
     const columns = container.querySelectorAll(".footer-col");
     expect(columns).toHaveLength(4);
@@ -56,6 +64,9 @@ describe("Footer", () => {
         .getByRole("link", { name: "Overview" })
         .getAttribute("href"),
     ).toBe(OPENCLAW_ECOSYSTEM_URL);
+    expect(
+      within(ecosystem as HTMLElement).getByRole("link", { name: "Blog" }).getAttribute("href"),
+    ).toBe(OPENCLAW_BLOG_CLAWHUB_URL);
   });
 
   it("collapses footer sections by heading until toggled open", async () => {

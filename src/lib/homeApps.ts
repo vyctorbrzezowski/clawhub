@@ -20,6 +20,8 @@ export type HomePluginShortcut = {
   description: string;
   packageName: string;
   brand: HomePluginBrand;
+  /** Fallback when Simple Icons slug is unavailable on CDN. */
+  iconDomain?: string;
 };
 
 /** Left orbit — skills for everyday tools. */
@@ -155,6 +157,7 @@ export const HOME_PLUGIN_SHORTCUTS: HomePluginShortcut[] = [
     description: "Meetings and team chat for agents.",
     packageName: "@openclaw/msteams",
     brand: { slug: "microsoftteams", color: "6264A7" },
+    iconDomain: "teams.microsoft.com",
   },
   {
     id: "brave",
@@ -179,6 +182,9 @@ export function homeAppIconUrl(iconDomain: string) {
 }
 
 export function homePluginShortcutIconUrl(shortcut: HomePluginShortcut) {
+  if (shortcut.iconDomain) {
+    return homeAppIconUrl(shortcut.iconDomain);
+  }
   return homePluginBrandIconUrl(shortcut.brand);
 }
 

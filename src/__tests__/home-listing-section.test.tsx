@@ -328,4 +328,25 @@ describe("HomeListingSection", () => {
     });
   });
 
+  it("shows plugin taxonomy in category select and refetches with category", async () => {
+    render(<HomeListingSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Plugins" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("WhatsApp")).toBeTruthy();
+    });
+
+    fetchPluginCatalogMock.mockClear();
+    fireEvent.click(screen.getByRole("combobox", { name: "Category" }));
+    expect(screen.getByRole("option", { name: "Channels & Communication" })).toBeTruthy();
+    expect(screen.queryByRole("option", { name: "Coding & Dev Tools" })).toBeNull();
+    fireEvent.click(screen.getByRole("option", { name: "Channels & Communication" }));
+
+    await waitFor(() => {
+      expect(fetchPluginCatalogMock).toHaveBeenCalledWith(
+        expect.objectContaining({ category: "channels", isOfficial: true }),
+      );
+    });
+  });
+
 });

@@ -120,7 +120,7 @@ describe("restored UI design contract", () => {
     const homeSource = home();
     const css = styles();
 
-    expect(homeSource).toContain("BUILT BY THE COMMUNITY.");
+    expect(homeSource).toContain("BUILT BY THE COMMUNITY");
     expect(homeSource).toContain("home-v2-sub-stat");
     expect(homeSource).toContain("HOME_PUBLISHER_STAT");
     expect(homeSource).toContain('to="/publishers"');
