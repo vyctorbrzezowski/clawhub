@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import type { PointerEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FOOTER_ECOSYSTEM_PROJECTS,
   FOOTER_NAV_SECTIONS,
@@ -79,6 +79,32 @@ function FooterEcoMark({ project }: { project: FooterEcosystemProject }) {
 }
 
 function FooterEasterBackdrop() {
+  const backdropRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateReveal = () => {
+      const backdrop = backdropRef.current;
+      const footer = backdrop?.closest(".site-footer-v2");
+      if (!(backdrop instanceof HTMLElement) || !(footer instanceof HTMLElement)) {
+        return;
+      }
+
+      const footerRect = footer.getBoundingClientRect();
+      const depth = Math.max(1, backdrop.getBoundingClientRect().height);
+      const reveal = Math.min(1, Math.max(0, (window.innerHeight - footerRect.bottom + 48) / (depth * 0.82)));
+      backdrop.style.setProperty("--footer-easter-reveal-clip", `${((1 - reveal) * 100).toFixed(2)}%`);
+      backdrop.style.setProperty("--footer-easter-reveal-y", `${((1 - reveal) * -72).toFixed(1)}px`);
+    };
+
+    updateReveal();
+    window.addEventListener("scroll", updateReveal, { passive: true });
+    window.addEventListener("resize", updateReveal);
+    return () => {
+      window.removeEventListener("scroll", updateReveal);
+      window.removeEventListener("resize", updateReveal);
+    };
+  }, []);
+
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     event.currentTarget.style.setProperty("--footer-easter-x", `${event.clientX - rect.left}px`);
@@ -92,6 +118,7 @@ function FooterEasterBackdrop() {
 
   return (
     <div
+      ref={backdropRef}
       className="footer-v2-easter"
       aria-hidden="true"
       onPointerMove={handlePointerMove}
