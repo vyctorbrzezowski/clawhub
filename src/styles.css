@@ -16104,7 +16104,14 @@ a.publisher-profile-detail:hover {
   width: min(100%, calc(var(--home-v2-feature-card-w) + 74px));
   height: var(--home-v2-feature-card-h);
   flex-shrink: 0;
+  cursor: grab;
   filter: drop-shadow(0 22px 38px color-mix(in srgb, var(--hv2-bg) 58%, transparent));
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.home-v2-stack-feature-deck.is-dragging {
+  cursor: grabbing;
 }
 
 .home-v2-stack-feature-item {

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { SKILLS_BROWSE_SEARCH } from "../lib/homeApps";
 import {
   getHomeStackHref,
@@ -16,21 +16,40 @@ import {
 import { StackAvatar } from "./homeStackAvatar";
 
 const FEATURE_DECK_INTERVAL_MS = 4200;
+const FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX = 6;
+const FEATURE_DECK_SWIPE_THRESHOLD_PX = 38;
 
 type FeaturedPreviewCardProps = {
   preview: HomeStackPreview;
   href: ReturnType<typeof getHomeStackHref>;
   layer: number;
+  onActivate: () => void;
   onPause: () => void;
   onResume: () => void;
+  onClickCapture?: (event: MouseEvent<HTMLAnchorElement>) => void;
 };
 
-function FeaturedPreviewCard({ preview, href, layer, onPause, onResume }: FeaturedPreviewCardProps) {
+function FeaturedPreviewCard({
+  preview,
+  href,
+  layer,
+  onActivate,
+  onPause,
+  onResume,
+  onClickCapture,
+}: FeaturedPreviewCardProps) {
   return (
     <Link
       {...href}
       className={`home-v2-stack-feature-item is-layer-${layer}`}
       aria-label={`${preview.title} — ${preview.meta}. ${preview.description}`}
+      onClickCapture={(event) => {
+        onClickCapture?.(event);
+        if (event.defaultPrevented || layer === 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        onActivate();
+      }}
       onMouseEnter={onPause}
       onMouseLeave={onResume}
       onFocus={onPause}
@@ -57,19 +76,88 @@ function FeaturedPreviewDeck({
   previews,
   href,
   activeIndex,
+  setActiveIndex,
   setHoverPaused,
+  onPrevious,
+  onNext,
 }: {
   previews: HomeStackPreview[];
   href: ReturnType<typeof getHomeStackHref>;
   activeIndex: number;
+  setActiveIndex: (index: number) => void;
   setHoverPaused: (paused: boolean) => void;
+  onPrevious: () => void;
+  onNext: () => void;
 }) {
   const count = previews.length;
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    lastX: number;
+    dragged: boolean;
+  } | null>(null);
+  const suppressClickRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   if (count === 0) return null;
 
+  const suppressDraggedClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!suppressClickRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    suppressClickRef.current = false;
+  };
+
+  const finishDrag = (event: PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const deltaX = drag.lastX - drag.startX;
+    const absDeltaX = Math.abs(deltaX);
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    dragRef.current = null;
+    setIsDragging(false);
+    setHoverPaused(false);
+
+    if (absDeltaX > FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX) {
+      suppressClickRef.current = true;
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+    }
+    if (absDeltaX < FEATURE_DECK_SWIPE_THRESHOLD_PX) return;
+    if (deltaX < 0) onNext();
+    else onPrevious();
+  };
+
   return (
-    <div className="home-v2-stack-feature-deck">
+    <div
+      className={`home-v2-stack-feature-deck${isDragging ? " is-dragging" : ""}`}
+      onPointerDown={(event) => {
+        if (event.button !== 0 || count <= 1) return;
+        dragRef.current = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          lastX: event.clientX,
+          dragged: false,
+        };
+        setIsDragging(true);
+        setHoverPaused(true);
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        const drag = dragRef.current;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        drag.lastX = event.clientX;
+        if (Math.abs(drag.lastX - drag.startX) > FEATURE_DECK_DRAG_CLICK_THRESHOLD_PX) {
+          drag.dragged = true;
+        }
+      }}
+      onPointerUp={finishDrag}
+      onPointerCancel={finishDrag}
+    >
       {previews.map((preview, index) => {
         const layer = (index - activeIndex + count) % count;
         return (
@@ -78,8 +166,10 @@ function FeaturedPreviewDeck({
             preview={preview}
             href={href}
             layer={layer}
+            onActivate={() => setActiveIndex(index)}
             onPause={() => setHoverPaused(true)}
             onResume={() => setHoverPaused(false)}
+            onClickCapture={suppressDraggedClick}
           />
         );
       })}
@@ -143,7 +233,10 @@ function FeaturedStackBanner({ stack }: { stack: HomeStack }) {
           previews={previews}
           href={href}
           activeIndex={activeIndex}
+          setActiveIndex={setActiveIndex}
           setHoverPaused={setHoverPaused}
+          onPrevious={showPrevious}
+          onNext={showNext}
         />
       </div>
       <div className="home-v2-stack-feature-footer" aria-label="Collection contents">
