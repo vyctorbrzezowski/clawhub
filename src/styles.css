@@ -11965,27 +11965,32 @@ a.search-empty-action {
   position: relative;
   isolation: isolate;
   margin-bottom: var(--footer-easter-depth);
-  overflow: visible;
   border-radius: 0 0 40px 40px;
   background: var(--hv2-bg);
   border-top-color: var(--hv2-border);
 }
 
-.app-shell:has(.home-v2-main) .site-footer-v2::before {
+.app-shell:has(.home-v2-main) .site-footer-v2::after {
   position: absolute;
-  z-index: -1;
-  top: calc(100% - 40px);
-  right: 0;
-  bottom: calc(var(--footer-easter-depth) * -1);
-  left: 0;
-  background: url("/footer-openclaw-easter-egg.png") center 48% / 118% auto fixed;
-  opacity: 1;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--hv2-bg);
   content: "";
   pointer-events: none;
 }
 
-.app-shell:has(.home-v2-main) .site-footer-v2::after {
-  content: none;
+.app-shell:has(.home-v2-main) .site-footer-v2::before {
+  position: absolute;
+  z-index: -1;
+  top: calc(100% - 8px);
+  right: 0;
+  bottom: calc(var(--footer-easter-depth) * -1);
+  left: 0;
+  background: url("/footer-openclaw-easter-egg.png") center center / 112% auto no-repeat;
+  opacity: 1;
+  content: "";
+  pointer-events: none;
 }
 
 .app-shell:has(.home-v2-main) .site-footer-v2 .site-footer-inner {
