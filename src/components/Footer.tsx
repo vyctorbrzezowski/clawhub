@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
+import type { PointerEvent } from "react";
 import { useEffect, useState } from "react";
 import {
   FOOTER_ECOSYSTEM_PROJECTS,
@@ -12,6 +13,16 @@ import {
 } from "../lib/nav-items";
 
 const FOOTER_BRAND_MARK_SRC = "/og-clawhub-watermark.png";
+const FOOTER_EASTER_ASCII = [
+  "....:: clawhub/openclaw ::....  skills plugins publishers trust signals",
+  ">>> install scan publish verify    @@ gateway @@ registry @@ agents @@",
+  "  30 skills 12 plugins    /api/v1/skills   /owners   /audit   /ship",
+  ":::: signed manifests ::::: moderated releases ::::: version history ::::",
+  "  hooks runners slash-commands skill.md templates scanners review-bots",
+  "openclaw ecosystem    crabbox clickclack crawler packs gateway plugins",
+  "---- downloads installs stars lineage ownership docs package integrity",
+  "  safe browse paths   official gateways   publisher handles   org trust",
+];
 
 function sectionId(title: string) {
   return `footer-section-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
@@ -58,6 +69,32 @@ function FooterEcoMark({ project }: { project: FooterEcosystemProject }) {
     <a className={className} href={project.href} target="_blank" rel="noreferrer" title={project.blurb}>
       {content}
     </a>
+  );
+}
+
+function FooterEasterBackdrop() {
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty("--footer-easter-x", `${event.clientX - rect.left}px`);
+    event.currentTarget.style.setProperty("--footer-easter-y", `${event.clientY - rect.top}px`);
+    event.currentTarget.style.setProperty("--footer-easter-intensity", "1");
+  };
+
+  const handlePointerLeave = (event: PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.style.setProperty("--footer-easter-intensity", "0");
+  };
+
+  return (
+    <div
+      className="footer-v2-easter"
+      aria-hidden="true"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+    >
+      <div className="footer-v2-easter-image footer-v2-easter-image--base" />
+      <pre className="footer-v2-easter-ascii">{FOOTER_EASTER_ASCII.concat(FOOTER_EASTER_ASCII).join("\n")}</pre>
+      <div className="footer-v2-easter-image footer-v2-easter-image--top" />
+    </div>
   );
 }
 
@@ -231,6 +268,7 @@ export function Footer() {
           </p>
         </div>
       </div>
+      <FooterEasterBackdrop />
     </footer>
   );
 }

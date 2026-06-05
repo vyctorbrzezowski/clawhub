@@ -11981,24 +11981,71 @@ a.search-empty-action {
 }
 
 .app-shell:has(.home-v2-main) .site-footer-v2::before {
+  content: none;
+}
+
+.footer-v2-easter {
+  display: none;
+}
+
+.app-shell:has(.home-v2-main) .footer-v2-easter {
+  --footer-easter-x: 50%;
+  --footer-easter-y: 34%;
+  --footer-easter-intensity: 0;
   position: absolute;
   z-index: -1;
+  display: block;
   top: calc(100% - 8px);
   right: 0;
   bottom: calc(var(--footer-easter-depth) * -1);
   left: 0;
-  background:
-    url("/footer-openclaw-easter-egg-transparent.png") center center / 112% auto no-repeat,
-    radial-gradient(
-      circle at 50% 34%,
-      color-mix(in srgb, #ff6a3d 28%, transparent) 0 1px,
-      color-mix(in srgb, #ff6a3d 16%, transparent) 2px 22px,
-      transparent 90px
-    ),
-    url("/footer-openclaw-easter-egg.png") center center / 112% auto no-repeat;
-  opacity: 1;
+  overflow: hidden;
+  background: #050505;
   content: "";
+  pointer-events: auto;
+}
+
+.footer-v2-easter-image {
+  position: absolute;
+  inset: 0;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 112% auto;
   pointer-events: none;
+}
+
+.footer-v2-easter-image--base {
+  background-image: url("/footer-openclaw-easter-egg.png");
+}
+
+.footer-v2-easter-ascii {
+  position: absolute;
+  inset: -7% -5%;
+  z-index: 1;
+  margin: 0;
+  color: color-mix(in srgb, var(--hv2-accent) 72%, white 12%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.38;
+  letter-spacing: 0.08em;
+  white-space: pre-wrap;
+  opacity: calc(0.46 * var(--footer-easter-intensity));
+  mix-blend-mode: screen;
+  transform: translate3d(-1.5%, -1%, 0) rotate(-1deg);
+  mask-image: radial-gradient(
+    circle 176px at var(--footer-easter-x) var(--footer-easter-y),
+    #000 0 34%,
+    rgb(0 0 0 / 0.72) 48%,
+    transparent 78%
+  );
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+
+.footer-v2-easter-image--top {
+  z-index: 2;
+  background-image: url("/footer-openclaw-easter-egg-transparent.png");
 }
 
 .app-shell:has(.home-v2-main) .site-footer-v2 .site-footer-inner {
