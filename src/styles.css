@@ -11993,8 +11993,6 @@ a.search-empty-action {
   --footer-easter-x: 50%;
   --footer-easter-y: 34%;
   --footer-easter-intensity: 0;
-  --footer-easter-reveal-clip: 100%;
-  --footer-easter-reveal-y: -72px;
   position: absolute;
   z-index: -1;
   display: block;
@@ -12005,9 +12003,6 @@ a.search-empty-action {
   overflow: hidden;
   background: #050505;
   content: "";
-  clip-path: inset(var(--footer-easter-reveal-clip) 0 0 0);
-  transform: translate3d(0, var(--footer-easter-reveal-y), 0);
-  will-change: clip-path, transform;
   pointer-events: auto;
 }
 
