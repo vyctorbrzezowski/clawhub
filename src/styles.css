@@ -12020,7 +12020,7 @@ a.search-empty-action {
 
 .footer-v2-easter-ascii {
   position: absolute;
-  inset: -7% -5%;
+  inset: -12% -14%;
   z-index: 1;
   margin: 0;
   color: color-mix(in srgb, var(--hv2-accent) 72%, white 12%);
@@ -12029,7 +12029,7 @@ a.search-empty-action {
   font-weight: 600;
   line-height: 1.38;
   letter-spacing: 0.08em;
-  white-space: pre-wrap;
+  white-space: pre;
   opacity: calc(0.46 * var(--footer-easter-intensity));
   mix-blend-mode: screen;
   transform: translate3d(-1.5%, -1%, 0) rotate(-1deg);

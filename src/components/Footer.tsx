@@ -23,6 +23,12 @@ const FOOTER_EASTER_ASCII = [
   "---- downloads installs stars lineage ownership docs package integrity",
   "  safe browse paths   official gateways   publisher handles   org trust",
 ];
+const FOOTER_EASTER_ASCII_FIELD = Array.from({ length: 44 }, (_, row) => {
+  const a = FOOTER_EASTER_ASCII[row % FOOTER_EASTER_ASCII.length];
+  const b = FOOTER_EASTER_ASCII[(row + 3) % FOOTER_EASTER_ASCII.length];
+  const c = FOOTER_EASTER_ASCII[(row + 5) % FOOTER_EASTER_ASCII.length];
+  return `${a}   ${b}   ${c}`;
+}).join("\n");
 
 function sectionId(title: string) {
   return `footer-section-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
@@ -92,7 +98,7 @@ function FooterEasterBackdrop() {
       onPointerLeave={handlePointerLeave}
     >
       <div className="footer-v2-easter-image footer-v2-easter-image--base" />
-      <pre className="footer-v2-easter-ascii">{FOOTER_EASTER_ASCII.concat(FOOTER_EASTER_ASCII).join("\n")}</pre>
+      <pre className="footer-v2-easter-ascii">{FOOTER_EASTER_ASCII_FIELD}</pre>
       <div className="footer-v2-easter-image footer-v2-easter-image--top" />
     </div>
   );
