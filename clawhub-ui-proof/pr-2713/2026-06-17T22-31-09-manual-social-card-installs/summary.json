@@ -1,0 +1,40 @@
+{
+  "baseline": "upstream/main",
+  "candidate": "worktree",
+  "generatedAt": "2026-06-17T22:31:09.000Z",
+  "lanes": [
+    {
+      "localOutputDir": "/Users/vyctor/Code/clawhub-social-card-installs/.artifacts/clawhub-ui-proof/2026-06-17T22-31-09-manual-social-card-installs/baseline",
+      "name": "baseline",
+      "ref": "upstream/main",
+      "status": "passed",
+      "steps": [
+        {
+          "name": "01 skill social card",
+          "screenshot": "01-skill-social-card.png",
+          "slug": "01-skill-social-card",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "localOutputDir": "/Users/vyctor/Code/clawhub-social-card-installs/.artifacts/clawhub-ui-proof/2026-06-17T22-31-09-manual-social-card-installs/candidate",
+      "name": "candidate",
+      "ref": "worktree",
+      "status": "passed",
+      "steps": [
+        {
+          "name": "01 skill social card",
+          "screenshot": "01-skill-social-card.png",
+          "slug": "01-skill-social-card",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "mode": "before-after",
+  "outputDir": "/Users/vyctor/Code/clawhub-social-card-installs/.artifacts/clawhub-ui-proof/2026-06-17T22-31-09-manual-social-card-installs",
+  "provider": "local-dev-server",
+  "scenario": "/Users/vyctor/Code/clawhub-social-card-installs/.artifacts/proof-scenarios/social-card-installs.pw.ts",
+  "status": "completed"
+}
