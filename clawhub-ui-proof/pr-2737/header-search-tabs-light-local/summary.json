@@ -1,0 +1,22 @@
+{
+  "status": "pass",
+  "mode": "feature",
+  "scenario": ".artifacts/proof-scenarios/header-search-tabs-light.pw.mjs",
+  "provider": "local-playwright",
+  "candidate": "brzezowski/fix-header-search-dark-tabs",
+  "lanes": [
+    {
+      "name": "candidate",
+      "status": "pass",
+      "steps": [
+        {
+          "lane": "candidate",
+          "name": "Header search tabs in light theme",
+          "slug": "01-header-search-tabs-light-theme",
+          "status": "pass",
+          "screenshot": "screenshots/01-header-search-tabs-light-theme.png"
+        }
+      ]
+    }
+  ]
+}
