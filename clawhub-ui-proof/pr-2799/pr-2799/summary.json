@@ -15,9 +15,9 @@
           "status": "passed"
         },
         {
-          "name": "Mobile /publishers (390px)",
-          "slug": "mobile-publishers",
-          "screenshot": "mobile-publishers.png",
+          "name": "Mobile nav Creators",
+          "slug": "mobile-nav-creators",
+          "screenshot": "mobile-nav-creators.png",
           "status": "passed"
         }
       ]
