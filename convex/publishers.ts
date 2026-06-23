@@ -44,6 +44,7 @@ import { readCanonicalStat } from "./lib/skillStats";
 import { adjustUserSkillStatsForSkillChange } from "./lib/userSkillStats";
 
 const MAX_PUBLIC_PUBLISHER_LIST_LIMIT = 500;
+const MAX_PUBLISHER_HANDLE_PREFIX_CANDIDATES = 100;
 const PUBLISHER_LIST_PREVIEW_LIMIT = 3;
 const GITHUB_AUTH_ACCOUNT_RECOVERY_MATCH_LIMIT = 10;
 const PERSONAL_PUBLISHER_RECOVERY_OWNER_MIGRATION_LIMIT = 100;
@@ -544,21 +545,30 @@ function hasPublisherListContent(summary: PublisherListSummary) {
   return summary.item.stats.skills + summary.item.stats.packages > 0;
 }
 
+function shouldIncludePublisherListSummary(
+  summary: PublisherListSummary,
+  options?: { includeEmptyPublishers?: boolean },
+) {
+  return options?.includeEmptyPublishers || hasPublisherListContent(summary);
+}
+
 async function getVisiblePublisherListSummaries(
   ctx: Pick<QueryCtx, "db">,
   publishers: Doc<"publishers">[],
+  options?: { includeEmptyPublishers?: boolean },
 ) {
   const summaries = await Promise.all(
     publishers.map((publisher) => toVisiblePublisherListSummary(ctx, publisher)),
   );
   return summaries
     .filter((summary): summary is PublisherListSummary => Boolean(summary))
-    .filter(hasPublisherListContent);
+    .filter((summary) => shouldIncludePublisherListSummary(summary, options));
 }
 
 async function hydratePublisherListSummaries(
   ctx: Pick<QueryCtx, "db">,
   summaries: PublisherListSummary[],
+  options?: { includeEmptyPublishers?: boolean },
 ) {
   const items = await Promise.all(
     summaries.map((summary) =>
@@ -570,7 +580,9 @@ async function hydratePublisherListSummaries(
   );
   return items
     .filter((item): item is PublisherListItem => Boolean(item))
-    .filter((item) => item.stats.skills + item.stats.packages > 0);
+    .filter(
+      (item) => options?.includeEmptyPublishers || item.stats.skills + item.stats.packages > 0,
+    );
 }
 
 async function getUserStarredCount(ctx: Pick<QueryCtx, "db">, userId: Id<"users">) {
@@ -648,6 +660,81 @@ function matchesPublisherQuery(publisher: PublisherListItem, queryText: string) 
   const haystack =
     `${publisher.displayName} ${publisher.handle} ${publisher.bio ?? ""}`.toLowerCase();
   return haystack.includes(queryText);
+}
+
+function publisherHandlePrefixUpperBound(value: string) {
+  return `${value}\uffff`;
+}
+
+async function queryActivePublishersByHandlePrefix(
+  ctx: Pick<QueryCtx, "db">,
+  kind: PublicPublisherKindFilter,
+  handlePrefix: string,
+) {
+  return await ctx.db
+    .query("publishers")
+    .withIndex("by_active_kind_handle", (q) =>
+      q
+        .eq("deletedAt", undefined)
+        .eq("deactivatedAt", undefined)
+        .eq("kind", kind)
+        .gte("handle", handlePrefix)
+        .lt("handle", publisherHandlePrefixUpperBound(handlePrefix)),
+    )
+    .take(MAX_PUBLISHER_HANDLE_PREFIX_CANDIDATES);
+}
+
+async function queryPopularActivePublishers(
+  ctx: Pick<QueryCtx, "db">,
+  kindFilter?: PublicPublisherKindFilter,
+) {
+  if (kindFilter) {
+    return await ctx.db
+      .query("publishers")
+      .withIndex("by_active_kind_total_installs", (q) =>
+        q.eq("deletedAt", undefined).eq("deactivatedAt", undefined).eq("kind", kindFilter),
+      )
+      .order("desc")
+      .take(MAX_PUBLIC_PUBLISHER_LIST_LIMIT);
+  }
+  return await ctx.db
+    .query("publishers")
+    .withIndex("by_active_total_installs", (q) =>
+      q.eq("deletedAt", undefined).eq("deactivatedAt", undefined),
+    )
+    .order("desc")
+    .take(MAX_PUBLIC_PUBLISHER_LIST_LIMIT);
+}
+
+async function collectActivePublisherRowsForListPage(
+  ctx: Pick<QueryCtx, "db">,
+  args: {
+    kindFilter?: PublicPublisherKindFilter;
+    queryText?: string;
+  },
+) {
+  const popularRows = await queryPopularActivePublishers(ctx, args.kindFilter);
+  const normalizedQuery = args.queryText ? normalizePublisherHandle(args.queryText) : undefined;
+  if (!normalizedQuery) return popularRows;
+
+  const kinds: PublicPublisherKindFilter[] = args.kindFilter ? [args.kindFilter] : ["user", "org"];
+  const [exactMatch, ...prefixMatches] = await Promise.all([
+    getPublisherByHandle(ctx, normalizedQuery),
+    ...kinds.map((kind) => queryActivePublishersByHandlePrefix(ctx, kind, normalizedQuery)),
+  ]);
+  const merged = new Map<Id<"publishers">, Doc<"publishers">>();
+  for (const publisher of popularRows) {
+    merged.set(publisher._id, publisher);
+  }
+  if (exactMatch && isPublisherActive(exactMatch)) {
+    merged.set(exactMatch._id, exactMatch);
+  }
+  for (const rows of prefixMatches) {
+    for (const publisher of rows) {
+      merged.set(publisher._id, publisher);
+    }
+  }
+  return [...merged.values()];
 }
 
 function getPublisherListCounts(items: PublisherListItem[]): PublisherListCounts {
@@ -2112,22 +2199,14 @@ export const listPublicPage = query({
     const queryText = args.query?.trim();
     const offset = args.paginationOpts.cursor ? Number(args.paginationOpts.cursor) : 0;
     const safeOffset = Number.isFinite(offset) && offset > 0 ? Math.trunc(offset) : 0;
-    const activeRows = kindFilter
-      ? await ctx.db
-          .query("publishers")
-          .withIndex("by_active_kind_total_installs", (q) =>
-            q.eq("deletedAt", undefined).eq("deactivatedAt", undefined).eq("kind", kindFilter),
-          )
-          .order("desc")
-          .take(MAX_PUBLIC_PUBLISHER_LIST_LIMIT)
-      : await ctx.db
-          .query("publishers")
-          .withIndex("by_active_total_installs", (q) =>
-            q.eq("deletedAt", undefined).eq("deactivatedAt", undefined),
-          )
-          .order("desc")
-          .take(MAX_PUBLIC_PUBLISHER_LIST_LIMIT);
-    const publisherSummaries = await getVisiblePublisherListSummaries(ctx, activeRows);
+    const activeRows = await collectActivePublisherRowsForListPage(ctx, {
+      kindFilter,
+      queryText,
+    });
+    const includeEmptyPublishers = Boolean(queryText);
+    const publisherSummaries = await getVisiblePublisherListSummaries(ctx, activeRows, {
+      includeEmptyPublishers,
+    });
     const itemSummaries = publisherSummaries
       .filter(
         (summary) =>
@@ -2136,16 +2215,7 @@ export const listPublicPage = query({
       )
       .sort((a, b) => comparePublisherListItems(a.item, b.item));
     const globalPublisherSummaries = kindFilter
-      ? await getVisiblePublisherListSummaries(
-          ctx,
-          await ctx.db
-            .query("publishers")
-            .withIndex("by_active_total_installs", (q) =>
-              q.eq("deletedAt", undefined).eq("deactivatedAt", undefined),
-            )
-            .order("desc")
-            .take(MAX_PUBLIC_PUBLISHER_LIST_LIMIT),
-        )
+      ? await getVisiblePublisherListSummaries(ctx, await queryPopularActivePublishers(ctx))
       : publisherSummaries;
     const globalCounts = getPublisherListSummaryCounts(globalPublisherSummaries);
     const counts = queryText ? getPublisherListSummaryCounts(itemSummaries) : globalCounts;
@@ -2153,6 +2223,7 @@ export const listPublicPage = query({
     const page = await hydratePublisherListSummaries(
       ctx,
       itemSummaries.slice(safeOffset, nextOffset),
+      { includeEmptyPublishers },
     );
 
     return {
