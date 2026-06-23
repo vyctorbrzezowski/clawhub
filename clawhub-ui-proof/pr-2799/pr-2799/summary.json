@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "mode": "feature",
+  "scenario": "publishers-creators-copy",
+  "candidate": "brzezowski/publishers-creators-copy",
+  "provider": "local",
+  "lanes": [
+    {
+      "name": "candidate",
+      "steps": [
+        {
+          "name": "Desktop /publishers (1280px)",
+          "slug": "desktop-publishers",
+          "screenshot": "desktop-publishers.png",
+          "status": "passed"
+        },
+        {
+          "name": "Mobile /publishers (390px)",
+          "slug": "mobile-publishers",
+          "screenshot": "mobile-publishers.png",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}
