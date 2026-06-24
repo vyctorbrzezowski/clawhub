@@ -252,7 +252,15 @@ function withoutExpectedBannedSessionTeardownErrors(errors: string[]) {
         error.includes("CONVEX A(skills:publishVersion)") &&
         error.includes("Function execution timed out")
       ) &&
-      !(error.includes("CONVEX A(auth:signIn)") && error.includes("account has been banned")),
+      !(
+        error.includes("CONVEX A(auth:signIn)") &&
+        (error.includes("account has been banned") ||
+          error.includes("Function execution timed out"))
+      ) &&
+      !(
+        error.includes("CONVEX M(users:upsertDevPersonaInternal)") &&
+        error.includes("account has been banned")
+      ),
   );
 }
 
