@@ -1,0 +1,33 @@
+{
+  "baseline": null,
+  "candidate": "brzezowski/creators-profile-polish",
+  "generatedAt": "2026-06-24T06:30:00.000Z",
+  "lanes": [
+    {
+      "name": "candidate",
+      "ref": "brzezowski/creators-profile-polish",
+      "status": "pass",
+      "steps": [
+        {
+          "lane": "candidate",
+          "name": "Validation panel — collapsed findings",
+          "screenshot": "screenshots/validation-collapsed.png",
+          "slug": "validation-collapsed",
+          "status": "pass"
+        },
+        {
+          "lane": "candidate",
+          "name": "Validation panel — expanded error with fix guide",
+          "screenshot": "screenshots/validation-expanded.png",
+          "slug": "validation-expanded",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "mode": "feature",
+  "outputDir": ".artifacts/proof/pr-2835-validation",
+  "provider": "local",
+  "scenario": "manual/local-scanned-runtime-plugin validation panel",
+  "status": "pass"
+}
